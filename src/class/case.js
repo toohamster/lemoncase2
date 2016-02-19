@@ -1,5 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, _, settings, Collector, console, callMainIns */
+/*global Instruction, _, settings, Collector, console, IF */
 function linker(syntaxTree) {
 	//TODO link tree.
 	var executionTree = {};
@@ -120,13 +120,14 @@ $CP.$run = function () {
 };
 
 $CP.$$core = function () {
+	var CASE = this;
 	this.$$coreId = setInterval(function () {
-		if (_.now() >= this.$$activeTime) {
-			this.$$setInstruction().$$setCounter().$run();
+		if (_.now() >= CASE.$$activeTime) {
+			CASE.$$setInstruction().$$setCounter().$run();
 		} else {
-			(this.$$idleTask || _.noop).call(this);
+			(CASE.$$idleTask || _.noop).call(CASE);
 		}
-	}.bind(this), this.$$getConfig('clock') || settings.defaultClock);
+	}, this.$$getConfig('clock') || settings.defaultClock);
 
 	return this;
 };
