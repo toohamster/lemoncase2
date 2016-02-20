@@ -1,10 +1,10 @@
 import test from 'ava';
 
 import {create, use} from '../src/parser/earley/earley-core.js';
-import {testRule} from '../src/parser/earley/preset.js';
+import preset from '../src/parser/earley/preset.js';
 
 test('basic arithmatic', t => {
-	use(testRule);
+	use(preset.testRule);
 	let myLang = create([], 'Sum');
 	
 	let input = "11+(2*322+5) -_-|||";
@@ -36,3 +36,18 @@ test('basic arithmatic', t => {
 	
 	t.same(myLang.parse(input), expect, 'expect parse result');
 });
+
+test('empty rule', t => {
+	use(preset.testEmpty);
+	let myLang = create([], 'Empty');
+	
+	let input = '';
+	t.is(myLang.parse(input), null);
+});
+
+// test('regular expression', t => {
+// 	use(preset.regex);
+// 	let myLang = create([], 'Regex');
+	
+// 	t.same(myLang.parse('/aa/'), {pattern:'aa', flag:''});
+// });

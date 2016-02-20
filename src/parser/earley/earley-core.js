@@ -116,6 +116,11 @@ ProtoParser.prototype = {
 	},
 	scan: function (chart, i, j, partOfSpeech){
 		var item = chart[i][j], character = this.input[i];
+		
+		if (character === undefined) {
+			//end of file, no more scan
+			return this;
+		}
 
 		if (partOfSpeech(character)) {
 			if (chart[i + 1] == null) {

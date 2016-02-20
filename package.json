@@ -15,5 +15,11 @@
   "license": "ISC",
   "devDependencies": {
     "ava": "^0.12.0"
+  },
+  "ava": {
+    "files": [
+      "test/*Spec.js"
+    ],
+    "failFast": true
   }
 }

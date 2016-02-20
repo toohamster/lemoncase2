@@ -13,7 +13,46 @@ module.exports = {
 		
 	],
 	number: [],
-	regex: [],
+	regex: [
+		{
+			name: 'Regex',
+			rule: [char('/'), '$regexInner', char('/'), '$regexFlag'],
+			cb: function (arg) {
+				return {
+					pattern: arg[1],
+					flag: arg[3]
+				};
+			}
+		}, {
+			name: '$regexFlag',
+			rule: []
+		}, {
+			name: '$regexFlag',
+			rule: [range(/[gim]/), '$regexFlag'],
+			cb: join
+		}, {
+			name: '$regexInner',
+			rule: ['$regex001', '$regexInner'],
+			cb: join
+		}, {
+			name: '$regexInner',
+			rule: ['$regex001'],
+			cb: join
+		}, {
+			name: '$regex001',
+			rule: [range(/[^/\n]/)]
+		}, {
+			name: '$regex001',
+			rule: [char('['), '$regex002', char('/'), '$regex002' ,char(']')]
+		}, {
+			name: '$regex002',
+			rule: []
+		}, {
+			name: '$regex002',
+			rule: [not(']'), '$regex002'],
+			cb: join
+		}
+	],
 	//non optional white space
 	space: [
 		{
@@ -71,12 +110,32 @@ module.exports = {
 		}, {
 			name: 'Number',
 			rule: [range(/\d/), 'Number'],
-			cb: function (arg){
-				return arg[0] + arg[1];
-			}
+			cb: join
 		}, {
 			name: 'Number',
 			rule: [range(/\d/)]
+		}
+	],
+	testEmpty: [
+		{
+			name: 'A',
+			rule: []
+		}, {
+			name: 'A',
+			rule: ['B']
+		}, {
+			name: 'B',
+			rule: ['A']
+		}, {
+			name: 'Empty',
+			rule: ['A'],
+			cb: function (arg){
+				if (arg[0]) {
+					throw 'it should be empty';
+				}
+				
+				return null;
+			}
 		}
 	]
 };
