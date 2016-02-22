@@ -179,3 +179,13 @@ Dictionary.prototype.getKeys = function () {
 Dictionary.prototype.fetch = function () {
 	return this.$$buffer.shift();
 };
+
+Dictionary.prototype.isFieldDefined = function (name) {
+	var i, len = this.$field.length;
+
+	for (i = 0; i < len; i += 1) {
+		if (this.$field[i].name === name) { return true; }
+	}
+
+	return false;
+};

@@ -71,9 +71,9 @@ _ = {
 settings = {
 	contextFrame: null,
 	defaultNextLoopDelay: 3000,
-	defaultReadyTimeout: 3000,
+	readyTimeout: 3000,
 	defaultClock: 10,
-	defaultTriggerCallback: _.noop,
+	bootExceptionHandle: _.noop,
 	triggerCallback: _.noop,
 	runCallback: _.noop,
 	runExceptionHandle: _.noop,
@@ -93,6 +93,10 @@ setup = function (options) {
 		}, settings);
 		return;
 	}
+};
+setup.setContextFrame = function (iframeDOM) {
+	trigger.setupIframe(iframeDOM);
+	settings.contextFrame = iframeDOM;
 };
 
 

@@ -28,13 +28,21 @@ var IF = function InstructionFactory(TYPE, opts) {
 		}
 		return this.$body;
 	};
+	Instruction.prototype.assignCase = function ($case) {
+		this.$case = $case;
+
+		return this;
+	};
 	Instruction.create = function () {
 		return new Instruction({
 			BODY: opts.bodyFactory.apply(null, arguments)
 		});
 	};
+	Instruction.$new = function (opts, $case) {
+		return new Instruction(opts, $case);
+	};
 
-	instructionFactories[TYPE] = this;
+	instructionFactories[TYPE] = Instruction;
 
 	return Instruction;
 }, instructionFactories = [];

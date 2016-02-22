@@ -1,23 +1,47 @@
-/*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, _, settings, Collector, console, IF */
-function linker(syntaxTree) {
-	//TODO link tree.
-	var executionTree = {};
+/*jslint plusplus: true, sloppy: true, nomen: true */
+/*global CALL, EXIT, _, settings, Collector, console, IF */
+function linker(syntaxTree, object, dictionary, $case) {
+	var eT = {
+		process: {},
+		config: {}
+	};
 
-	return executionTree;
+	_.forEach(syntaxTree.DICTIONARY_KEYS, function (v, fieldName) {
+		if (!dictionary.isFieldDefined(fieldName)) {
+			throw new Error('The field: ' + fieldName + ' is undefined in dictionary.');
+		}
+	});
+
+	_.forEach(syntaxTree.OBJECT_KEYS, function (v, objectName) {
+		if (!object.hasOwnProperty(objectName)) {
+			throw new Error('The key: ' + objectName + ' is undefined in object.');
+		}
+	});
+
+	_.forEach(syntaxTree.PROCESSES, function (prcOpts, prcName) {
+		var prc = eT.process[prcName] = [];
+		_.forEach(prcOpts.BODY.segment, function (insOpts) {
+			prc.push(IF(insOpts.TYPE).$new(insOpts, $case));
+		});
+	});
+
+	eT.config.times = syntaxTree.CONFIG.times;
+	eT.config.interval = syntaxTree.CONFIG.interval;
+
+	return eT;
 }
-function Case(syntaxTree) {
+function Case(syntaxTree, object, dictionary) {
 	if (!(this instanceof Case)) {
 		return new Case(syntaxTree);
 	}
 
 	// executionTree
-	this.$$executionTree = linker(syntaxTree);
+	this.$$executionTree = linker(syntaxTree, object, dictionary, this);
 
 	// Outside object.
-	this.$dictionary = null;
-	this.$objectList = null;
-	this.$$log = new Collector(syntaxTree.DATA_KEYS); //TODO
+	this.$dictionary = dictionary;
+	this.$objectList = object;
+	this.$$log = new Collector(syntaxTree.DATA_KEYS);
 
 	// states
 	this.$$state = 'ready';
@@ -36,33 +60,21 @@ function Case(syntaxTree) {
 	// buffer
 	this.$$instructionBuffer = undefined;
 	this.$$tempInstruction = undefined;
-	this.$$idleTask = null;
+	this.$$idleTask = _.noop;
 }
 
 var $CP = Case.prototype;
 
 $CP.$$getConfig = function (key) {
-	return this.$$executionTree.CONFIG[key];
+	return this.$$executionTree.config[key];
 };
 
 $CP.$$bootstrap = function () {
 	this.$$currentLoop = 0;
 
-	if (this.hasDictionary()) {
-		this.$$currentCaseData =
-			this.$dictionary.load(this.$$getConfig('maxLoop')).fetch();
-	}
-
-	if (!this.validateObjectList(this.$objectList, this.$$syntaxTree.OBJECT_KEYS)) {
-        var err = new Error('元件库错误');
-        settings.runExceptionHandle.call(this, err);
-        //stop here or otherwise it will start the timer after 3000ms
-        throw err;
-	}
-
 	this.$setActiveTime()
-		.$setTempInstruction(IF(0x00).create('main'))
-		.$$collector.initialization();
+		.$setTempInstruction(IF(CALL).create('main'))
+		.$$log.initialization();
 
 	return this;
 };
@@ -80,53 +92,37 @@ $CP.$$interrupt = function () {
 	return this;
 };
 
-$CP.$$setInstruction = function () {
-	if (!this.$$tempInstruction) {
-		var block = this.$getCurrentBlock();
-		this.$$instructionBuffer
-			= block ? block.segment[block.counter] : undefined;
-	}
+$CP.$$popInstruction = function () {
+	var tmpIns = this.$$tempInstruction,
+		block = this.$getCurrentBlock();
 
-	return this;
-};
-
-$CP.$$setCounter = function (offset) {
-	var block = this.$getCurrentBlock();
-	if (!this.$$tempInstruction && block) {
-		block.counter += (offset || 1);
-	}
-
-	return this;
-};
-
-$CP.$run = function () {
-	var ins = this.$$tempInstruction || this.$$instructionBuffer;
-	try {
+	if (tmpIns) {
 		this.$setTempInstruction();
+		return tmpIns;
+	} else if (block) {
+		this.$$instructionBuffer = block.segment[block.counter++];
+		return this.$$instructionBuffer;
+	} else {
+		return IF(EXIT).create().assignCase(this);
+	}
+};
 
-		if (ins) {
-			ins.execute(this);
-
-			settings.runCallback.call(this, ins);
-		} else {
-			this.$exitLoop();
-		}
-
-		return this;
+$CP.$$run = function () {
+	try {
+		this.$$popInstruction().execute(this);
+		settings.runCallback.call(this);
 	} catch (error) {
 		console.error(error);
-		settings.runExceptionHandle.call(this, ins, error);
+		settings.runExceptionHandle.call(this, error);
 	}
+	return this;
 };
 
 $CP.$$core = function () {
 	var CASE = this;
+
 	this.$$coreId = setInterval(function () {
-		if (_.now() >= CASE.$$activeTime) {
-			CASE.$$setInstruction().$$setCounter().$run();
-		} else {
-			(CASE.$$idleTask || _.noop).call(CASE);
-		}
+		CASE['$$' + (_.now() >= CASE.$$activeTime ? 'run' : 'idleTask')]();
 	}, this.$$getConfig('clock') || settings.defaultClock);
 
 	return this;

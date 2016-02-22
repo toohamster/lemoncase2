@@ -2,7 +2,7 @@
 /*global $CP, _: false, settings, Dictionary */
 
 $CP.hasDictionary = function () {
-	return this.$dictionary !== undefined;
+	return !!this.$dictionary;
 };
 
 $CP.validateObjectList = function (objectList, keysUsed) {
@@ -30,13 +30,17 @@ $CP.start = function () {
 	if (state !== 'success' && state !== 'ready') {
 		throw new Error('Can not call play!');
 	}
-	this.$setState('running').$$bootstrap();
-	//todo
-	setTimeout(function () {
-		this.$$core();
-	}.bind(this), settings.defaultReadyTimeout);
 
-	return this;
+	try {
+		this.$setState('running').$$bootstrap();
+		setTimeout(function () {
+			this.$$core();
+		}.bind(this), settings.readyTimeout);
+
+		return this;
+	} catch (error) {
+		settings.bootExceptionHandle(error);
+	}
 };
 
 $CP.suspend = function () {

@@ -1,8 +1,8 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, $CP, _, settings, callMainIns */
+/*global Instruction, $CP, _, settings, IF */
 
 $CP.$setIdleTask = function (taskFn) {
-	this.$$idleTask = _.isFunction(taskFn) ? taskFn : null;
+	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
 
 	return this;
 };
@@ -14,8 +14,7 @@ $CP.$setActiveTime = function (offset) {
 };
 
 $CP.$setTempInstruction = function (ins) {
-	ins.$case = this;
-	this.$$tempInstruction = ins;
+	this.$$tempInstruction = ins ? ins.assignCase(this) : undefined;
 
 	return this;
 };
@@ -35,7 +34,7 @@ $CP.$pushBlock = function (segment) {
 	return this;
 };
 
-$CP.$pushScope = function (segment) {
+$CP.$pushScope = function (identifer) {
 	// BlockStack
 	var BS = this.$$blockStack;
 
@@ -43,7 +42,7 @@ $CP.$pushScope = function (segment) {
 		blockIndex: BS.length,
 		vars: {}
 	});
-	this.$pushBlock(segment);
+	this.$pushBlock(this.$getProcess(identifer));
 
 	return this;
 };
@@ -76,24 +75,24 @@ $CP.$getCurrentScope = function () {
 };
 
 $CP.$getProcess = function (identifier) {
-	return this.$$processes[identifier];
+	return this.$$executionTree.process[identifier];
 };
 
 $CP.$exitLoop = function () {
-	var loger = this.$$collector;
+	var loger = this.$$log;
 
-	this.$setActiveTime(this.$$config.nextLoopDelay || 3000);
+	this.$setActiveTime(this.$$getConfig('interval') || 3000);
 
 	loger.log([-1, this.$$currentLoop]).markLog(0, loger.getLength('logs'));
 
-	if ((this.$$currentLoop += 1) >= this.$$config.maxLoop) {
+	if ((this.$$currentLoop += 1) >= this.$$getConfig('times')) {
 		this.$$exitCase();
 		return this;
 	}
-	this.$setTempInstruction(callMainIns);
+	this.$setTempInstruction(IF(CALL).create('main'));
 	(settings.nextLoopCallback || _.noop).call(this);
 
-	if (this.$dictionary) {
+	if (this.hasDictionary()) {
 		this.$$currentCaseData = this.$dictionary.fetch();
 	}
 

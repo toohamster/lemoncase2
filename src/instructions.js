@@ -1,12 +1,26 @@
 /*jslint sloppy: true, nomen: true */
 /*global IF, settings, trigger, _, console, exitIns:true, callMainIns:true */
-IF(0x00, {
+var CALL = 0x00,
+	RETURN = 0x01,
+	EXIT = 0x02,
+
+	EXPRESSION = 0x10,
+	WAIT = 0x11,
+	TRIGGER = 0x12,
+	ASSERT = 0x13,
+	JUMPTO = 0x14,
+	REFRESH = 0x15,
+
+	LOG = 0x20,
+	CONSOLE = 0x21;
+
+IF(CALL, {
 	operation: function Call() {
 		var identifer = this.body('identifer');
 
 		this.$case
 			.$pushScope(identifer)
-			.$pushLog([13, 0, identifer], this.line());
+			.$pushLog([CALL, identifer], this.line());
 	},
 	bodyFactory: function (name) {
 		return {
@@ -14,7 +28,7 @@ IF(0x00, {
 		};
 	}
 });
-IF(0x01, {
+IF(RETURN, {
 	operation: function Return() {
 		this.$case.$popScope();
 	},
@@ -22,11 +36,11 @@ IF(0x01, {
 		return {};
 	}
 });
-IF(0x02, {
+IF(EXIT, {
 	operation: function Exit() {
 		this.$case
-			.$pushLog([100, 0], this.line())
-			.$markLog(100, this.$case.getCurrentLoop())
+			.$pushLog([EXIT], this.line())
+			.$markLog(EXIT, this.$case.getCurrentLoop())
 			.$exitLoop();
 	},
 	bodyFactory: function (delay) {
@@ -34,17 +48,23 @@ IF(0x02, {
 	}
 });
 
-IF(0x10, {
-	operation: function Assign() {
-		this.$case.$getCurrentScope().vars[this.body('identity')] =
-			this.$case.$runExp(this.body('exp'));
+IF(EXPRESSION, {
+	operation: function Expression() {
+		this.$case.$runExp(this.body('exp'));
+	},
+	bodyFactory: function (expFn) {
+		return {
+			exp: expFn
+		};
 	}
 });
-IF(0x11, {
+IF(WAIT, {
 	operation: function Wait() {
+		var delay = this.$case.$runExp(this.body('delay'));
+
 		this.$case
-			.$setActiveTime(this.body('delay'))
-			.$pushLog([0, 0, this.body('delay')], this.ling());
+			.$setActiveTime(delay)
+			.$pushLog([WAIT, delay], this.line());
 	},
 	bodyFactory: function (delay) {
 		return {
@@ -52,10 +72,12 @@ IF(0x11, {
 		};
 	}
 });
-IF(0x12, {
+IF(TRIGGER, {
 	operation: function Trigger() {
 		var cssPath = this.$case.$runExp(this.body('object')),
-			actionParam = this.$case.$runExp(this.body('param')),
+			param = {
+				value: this.$case.$runExp(this.body('param'))
+			},
 			action = this.body('action'),
 			DOM = _.document().querySelectorAll(cssPath)[0];
 
@@ -63,11 +85,11 @@ IF(0x12, {
 			throw new Error('Can not find a DOM by cssPath: ' + cssPath);
 		}
 
-		trigger(DOM).execute(action, actionParam);
+		trigger(DOM).does(action, param);
 		settings.triggerCallback.call(this.$case, DOM);
 
 		this.$case
-			.$pushLog([1, 0, cssPath, action, actionParam], this.line());
+			.$pushLog([TRIGGER, cssPath, action, param], this.line());
 	},
 	bodyFactory: function (object, action, param) {
 		return {
@@ -77,59 +99,60 @@ IF(0x12, {
 		};
 	}
 });
-IF(0x13, {
+IF(ASSERT, {
 	operation: function Assert() {
 		var startTime = _.now(),
 			exp = this.body('exp'),
 			timeout = this.body('timeout'),
-			CASE = this.$case;
-
-		CASE.$setTempInstruction(IF(0x02).create());
+			CASE = this.$case,
+			ins = this;
 
 		function queryHTMLElementByCSS() {
-			if (CASE.$runExp(exp)) {
-				CASE.$setIdleTask()
-					.$setTempInstruction()
-					.$setActiveTime()
-					.$pushLog([2, 0], this.line())
-					.$pushLogData(this.body('key'), _.now() - startTime);
-			}
+			if (!CASE.$runExp(exp)) { return; }
+
+			CASE.$setIdleTask()
+				.$setTempInstruction()
+				.$setActiveTime()
+				.$pushLog([ASSERT], ins.line())
+				.$pushLogData(ins.body('key'), _.now() - startTime);
 		}
 
-		if (timeout) {
+		if (timeout && timeout > 2 * settings.defaultClock) {
 			CASE.$setActiveTime(timeout)
+				.$setTempInstruction(IF(EXIT).create().assignCase(this.$case))
 				.$setIdleTask(queryHTMLElementByCSS);
 		}
 
 		if (CASE.$runExp(exp)) {
 			CASE.$setTempInstruction()
-				.$pushLog([2, 0], this.line());
+				.$pushLog([ASSERT], this.line());
 		}
 	},
 	bodyFactory: function (exp, timeout, dataKey) {
 		return {
 			exp: exp,
 			timeout: timeout,
-			dataKey: dataKey
+			key: dataKey
 		};
 	}
 });
-IF(0x14, {
+IF(JUMPTO, {
 	operation: function JumpTo() {
-		_.document().location.href = this.body('url');
-		this.$case.$pushLog([3], this.line());
+		var url = this.$case.$runExp(this.body('url'));
+		settings.contextFrame.src = url;
+		this.$case.$pushLog([JUMPTO, url], this.line());
 	}
 });
-IF(0x15, {
+IF(REFRESH, {
 	operation: function Refresh() {
-		_.document().location.reload();
-		this.$case.$pushLog([4], this.line());
+		settings.contextFrame.src = _.document().location.href;
+		this.$case.$pushLog([REFRESH], this.line());
 	}
 });
 
-IF(0x20, {
+IF(LOG, {
 	operation: function Log() {
-		this.$case.$pushLog([3, 0, this.$case.$runExp(this.body('msg'))]);
+		this.$case.$pushLog([LOG, this.$case.$runExp(this.body('msg'))]);
 	},
 	bodyFactory: function (msg) {
 		return {
@@ -137,9 +160,9 @@ IF(0x20, {
 		};
 	}
 });
-IF(0x21, {
+IF(CONSOLE, {
 	operation: function Console() {
-		console.log(this.$case(this.body('msg')));
+		console.log(this.$case.$runExp(this.body('msg')));
 	},
 	bodyFactory: function (msg) {
 		return {
