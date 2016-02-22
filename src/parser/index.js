@@ -1,4 +1,4 @@
-var Parser = require('./parser.js');
+var Parser = require('./state.js');
 
 module.exports = {
 	parse: function (input, options) {
