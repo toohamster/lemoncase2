@@ -93,7 +93,7 @@ $CP.$exitLoop = function () {
 	(settings.nextLoopCallback || _.noop).call(this);
 
 	if (this.hasDictionary()) {
-		this.$$currentCaseData = this.$dictionary.fetch();
+		this.$loopData = this.$dictionary.fetch();
 	}
 
 	return this;
@@ -102,7 +102,7 @@ $CP.$exitLoop = function () {
 $CP.$runExp = function (expFn) {
 	if (typeof expFn === 'function') {
 		return expFn(this.$getCurrentScope().vars,
-					 this.$objectList, this.$dictionary,
+					 this.$objectList, this.$loopData,
 					 _.countDOM, _.getInnerHTML);
 	}
 	return expFn;

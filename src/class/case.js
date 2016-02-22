@@ -50,10 +50,6 @@ function Case(syntaxTree, object, dictionary) {
 	this.$$currentLoop = 0;
 
 	// stacks
-	this.$$rootScope = {
-		caseData: null
-	};
-	this.$$globalVariable = {};
 	this.$$blockStack = []; // {counter, segment}
 	this.$$scopeStack = []; // {blockIndex, vars}
 
@@ -61,6 +57,7 @@ function Case(syntaxTree, object, dictionary) {
 	this.$$instructionBuffer = undefined;
 	this.$$tempInstruction = undefined;
 	this.$$idleTask = _.noop;
+	this.$loopData = null;
 }
 
 var $CP = Case.prototype;
@@ -71,6 +68,10 @@ $CP.$$getConfig = function (key) {
 
 $CP.$$bootstrap = function () {
 	this.$$currentLoop = 0;
+
+	if (this.hasDictionary()) {
+		this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
+	}
 
 	this.$setActiveTime()
 		.$setTempInstruction(IF(CALL).create('main'))
