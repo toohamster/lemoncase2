@@ -1,3 +1,7 @@
-var t = require('../src/parser/index.js').tokenizer(' /*123', {});
+var tokenizer = require('../src/parser/index.js').tokenizer;
 
-t.parse();
+var p = tokenizer(' [mama]+{baba}');
+p.nextToken();
+
+p.nextToken();
+p.nextToken();

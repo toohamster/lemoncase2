@@ -27,8 +27,8 @@ var Parser = function (options, input) {
 
 	//dKey - dictionary field used
 	//obKey - object key used
-	this.dKey = [];
-	this.obKey = [];
+	this.dKey = {};
+	this.obKey = {};
 };
 
 Parser.prototype.parse = function () {
