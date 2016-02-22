@@ -1,8 +1,8 @@
 // the keywords
-var reserve = ["in", "as", "by"];
+var reserve = ["in", "by"];
 var actions = ["click", "input", "rclick", "dblclick",
 	"movein", "moveout", "scroll", "select"];
-var macros = ["CLOCK", "ORIGIN", "MAX_LOOP", "NEXT_LOOP_DELAY"];
+var macros = ["CLOCK", "TIMES", "INTERVAL"];
 
 var keywords = ['wait', 'assert', 'log', 'var', 'process', '#set',
 'return'].concat(reserve).concat(actions).concat(macros);

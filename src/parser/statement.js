@@ -12,11 +12,14 @@ module.exports = function (Parser) {
 
 	// Parse a program. Initializes the parser, reads any number of
 	// statements, and wraps them in a Program node.  Optionally takes a
-	// `program` argument.  If present, the statements will be appended
-	// to its body instead of creating a new node.
-	
-	pp.parseTopLevel = function () {
+	// `program` argument.
 
+	pp.parseTopLevel = function (program) {
+		while (this.type !== tt.eof) {
+			
+		}
+
+		return program;
 	};
 
 	pp.parseSet = function () {

@@ -10,5 +10,11 @@ function has(obj, propName) {
 
 module.exports = {
 	isArray: isArray,
-	has: has
+	has: has,
+	UID: (function () {
+		var id = 0;
+		return function (string) {
+			return string + id++;
+		};
+	}())
 };

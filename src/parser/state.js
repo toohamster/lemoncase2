@@ -24,17 +24,28 @@ var Parser = function (options, input) {
 
 	// conf - #set
 	this.conf = [];
+	this.keys = [];
+	this.pcs = [];
 
 	//dKey - dictionary field used
 	//obKey - object key used
-	this.dKey = {};
-	this.obKey = {};
+	this.dTable = {};
+	this.obTable = {};
 };
 
 Parser.prototype.parse = function () {
 	this.nextToken();
 
-	return this.parseTopLevel();
+	var program = {
+		CONFIG: this.conf,
+		DATA_KEYS: this.keys,
+		PROCESSES: this.pcs,
+
+		DICTIONARY_KEYS: this.dTable,
+		OBJECT_KEYS: this.obTable
+	};
+
+	return this.parseTopLevel(program);
 };
 
 var extend = function (fn) {
@@ -43,6 +54,7 @@ var extend = function (fn) {
 
 extend(require('./location.js'));
 extend(require('./tokenize.js'));
+extend(require('./statement.js'));
 
 
 module.exports = Parser;

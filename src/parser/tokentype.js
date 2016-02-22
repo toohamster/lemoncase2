@@ -93,7 +93,6 @@ function kw(name, options) {
 }
 
 kw('in');
-kw('as');
 kw('by');
 kw('click', beforeExpr);
 kw('input', beforeExpr);
@@ -104,8 +103,8 @@ kw('moveout', beforeExpr);
 kw('scroll', beforeExpr);
 kw('select', beforeExpr);
 kw('CLOCK');
-kw('MAX_LOOP');
-kw('NEXT_LOOP_DELAY');
+kw('TIMES');
+kw('INTERVAL');
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);
