@@ -10,6 +10,13 @@ var lineBreak = require('./whitespace.js').lineBreak;
 module.exports = function (Parser) {
 	var pp = Parser.prototype;
 
+	pp.next = function () {
+		this.lastTokEnd = this.end;
+		this.lastTokStart = this.start;
+
+		this.nextToken();
+	};
+
 	pp.nextToken = function () {
 		this.skipSpace();
 
@@ -397,7 +404,7 @@ module.exports = function (Parser) {
 			type = keywordTypes[word];
 		} else {
 			if (word.charCodeAt(0) === 35) {
-				this.raise(start, '# is only valid for #set');
+				this.raise(start, '# is only valid for # macro');
 			}
 
 			type = tt.name;

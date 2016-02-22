@@ -22,6 +22,7 @@ var TokenType = function (label, conf) {
 	this.prefix = !!conf.prefix;
 	this.postfix = !!conf.postfix;
 	this.binop = conf.binop || null;
+	this.macro = !!conf.macro;
 };
 
 function binop (name, prec) {
@@ -29,6 +30,7 @@ function binop (name, prec) {
 }
 
 var beforeExpr = { beforeExpr: true };
+var macro = { macro: true };
 
 var types = {
 	num: new TokenType('num'),
@@ -102,16 +104,17 @@ kw('movein', beforeExpr);
 kw('moveout', beforeExpr);
 kw('scroll', beforeExpr);
 kw('select', beforeExpr);
-kw('CLOCK');
-kw('TIMES');
-kw('INTERVAL');
+kw('#CLOCK', macro);
+kw('#TIMES', macro);
+kw('#INTERVAL', macro);
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);
 kw('var');
-kw('#set');
 kw('process');
 kw('return', beforeExpr);
+kw('jumpTo');
+kw('refresh');
 
 module.exports = {
 	TokenType: TokenType,

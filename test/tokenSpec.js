@@ -2,11 +2,11 @@ import test from 'ava';
 import {tokenizer} from '../src/parser/index.js';
 
 test('parse kw', t => {
-	var p = tokenizer(' #set ', {});
+	var p = tokenizer(' #CLOCK ', {});
 	p.nextToken();
 	
-	t.is(p.type.label, '#set');
-	t.is(p.value, '#set');
+	t.is(p.type.label, '#CLOCK');
+	t.is(p.value, '#CLOCK');
 });
 
 test('parse name', t => {

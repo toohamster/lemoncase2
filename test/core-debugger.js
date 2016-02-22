@@ -1,7 +1,5 @@
 var tokenizer = require('../src/parser/index.js').tokenizer;
 
-var p = tokenizer(' [mama]+{baba}');
+var p = tokenizer('#CLOCK 1234\n', {});
 p.nextToken();
-
-p.nextToken();
-p.nextToken();
+p.parseSet();
