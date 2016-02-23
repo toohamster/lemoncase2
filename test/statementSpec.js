@@ -38,3 +38,30 @@ test('parse var decl', t => {
 		p.parseStatement();
 	});
 });
+
+test('parse log', t => {
+	var p = tokenizer('log a +"输出";');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+});
+
+test('parse assert', t => {
+	var p = tokenizer('assert ".btnG" in 3000;');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+});
+
+test('input statement', t => {
+	var p = tokenizer('input [obj] by /abc/;');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+});

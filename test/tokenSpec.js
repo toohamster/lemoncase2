@@ -52,7 +52,7 @@ test('index', t => {
 	var p = tokenizer(' [mama]+{baba}');
 	p.nextToken();
 	
-	t.is(p.type.label, 'dictionary index');
+	t.is(p.type.label, 'dictionaryIndex');
 	t.is(p.value, 'mama');
 	
 	p.nextToken();
@@ -60,6 +60,29 @@ test('index', t => {
 	
 	p.nextToken();
 	
-	t.is(p.type.label, 'object@');
+	t.is(p.type.label, 'objectStore');
 	t.is(p.value, 'baba');
-})
+});
+
+test('multiple and modulo', t => {
+	var p = tokenizer('*%');
+	
+	p.nextToken();
+	t.is(p.type.label, '*');
+	
+	p.nextToken();
+	t.is(p.type.label, '%');
+});
+
+test('tag', t => {
+	var p = tokenizer('/><@<#');
+	
+	p.nextToken();
+	t.is(p.type.label, '/>');
+	
+	p.nextToken();
+	t.is(p.type.label, '<@');
+	
+	p.nextToken();
+	t.is(p.type.label, '<#');
+});

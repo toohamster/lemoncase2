@@ -110,8 +110,11 @@ module.exports = function (Parser) {
 		if (isIdentifierStart(next)) {
 			var name = this.readWord1();
 			next = this.fullCharCodeAtPos();
+			// ']'
 			if (next !== 93) this.raise(start, 'Unterminated dictionary index');
 			this.pos++;
+			// mark it in dictionary conf
+			this.dTable[name] = true;
 
 			return this.finishToken(tt.dict, name);
 		}
@@ -126,8 +129,11 @@ module.exports = function (Parser) {
 		if (isIdentifierStart(next)) {
 			var name = this.readWord1();
 			next = this.fullCharCodeAtPos();
+			// '}'
 			if (next !== 125) this.raise(start, 'Unterminated object store index');
 			this.pos++;
+			//mark it in ob conf
+			this.obTable[name] = true;
 
 			return this.finishToken(tt.objectAt, name);
 		}
@@ -153,7 +159,7 @@ module.exports = function (Parser) {
 	pp.readToken_mult_modulo_exp = function (code) {
 		var next = this.input.charCodeAt(this.pos+1);
 		var size = 1;
-		var type = code === 42 ? tt.start : tt.modulo;
+		var type = code === 42 ? tt.star : tt.modulo;
 
 		if (next === 61) return this.finishOp(tt.assign, size + 1);
 		return this.finishOp(type, size);
@@ -176,7 +182,7 @@ module.exports = function (Parser) {
 	};
 
 	pp.readToken_lt_gt = function (code) {
-		var next = this.input.charAt(this.pos+1);
+		var next = this.input.charCodeAt(this.pos+1);
 		var size = 1;
 		if (next === code) {
 			this.raise(this.pos, 'bitwise operator is not allowed');
@@ -259,11 +265,11 @@ module.exports = function (Parser) {
 
 	pp.finishToken = function (type, val) {
 		this.end = this.pos;
-		var prevType = this.type;
+		// var prevType = this.type;
 		this.type = type;
 		this.value = val;
 
-		this.exprAllowed = prevType.beforeExpr;
+		this.exprAllowed = this.type.beforeExpr;
 	};
 
 	pp.readRegexp = function () {
@@ -432,5 +438,5 @@ module.exports = function (Parser) {
 		}
 
 		return parseInt(this.input.slice(start, this.pos).trim(), 10);
-	}
+	};
 };

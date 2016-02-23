@@ -6,6 +6,8 @@ var isIdentifierStart = require('./identifier.js').isIdentifierStart;
 var isIdentifierChar = require('./identifier.js').isIdentifierChar;
 
 var getLineInfo = require('./locutil.js').getLineInfo;
+var UID = require('./util.js').UID;
+var genExpr = require('./walk.js');
 
 module.exports = function (Parser) {
 	var pp = Parser.prototype;
@@ -112,16 +114,18 @@ module.exports = function (Parser) {
 			case tt._movein: case tt._moveout: case tt._select:
 			case tt._scroll:
 				return this.parseClickAction(starttype.keyword);
+			case tt._input:
+				return this.parseInputAction();
 			case tt._return:
 				return this.parseReturnStatement();
 			case tt._wait:
-				return this.raise(this.pos, 'todo');
+				return this.parseWaitStatement();
 			case tt._assert:
-				return this.raise(this.pos, 'todo');
+				return this.parseAssertStatement();
 			case tt._log:
-				return this.raise(this.pos, 'todo');
+				return this.parseLogStatement();
 			case tt._jumpTo:
-				return this.raise(this.pos, 'todo');
+				return this.parseGotoStatement();
 			case tt._refresh:
 				return this.parseRefreshStatement();
 			case tt._var:
@@ -149,9 +153,7 @@ module.exports = function (Parser) {
 		var node = {
 			LINE: getLineInfo(this.input, this.start),
 			TYPE: 0x10,
-			BODY: {
-
-			}
+			BODY: {}
 		};
 
 		this.next();
@@ -183,8 +185,24 @@ module.exports = function (Parser) {
 			if (!this.eat(tt.comma)) break;
 		}
 
-		node.BODY.declarations = declarations;
+		node.BODY.raw = declarations;
 	};
+	
+	pp.parseWaitStatement = function () {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: 0x11,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		
+		this.semicolon();
+		
+		return node;
+	}
 
 	pp.parseClickAction = function (keyword) {
 		var node = {
@@ -197,11 +215,74 @@ module.exports = function (Parser) {
 
 		this.next();
 
-		node.BODY.object = this.type === tt.string ? this.value : this.raise(this.start, 'Expect a string');
+		node.BODY.raw = this.parseExpression();
 
-		this.next();
 		this.semicolon();
 
+		return node;
+	};
+	
+	pp.parseInputAction = function () {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: 0x12,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		
+		this.expect(tt._by);
+		
+		node.BODY.raw1 = this.parseExpression();
+		
+		this.semicolon();
+		
+		return node;
+	};
+	
+	pp.parseAssertStatement = function () {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: 0x13,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		
+		if (this.eat(tt._in)) {
+			if (this.type === tt.num) {
+				node.BODY.timeout = this.value;
+			} else {
+				this.unexpected();
+			}
+			
+			this.next();
+		}
+		
+		this.semicolon();
+		//do not forgot the data key
+		node.BODY.key = this.keys = UID('#');
+		
+		return node;
+	}
+	
+	pp.parseGotoStatement = function () {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: 0x14,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		
+		this.semicolon();
+		
 		return node;
 	};
 
@@ -214,6 +295,22 @@ module.exports = function (Parser) {
 		this.next();
 		this.semicolon();
 
+		return node;
+	};
+	
+	pp.parseLogStatement = function () {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: 0x20,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		
+		this.semicolon();
+		
 		return node;
 	};
 };

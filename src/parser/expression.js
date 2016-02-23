@@ -197,6 +197,9 @@ module.exports = function (Parser) {
 
 			case tt.num: case tt.string:
 				return this.parseLiteral(this.value);
+			
+			case tt.objectAt: case tt.dict:
+				return this.parseExtLiteral(this.type);
 
 			case tt.parenL:
 				return this.parseParenExpression();
@@ -218,6 +221,17 @@ module.exports = function (Parser) {
 
 		this.next();
 
+		return node;
+	};
+	
+	pp.parseExtLiteral = function (type) {
+		var node = {
+			type: type.label,
+			value: this.value
+		};
+		
+		this.next();
+		
 		return node;
 	};
 

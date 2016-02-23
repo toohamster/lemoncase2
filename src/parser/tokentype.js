@@ -40,8 +40,8 @@ var types = {
 	eof: new TokenType('eof'),
 
 	// special to lemoncase
-	objectAt: new TokenType('object@'),
-	dict: new TokenType('dictionary index'),
+	objectAt: new TokenType('objectStore'),
+	dict: new TokenType('dictionaryIndex'),
 
 	//punctuation token types
 	bracketL: new TokenType('[', beforeExpr),
@@ -95,7 +95,7 @@ function kw(name, options) {
 }
 
 kw('in');
-kw('by');
+kw('by', beforeExpr);
 kw('click', beforeExpr);
 kw('input', beforeExpr);
 kw('rclick', beforeExpr);
