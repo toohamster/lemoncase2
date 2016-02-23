@@ -79,9 +79,11 @@ module.exports = function (Parser) {
 	};
 
 	pp.parsePcParam = function (node) {
-		this.expect(tt.parenL);
+		if (this.eat(tt.parenL)) {
+			node.BODY.params = this.parseBindingList(tt.parenR, false, false);
+		}
+
 		//todo check var list
-		return node.BODY.params = this.parseBindingList(tt.parenR, false, false);
 	};
 
 	pp.parsePcBlock = function (node) {
@@ -124,9 +126,9 @@ module.exports = function (Parser) {
 				return this.parseRefreshStatement();
 			case tt._var:
 				return this.parseVarStatement();
+			default:
+				this.unexpected();
 		}
-
-		this.raise(this.start, 'Unexpected statement');
 	};
 
 	pp.parseReturnStatement = function () {
@@ -172,7 +174,7 @@ module.exports = function (Parser) {
 			decl.id = this.parseIndent();
 
 			if (this.eat(tt.eq)) {
-				decl.init = this.parseMayBeAssign()
+				decl.init = this.parseMaybeAssign();
 			} else {
 				decl.init = null;
 			}

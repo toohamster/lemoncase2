@@ -27,5 +27,14 @@ test('parse click', t => {
 	
 	t.notThrows(function (){
 		p.parseStatement();
-	})
+	});
+});
+
+test('parse var decl', t => {
+	var p = tokenizer('var a=1 , b =  2;');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
 });
