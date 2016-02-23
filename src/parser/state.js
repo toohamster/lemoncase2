@@ -55,6 +55,8 @@ extend(require('./location.js'));
 extend(require('./tokenize.js'));
 extend(require('./statement.js'));
 extend(require('./parseutil.js'));
+extend(require('./expression.js'));
+extend(require('./lval.js'));
 
 
 module.exports = Parser;

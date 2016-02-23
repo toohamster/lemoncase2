@@ -1,7 +1,7 @@
 import test from 'ava';
 import {tokenizer} from '../src/parser/index.js';
 
-test('parse set', t => {
+test('parse macro', t => {
 	var p = tokenizer('#CLOCK 1234\n#TIMES \t200 \n', {});
 	p.nextToken();
 	
@@ -10,4 +10,22 @@ test('parse set', t => {
 	
 	p.parseStructure();
 	t.is(p.conf.times, 200);
+});
+
+test('parse process', t => {
+	var p = tokenizer('//main\n process main (a, b){}\n', {});
+	p.nextToken();
+	
+	p.parseStructure();
+	
+	t.is(p.pcs.main.BODY.segment.length, 0);
+});
+
+test('parse click', t => {
+	var p = tokenizer('click "me";');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	})
 });
