@@ -83,7 +83,7 @@ var types = {
 	modulo: binop("%", 10),
 	star: binop("*", 10),
 	slash: binop("/", 10),
-	match: binop('~=', 0)
+	match: binop('~~', 6)
 };
 
 var keywords = {};

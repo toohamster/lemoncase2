@@ -38,23 +38,13 @@ module.exports = function (Parser) {
 		if (!setType.macro) this.unexpected();
 
 		var confTable = this.conf;
-		var key = this.value.substr(1).toLowerCase(); // #CLOCK --> clock
+		var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
 
 		if (confTable[key]) this.raise(this.start, this.value + ' was defined already');
 
-		// #set CLOCK ...
+		confTable[key] = this.value;
 
-		var start = this.pos;
-		var ch = this.fullCharCodeAtPos();
-		while (this.pos < this.input.length && ch !== 10 && ch !== 13
-			&& ch !== 8232 && ch !== 8233) {
-			++this.pos;
-			ch = this.input.charCodeAt(this.pos);
-		}
-
-		var num = this.input.slice(start, this.pos).trim();
-
-		confTable[key] = Number(num);
+		this.next();
 	};
 
 	pp.parseProcess = function () {

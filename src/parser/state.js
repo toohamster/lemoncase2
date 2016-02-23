@@ -24,6 +24,7 @@ var Parser = function (options, input) {
 	this.conf = {};
 	this.keys = {};
 	this.pcs = {};
+	this.pcsTable = {};//keep track of all the unused process
 
 	//dKey - dictionary field used
 	//obKey - object key used

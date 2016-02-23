@@ -192,6 +192,7 @@ module.exports = function (Parser) {
 
 	pp.readToken_eq_excl = function (code) {
 		var next = this.input.charCodeAt(this.pos+1);
+		if (next === 126 && code === 33) return this.finishOp(tt.match, 2);
 		if (next === 61) return this.finishOp(tt.equality, this.input.charCodeAt(this.pos+2) === 61 ? 3 : 2);
 
 		return this.finishOp(code === 61 ? tt.eq : tt.prefix, 1);
@@ -236,9 +237,9 @@ module.exports = function (Parser) {
 
 			case 61: case 33: // '=!'
 				return this.readToken_eq_excl(code);
-			case 126:
+			case 126: // '~~'
 				var next = this.input.charCodeAt(this.pos+1);
-				if (next !== 61) this.raise(this.pos, 'bitwise operator is not allowed');
+				if (next !== 126) this.raise(this.pos, 'bitwise operator is not allowed');
 				return this.finishOp(tt.match, 2);
 		}
 
@@ -402,14 +403,34 @@ module.exports = function (Parser) {
 		var type;
 		if (this.keywords.test(word)) {
 			type = keywordTypes[word];
+
+			//macros span the whole line which makes no different from a line comment
+			if (type.macro) {
+				var val = this.readMacro();
+
+				return this.finishToken(type, val);
+			}
 		} else {
+			// #xxx is not a valid identifier
 			if (word.charCodeAt(0) === 35) {
 				this.raise(start, '# is only valid for # macro');
 			}
-
+			// everything else is fine
 			type = tt.name;
 		}
 
 		return this.finishToken(type, word);
 	};
+
+	pp.readMacro = function () {
+		var start = this.pos;
+		var ch = this.fullCharCodeAtPos();
+		while (this.pos < this.input.length && ch !== 10 && ch !== 13
+		&& ch !== 8232 && ch !== 8233) {
+			++this.pos;
+			ch = this.input.charCodeAt(this.pos);
+		}
+
+		return parseInt(this.input.slice(start, this.pos).trim(), 10);
+	}
 };
