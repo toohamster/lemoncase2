@@ -36,3 +36,12 @@ test('parse rclick / <>', t => {
 		p.parseStatement();
 	});
 });
+
+test('parse shiny ~~', t => {
+	var p = tokenizer('assert <#"asdf"/> ~~ "b" && <#"asdf"/> !~ "d";');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+});

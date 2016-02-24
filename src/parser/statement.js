@@ -130,18 +130,15 @@ module.exports = function (Parser) {
 				return this.parseRefreshStatement();
 			case tt._var:
 				return this.parseVarStatement();
+			case tt.name:
+				return this.parseExprStatement();
 			default:
 				this.unexpected();
 		}
 	};
 
 	pp.parseReturnStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x01
-		};
-
-		this.next();
+		var node = this.startLCNode(0x01);
 
 		if (this.eat(tt.semi)) node.args = null;
 		else this.raise(this.start, 'Return expression is not supported');
@@ -150,15 +147,10 @@ module.exports = function (Parser) {
 	};
 
 	pp.parseVarStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x10,
-			BODY: {}
-		};
-
-		this.next();
+		var node = this.startLCNode(0x10);
 
 		this.parseVar(node);
+		node.BODY.exp = genExpr(node.BODY.raw);
 
 		this.semicolon();
 
@@ -185,19 +177,47 @@ module.exports = function (Parser) {
 			if (!this.eat(tt.comma)) break;
 		}
 
-		node.BODY.raw = declarations;
+		node.BODY.raw = {
+			declarations: declarations,
+			type: 'varDecl'
+		};
 	};
 	
-	pp.parseWaitStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x11,
-			BODY: {}
-		};
+	pp.parseExprStatement = function () {
+		var line = getLineInfo(this.input, this.start);
+		var expr = this.parseExpression();
 		
-		this.next();
+		this.semicolon();
+		
+		// fn()
+		if (expr.type === 'CallExpr') {
+			return {
+				LINE: line,
+				TYPE: 0x00,
+				BODY: {
+					identifier: expr.callee.name
+				}
+			};
+		}
+		
+		// a = 1
+		var fn = genExpr(expr);
+		
+		return {
+			LINE: line,
+			TYPE: 0x10,
+			BODY: {
+				exp: fn,
+				raw: expr
+			}
+		}
+	}
+	
+	pp.parseWaitStatement = function () {
+		var node = this.startLCNode(0x11);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.delay = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
@@ -205,17 +225,10 @@ module.exports = function (Parser) {
 	}
 
 	pp.parseClickAction = function (keyword) {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x12,
-			BODY: {
-				action: keyword
-			}
-		};
-
-		this.next();
+		var node = this.startLCNode(0x12);
 
 		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
 
 		this.semicolon();
 
@@ -223,19 +236,15 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseInputAction = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x12,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x12);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
 		
 		this.expect(tt._by);
 		
 		node.BODY.raw1 = this.parseExpression();
+		node.BODY.param = genExpr(node.BODY.raw1);
 		
 		this.semicolon();
 		
@@ -243,15 +252,10 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseAssertStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x13,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x13);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.exp = genExpr(node.BODY.raw);
 		
 		if (this.eat(tt._in)) {
 			if (this.type === tt.num) {
@@ -271,15 +275,10 @@ module.exports = function (Parser) {
 	}
 	
 	pp.parseGotoStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x14,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x14);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.url = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
@@ -287,30 +286,35 @@ module.exports = function (Parser) {
 	};
 
 	pp.parseRefreshStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x15
-		};
+		var node = this.startLCNode(0x15);
 
-		this.next();
 		this.semicolon();
 
 		return node;
 	};
 	
 	pp.parseLogStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x20,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x20);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.msg = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
 		return node;
 	};
+	
+
+	pp.startLCNode = function (type) {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: type,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		return node;
+	};
+	
 };

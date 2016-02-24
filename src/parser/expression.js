@@ -90,12 +90,12 @@ module.exports = function (Parser) {
 
 		if (prec != null) {
 			if (prec > minPrec) {
-				var logical = this.type === tt.logicalOR || this.type === tt.logicalAND;
+				var type = this.type;
 				var op = this.value;
 				this.next();
 				var startPos = this.start;
 				var right = this.parseExprOp(this.parseMaybeUnary(false), startPos, prec);
-				var node = this.buildBinary(leftStartPos, left, right, op, logical);
+				var node = this.buildBinary(leftStartPos, left, right, op, type);
 
 				return this.parseExprOp(node, leftStartPos, minPrec);
 			}
@@ -104,20 +104,22 @@ module.exports = function (Parser) {
 		return left;
 	};
 
-	pp.buildBinary = function (startPos, left, right, op, logical) {
+	pp.buildBinary = function (startPos, left, right, op, type) {
 		var node = {
 			left: left,
 			operator: op,
 			right: right
 		};
 
-		node.type = logical ? 'LogicalExpr' : 'BinaryExpr';
+		if (type === tt.logicalAND || type === tt.logicalOR) node.type = 'LogicalExpr';
+		else if (type === tt.match) node.type = 'MatchExpr';
+		else node.type = 'BinaryExpr';
 
 		return node;
 	};
 
 	pp.parseMaybeUnary = function (sawUnary) {
-		var startPos = this.start, expr;
+		var expr;
 		if (this.type.prefix) {
 			var node = {}, update = this.type === tt.incDec;
 			node.operator = this.value;
@@ -166,10 +168,13 @@ module.exports = function (Parser) {
 		for (;;) {
 			if (this.eat(tt.parenL)) {
 				var node = {
-					type: 'CallExpr'
+					type: 'CallExpr',
+					callee: base
 				};
 
-				throw 'todo';
+				this.expect(tt.parenR);
+				
+				return node;
 			} else {
 				return base;
 			}
@@ -186,7 +191,8 @@ module.exports = function (Parser) {
 
 		switch (this.type) {
 			case tt.name:
-				return this.parseIndent(this.type !== tt.name);
+				var name = this.parseIndent(this.type !== tt.name);
+				return { type: 'Identifier', name: name };
 
 			case tt.regexp:
 				var value = this.value;
@@ -241,14 +247,14 @@ module.exports = function (Parser) {
 		this.expect(tt.parenR);
 
 		return {
-			type: 'ParenthesizedExpression',
+			type: 'ParenthesizedExpr',
 			expression: val
 		};
 	};
 
 	pp.parseTagExpression = function () {
 		var node = {
-			type: this.type.label
+			type: this.type === tt.tagAtL ? 'TextExpr' : 'CountExpr'
 		};
 
 		this.next();

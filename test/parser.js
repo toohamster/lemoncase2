@@ -91,12 +91,12 @@ module.exports = function (Parser) {
 
 		if (prec != null) {
 			if (prec > minPrec) {
-				var logical = this.type === tt.logicalOR || this.type === tt.logicalAND;
+				var type = this.type;
 				var op = this.value;
 				this.next();
 				var startPos = this.start;
 				var right = this.parseExprOp(this.parseMaybeUnary(false), startPos, prec);
-				var node = this.buildBinary(leftStartPos, left, right, op, logical);
+				var node = this.buildBinary(leftStartPos, left, right, op, type);
 
 				return this.parseExprOp(node, leftStartPos, minPrec);
 			}
@@ -105,20 +105,22 @@ module.exports = function (Parser) {
 		return left;
 	};
 
-	pp.buildBinary = function (startPos, left, right, op, logical) {
+	pp.buildBinary = function (startPos, left, right, op, type) {
 		var node = {
 			left: left,
 			operator: op,
 			right: right
 		};
 
-		node.type = logical ? 'LogicalExpr' : 'BinaryExpr';
+		if (type === tt.logicalAND || type === tt.logicalOR) node.type = 'LogicalExpr';
+		else if (type === tt.match) node.type = 'MatchExpr';
+		else node.type = 'BinaryExpr';
 
 		return node;
 	};
 
 	pp.parseMaybeUnary = function (sawUnary) {
-		var startPos = this.start, expr;
+		var expr;
 		if (this.type.prefix) {
 			var node = {}, update = this.type === tt.incDec;
 			node.operator = this.value;
@@ -167,10 +169,13 @@ module.exports = function (Parser) {
 		for (;;) {
 			if (this.eat(tt.parenL)) {
 				var node = {
-					type: 'CallExpr'
+					type: 'CallExpr',
+					callee: base
 				};
 
-				throw 'todo';
+				this.expect(tt.parenR);
+				
+				return node;
 			} else {
 				return base;
 			}
@@ -187,7 +192,8 @@ module.exports = function (Parser) {
 
 		switch (this.type) {
 			case tt.name:
-				return this.parseIndent(this.type !== tt.name);
+				var name = this.parseIndent(this.type !== tt.name);
+				return { type: 'Identifier', name: name };
 
 			case tt.regexp:
 				var value = this.value;
@@ -242,14 +248,14 @@ module.exports = function (Parser) {
 		this.expect(tt.parenR);
 
 		return {
-			type: 'ParenthesizedExpression',
+			type: 'ParenthesizedExpr',
 			expression: val
 		};
 	};
 
 	pp.parseTagExpression = function () {
 		var node = {
-			type: this.type.label
+			type: this.type === tt.tagAtL ? 'TextExpr' : 'CountExpr'
 		};
 
 		this.next();
@@ -637,18 +643,15 @@ module.exports = function (Parser) {
 				return this.parseRefreshStatement();
 			case tt._var:
 				return this.parseVarStatement();
+			case tt.name:
+				return this.parseExprStatement();
 			default:
 				this.unexpected();
 		}
 	};
 
 	pp.parseReturnStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x01
-		};
-
-		this.next();
+		var node = this.startLCNode(0x01);
 
 		if (this.eat(tt.semi)) node.args = null;
 		else this.raise(this.start, 'Return expression is not supported');
@@ -657,15 +660,10 @@ module.exports = function (Parser) {
 	};
 
 	pp.parseVarStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x10,
-			BODY: {}
-		};
-
-		this.next();
+		var node = this.startLCNode(0x10);
 
 		this.parseVar(node);
+		node.BODY.exp = genExpr(node.BODY.raw);
 
 		this.semicolon();
 
@@ -692,19 +690,47 @@ module.exports = function (Parser) {
 			if (!this.eat(tt.comma)) break;
 		}
 
-		node.BODY.raw = declarations;
+		node.BODY.raw = {
+			declarations: declarations,
+			type: 'varDecl'
+		};
 	};
 	
-	pp.parseWaitStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x11,
-			BODY: {}
-		};
+	pp.parseExprStatement = function () {
+		var line = getLineInfo(this.input, this.start);
+		var expr = this.parseExpression();
 		
-		this.next();
+		this.semicolon();
+		
+		// fn()
+		if (expr.type === 'CallExpr') {
+			return {
+				LINE: line,
+				TYPE: 0x00,
+				BODY: {
+					identifier: expr.callee.name
+				}
+			};
+		}
+		
+		// a = 1
+		var fn = genExpr(expr);
+		
+		return {
+			LINE: line,
+			TYPE: 0x10,
+			BODY: {
+				exp: fn,
+				raw: expr
+			}
+		}
+	}
+	
+	pp.parseWaitStatement = function () {
+		var node = this.startLCNode(0x11);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.delay = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
@@ -712,17 +738,10 @@ module.exports = function (Parser) {
 	}
 
 	pp.parseClickAction = function (keyword) {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x12,
-			BODY: {
-				action: keyword
-			}
-		};
-
-		this.next();
+		var node = this.startLCNode(0x12);
 
 		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
 
 		this.semicolon();
 
@@ -730,19 +749,15 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseInputAction = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x12,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x12);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
 		
 		this.expect(tt._by);
 		
 		node.BODY.raw1 = this.parseExpression();
+		node.BODY.param = genExpr(node.BODY.raw1);
 		
 		this.semicolon();
 		
@@ -750,15 +765,10 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseAssertStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x13,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x13);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.exp = genExpr(node.BODY.raw);
 		
 		if (this.eat(tt._in)) {
 			if (this.type === tt.num) {
@@ -778,15 +788,10 @@ module.exports = function (Parser) {
 	}
 	
 	pp.parseGotoStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x14,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x14);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.url = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
@@ -794,32 +799,37 @@ module.exports = function (Parser) {
 	};
 
 	pp.parseRefreshStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x15
-		};
+		var node = this.startLCNode(0x15);
 
-		this.next();
 		this.semicolon();
 
 		return node;
 	};
 	
 	pp.parseLogStatement = function () {
-		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0x20,
-			BODY: {}
-		};
-		
-		this.next();
+		var node = this.startLCNode(0x20);
 		
 		node.BODY.raw = this.parseExpression();
+		node.BODY.msg = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
 		return node;
 	};
+	
+
+	pp.startLCNode = function (type) {
+		var node = {
+			LINE: getLineInfo(this.input, this.start),
+			TYPE: type,
+			BODY: {}
+		};
+		
+		this.next();
+		
+		return node;
+	};
+	
 };
 },{"./identifier.js":2,"./locutil.js":5,"./tokentype.js":12,"./util.js":13,"./walk.js":14,"./whitespace.js":15}],11:[function(require,module,exports){
 var isIdentifierStart = require('./identifier.js').isIdentifierStart;
@@ -1412,13 +1422,102 @@ module.exports = {
 },{}],14:[function(require,module,exports){
 // walk a javascript style tree and transform it into a function
 
+var visitors = {
+	varDecl: function (node, c) {
+		var out = '', first = true;
+		
+		node.declarations.forEach(function (decl) {
+			if (decl.init) {
+				if (!first) out += ',';
+				
+				out += '$.' + decl.id + ' = ' + c(decl.init);
+				
+				first = false;
+			}
+		});
+		
+		return '(' + out + ')';
+	},
+	SequenceExpr: function (node, c) {
+		var out = '', first = true;
+		
+		node.expressions.forEach(function (expr) {
+			if (!first) out += ',';
+			
+			out += c(expr);
+			
+			first = false;
+		});
+		
+		return '(' + out + ')';
+	},
+	
+	// end point node
+	literal: function (node, c) {
+		return node.raw;
+	},
+	dictionaryIndex: function (node, c) {
+		return 'd.' + node.value;
+	},
+	objectStore: function (node, c) {
+		return 'o.' + node.value;
+	},
+	Identifier: function (node, c) {
+		return '$.' + node.name;
+	},
+	
+	// binary operator
+	LogicalExpr: function (node, c) {
+		return c(node.left) + node.operator + c(node.right);
+	},
+	BinaryExpr: function (node, c) {
+		return c(node.left) + node.operator + c(node.right);
+	},
+	MatchExpr: function (node, c) {
+		var out = '';
+		
+		if (node.operator === '~~') out += '!';
+		
+		return out + '!(' + c(node.left) + ').match(' + c(node.right) + ').length';
+	},
+	
+	// unary
+	UpdateExpr: function (node, c) {
+		var inside = '$.' + node.argument;
+		
+		return node.prefix ? node.operator + inside : inside + node.operator;
+	},
+	
+	// assign
+	AssignmentExpr: function (node, c) {
+		return c(node.left) + node.operator + c(node.right);
+	},
+	
+	// ()
+	ParenthesizedExpr: function (node, c) {
+		return '(' + c(node.expression) + ')';
+	},
+	
+	TextExpr: function (node, c) {
+		var inside = 'String(' + c(node.val) + ')';
+		
+		return 't(' + inside + ')';
+	},
+	CountExpr: function (node, c) {
+		var inside = 'String(' + c(node.val) + ')';
+		
+		return 'c(' + inside + ')';
+	}
+};
 
 module.exports = function genExpr (node) {
 	var string = (function c(node){
-		return '';
+		var type = node.type;
+		
+		return visitors[type](node, c);
 	})(node);
 	
-	return new Function('$,o,d,c,t', 'return throw "todo"');
+	return new Function('$,o,d,c,t', 'return ' + string + ';');
 };
 },{}],15:[function(require,module,exports){
 // Matches a whole line break (where CRLF is considered a single

@@ -65,3 +65,12 @@ test('input statement', t => {
 		p.parseStatement();
 	});
 });
+
+test('sequence expression', t => {
+	var p = tokenizer('b = 2, a += 1;');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+});
