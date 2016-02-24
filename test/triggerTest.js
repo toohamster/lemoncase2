@@ -6,7 +6,7 @@ var app = angular.module('testPanel', [
 	var iframe = document.querySelector('iframe');
 	$rootScope.iframe = iframe;
 	setup.setContextFrame(iframe);
-}).controller('panel', function ($scope) {
+}).controller('panel', function ($scope, $element) {
 	var object = {
 		button: '[type=button]'
 	}, dictionary = new Dictionary({
@@ -588,4 +588,23 @@ var app = angular.module('testPanel', [
 	$scope.stop = function () {
 		window.$case.stop();
 	};
+	
+	// code mirror
+	var $codeMirror;
+	
+	function setupCM () {
+		$codeMirror = CodeMirror.fromTextArea($element.find('textarea')[0], {
+			lineWrapping : true,
+			lineNumbers: true,
+			indentWithTabs: true,
+			indentUnit: 4,
+			mode: 'text/x-php'
+		});
+		
+		$codeMirror.setValue("process main {\n\twait 500;\n}");
+		$codeMirror.refresh();
+		$codeMirror.setSize('100%', '100%');
+	}
+	
+	setupCM();
 });

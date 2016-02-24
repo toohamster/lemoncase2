@@ -20,6 +20,7 @@ test('parse a monsterous thing', t => {
 process main {
 	var selector = "button";
 	var time = 999999;
+	time = 108, selector = ".btnG";
 		click ".btnG";
   input selector by "1";
   input "input" by /test\d{4}/img;

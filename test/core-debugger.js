@@ -1,6 +1,6 @@
 var tokenizer = require('../src/parser/index.js').tokenizer;
 
-var p = tokenizer('sub_1();');
+var p = tokenizer('input [obj] by /abc/;');
 p.nextToken();
 
 console.log(JSON.stringify(p.parseStatement(), null, 2));

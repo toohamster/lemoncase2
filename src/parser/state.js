@@ -22,7 +22,7 @@ var Parser = function (options, input) {
 
 	// conf - #set
 	this.conf = {};
-	this.keys = {};
+	this.keys = [];
 	this.pcs = {};
 	this.pcsTable = {};//keep track of all the unused process
 

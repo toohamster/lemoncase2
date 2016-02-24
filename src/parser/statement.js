@@ -184,7 +184,7 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseExprStatement = function () {
-		var line = getLineInfo(this.input, this.start);
+		var line = getLineInfo(this.input, this.start).line;
 		var expr = this.parseExpression();
 		
 		this.semicolon();
@@ -269,7 +269,8 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		//do not forgot the data key
-		node.BODY.key = this.keys = UID('#');
+		node.BODY.key = UID('#');
+		this.keys.push(node.BODY.key);
 		
 		return node;
 	}
@@ -307,7 +308,7 @@ module.exports = function (Parser) {
 
 	pp.startLCNode = function (type) {
 		var node = {
-			LINE: getLineInfo(this.input, this.start),
+			LINE: getLineInfo(this.input, this.start).line,
 			TYPE: type,
 			BODY: {}
 		};

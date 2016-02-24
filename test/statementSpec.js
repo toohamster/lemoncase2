@@ -55,6 +55,8 @@ test('parse assert', t => {
 	t.notThrows(function (){
 		p.parseStatement();
 	});
+	
+	t.is(p.keys[0], '#0');
 });
 
 test('input statement', t => {
@@ -64,6 +66,8 @@ test('input statement', t => {
 	t.notThrows(function (){
 		p.parseStatement();
 	});
+	
+	t.true(p.dTable['obj']);
 });
 
 test('sequence expression', t => {

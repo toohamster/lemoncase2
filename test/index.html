@@ -4,6 +4,8 @@
 <head>
 	<meta charset="utf-8"/>
 	<script src="../node_modules/angular/angular.min.js"></script>
+	<script src="../node_modules/codemirror/lib/codemirror.js"></script>
+	<script src="./codeMirrorMode.js"></script>
 	<script src="../lib/ranexp.js"></script>
 	<script src="../lib/trigger.js"></script>
 	<script src="../lib/collector.js"></script>
@@ -21,6 +23,14 @@
 	<script src="caseTest.js"></script>
 	
 	<script src="./parser.js"></script>
+	
+	<style>
+		#code {
+			float: right;
+			width: 400px;
+		}
+	</style>
+	<link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
 </head>
 <body ng-controller="panel">
 	<iframe src="test.html" style="width:1280px;height:500px;"></iframe>
@@ -55,6 +65,9 @@
 	<button ng-click="pause()">PAUSE</button>
 	<button ng-click="resume()">RESUME</button>
 	<button ng-click="stop()">STOP</button>
+	
+	<!-- code mirror -->
+	<textarea name="" id="code" cols="30" rows="10"></textarea>
 </body>
 
 </html>
