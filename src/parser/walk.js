@@ -34,6 +34,9 @@ var visitors = {
 	literal: function (node, c) {
 		return node.raw;
 	},
+	regexp: function (node, c) {
+		return '(' + node.raw + ').gen'; 
+	},
 	dictionaryIndex: function (node, c) {
 		return 'd.' + node.value;
 	},

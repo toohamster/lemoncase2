@@ -1,6 +1,15 @@
 import test from 'ava';
-import {walk} from '../src/parser/walk.js';
+import genExpr from '../src/parser/walk.js';
 
 test('walk', t => {
-	t.pass();
+	var string = genExpr({
+		type: 'regexp',
+		raw: '/^abcd/i',
+		value: {
+			pattern: 'abcd',
+			flags: 'i'
+		}
+	}).toString();
+	
+	t.regex(string, /\.gen/);
 });

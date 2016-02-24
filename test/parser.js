@@ -197,13 +197,13 @@ module.exports = function (Parser) {
 
 			case tt.regexp:
 				var value = this.value;
-				node = this.parseLiteral(value.value);
+				node = this.parseLiteral('regexp', value.value);
 				node.regexp = { pattern: value.pattern, flags: value.flags };
 
 				return node;
 
 			case tt.num: case tt.string:
-				return this.parseLiteral(this.value);
+				return this.parseLiteral('literal', this.value);
 			
 			case tt.objectAt: case tt.dict:
 				return this.parseExtLiteral(this.type);
@@ -219,9 +219,9 @@ module.exports = function (Parser) {
 		}
 	};
 
-	pp.parseLiteral = function (value) {
+	pp.parseLiteral = function (type, value) {
 		var node = {
-			type: 'literal',
+			type: type,
 			value: value,
 			raw: this.input.slice(this.start, this.end)
 		};
@@ -472,7 +472,7 @@ var Parser = function (options, input) {
 
 	// conf - #set
 	this.conf = {};
-	this.keys = {};
+	this.keys = [];
 	this.pcs = {};
 	this.pcsTable = {};//keep track of all the unused process
 
@@ -697,7 +697,7 @@ module.exports = function (Parser) {
 	};
 	
 	pp.parseExprStatement = function () {
-		var line = getLineInfo(this.input, this.start);
+		var line = getLineInfo(this.input, this.start).line;
 		var expr = this.parseExpression();
 		
 		this.semicolon();
@@ -742,6 +742,7 @@ module.exports = function (Parser) {
 
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
+		node.BODY.action = keyword;
 
 		this.semicolon();
 
@@ -758,6 +759,7 @@ module.exports = function (Parser) {
 		
 		node.BODY.raw1 = this.parseExpression();
 		node.BODY.param = genExpr(node.BODY.raw1);
+		node.BODY.action = 'input';
 		
 		this.semicolon();
 		
@@ -782,7 +784,8 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		//do not forgot the data key
-		node.BODY.key = this.keys = UID('#');
+		node.BODY.key = UID('#');
+		this.keys.push(node.BODY.key);
 		
 		return node;
 	}
@@ -820,7 +823,7 @@ module.exports = function (Parser) {
 
 	pp.startLCNode = function (type) {
 		var node = {
-			LINE: getLineInfo(this.input, this.start),
+			LINE: getLineInfo(this.input, this.start).line,
 			TYPE: type,
 			BODY: {}
 		};
@@ -1455,6 +1458,9 @@ var visitors = {
 	// end point node
 	literal: function (node, c) {
 		return node.raw;
+	},
+	regexp: function (node, c) {
+		return '(' + node.raw + ').gen'; 
 	},
 	dictionaryIndex: function (node, c) {
 		return 'd.' + node.value;

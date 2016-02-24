@@ -196,13 +196,13 @@ module.exports = function (Parser) {
 
 			case tt.regexp:
 				var value = this.value;
-				node = this.parseLiteral(value.value);
+				node = this.parseLiteral('regexp', value.value);
 				node.regexp = { pattern: value.pattern, flags: value.flags };
 
 				return node;
 
 			case tt.num: case tt.string:
-				return this.parseLiteral(this.value);
+				return this.parseLiteral('literal', this.value);
 			
 			case tt.objectAt: case tt.dict:
 				return this.parseExtLiteral(this.type);
@@ -218,9 +218,9 @@ module.exports = function (Parser) {
 		}
 	};
 
-	pp.parseLiteral = function (value) {
+	pp.parseLiteral = function (type, value) {
 		var node = {
-			type: 'literal',
+			type: type,
 			value: value,
 			raw: this.input.slice(this.start, this.end)
 		};

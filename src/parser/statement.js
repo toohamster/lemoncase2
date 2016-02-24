@@ -229,6 +229,7 @@ module.exports = function (Parser) {
 
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
+		node.BODY.action = keyword;
 
 		this.semicolon();
 
@@ -245,6 +246,7 @@ module.exports = function (Parser) {
 		
 		node.BODY.raw1 = this.parseExpression();
 		node.BODY.param = genExpr(node.BODY.raw1);
+		node.BODY.action = 'input';
 		
 		this.semicolon();
 		

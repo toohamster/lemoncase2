@@ -1,5 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global angular, Case, setup, trigger, syntaxTree, console */
+/*global angular, Case, setup, trigger, syntaxTree, console, LP */
 var app = angular.module('testPanel', [
 
 ]).run(function ($rootScope) {
@@ -562,7 +562,9 @@ var app = angular.module('testPanel', [
 
 	$scope.linkCase = function () {
 		console.log('--------- Link test case --------------');
-		var c = new Case(syntaxTree, object, dictionary);
+		// var c = new Case(syntaxTree, object, dictionary);
+		var ast = LP.parse($codeMirror.getValue(), {});
+		var c = new Case(ast, object, dictionary);
 		window.$case = c;
 	};
 
@@ -601,7 +603,7 @@ var app = angular.module('testPanel', [
 			mode: 'text/x-php'
 		});
 		
-		$codeMirror.setValue("process main {\n\twait 500;\n}");
+		$codeMirror.setValue("process main {\n\tvar a = '[type=email]';\n\tinput 'input' + a by 1;\n}");
 		$codeMirror.refresh();
 		$codeMirror.setSize('100%', '100%');
 	}
