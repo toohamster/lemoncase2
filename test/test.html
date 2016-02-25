@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>LemonCase2</title>
+	<meta charset="utf-8">
+	<script src="../node_modules/angular/angular.min.js"></script>
+	<script>
+//		var _ = HTMLElement.prototype.dispatchEvent;
+//		HTMLElement.prototype.dispatchEvent = function (e) {
+//			_.call(this, e);
+//			console.log(e);
+//		}
+		var test = angular.module('test', []).controller('fun', function ($scope, $timeout) {
+			$scope.show = function () {
+				$timeout(function () {
+					$scope.content = '出现了'
+				}, 2000);
+			};
+		})
+	</script>
+</head>
+<body ng-app="test" ng-controller="fun">
+	<textarea ng-model="ta"></textarea>
+	<input/>
+	<input type="email" />
+	<input type="password" />
+	<input type="button" ng-click="show()" />
+	<a href="http://baidu.com">content</a>
+	<select>
+		<option>one</option>
+		<option>two</option>
+		<option>three</option>
+	</select>
+	<span>{{content}}</span>
+	<h1>{{ta}}</h1>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<script src="../node_modules/angular/angular.min.js"></script>
+	<script src="../dist/lemoncase.min.js"></script>
+
+	<script src="triggerTest.js"></script>
+	<script>
+		var app = angular.module('test', ['lemoncase']).run(function (LC) {
+			var ast = LC.parse('#TIMES 2\nprocess main{ console "ok" + [word]; }');
+			console.log(LC);
+			
+			var object = {
+				button: '[type=button]'
+			};
+			
+			var dictionary = new LC.Dictionary({
+				field: [
+					{
+						name: 'word',
+						pattern: /\w{4,8}/
+					}
+				]
+			});
+			
+			var c = new LC.Case(ast, object, dictionary);
+			c.start();
+			
+			LC.setup.setContextFrame();
+		});
+	</script>
+</head>
+<body ng-app="test">
+</body>
+
+</html>

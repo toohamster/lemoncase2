@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html ng-app="testPanel">
+
+<head>
+	<meta charset="utf-8"/>
+	<script src="../node_modules/angular/angular.min.js"></script>
+	<script src="../node_modules/codemirror/lib/codemirror.js"></script>
+	<script src="../node_modules/browserify"></script>
+	<script src="./codeMirrorMode.js"></script>
+	<script src="../lib/ranexp.js"></script>
+	<script src="../lib/trigger.js"></script>
+	<script src="../lib/collector.js"></script>
+
+	<script src="../src/global.js"></script>
+	<!-- src -->
+	<script src="../src/class/dictionary.js"></script>
+	<script src="../src/class/instruction.js"></script>
+	<script src="../src/class/case.js"></script>
+	<script src="../src/class/case_P.js"></script>
+	<script src="../src/class/case_I.js"></script>
+	<script src="../src/instructions.js"></script>
+
+	<script src="triggerTest.js"></script>
+	<script src="caseTest.js"></script>
+	
+	<script src="./parser.js"></script>
+	
+	<style>
+		#code {
+			float: right;
+			width: 400px;
+		}
+	</style>
+	<link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
+</head>
+<body ng-controller="panel">
+	<iframe src="test.html" style="width:1280px;height:500px;"></iframe>
+	<div>
+		<input ng-model="opts.selector" />
+		<button ng-click="getActionOfDOM()">Check Actions</button>
+		<input ng-model="opts.action" />
+		<input ng-model="actionParam.value" />
+		<button ng-click="fire()">FIRE!</button>
+	</div>
+
+	<ul style="display:inline-block">
+		<li><h3>DOMs</h3></li>
+		<li ng-repeat="(s, k) in selectors"
+			ng-click="opts.selector=k">{{k}}</li>
+	</ul>
+	<ul style="display:inline-block">
+		<li><h3>Actions of DOM</h3></li>
+		<li ng-repeat="(k, s) in DOMActions"
+			ng-click="opts.action=k">{{k}}</li>
+	</ul>
+	<ul style="display:inline-block">
+		<li><h3>Cases</h3></li>
+		<li ng-repeat="(k, s) in caseList"
+			ng-click="load(s)">{{k}}</li>
+	</ul>
+	<button ng-click="linkCase()">LINKer</button> |
+	<button ng-click="bootCase()">BOOT</button>
+	<button ng-click="coreCase()">CORE</button>
+	<button ng-click="stepCase()">STEP</button> |
+	<button ng-click="start()">START</button>
+	<button ng-click="pause()">PAUSE</button>
+	<button ng-click="resume()">RESUME</button>
+	<button ng-click="stop()">STOP</button>
+	
+	<!-- code mirror -->
+	<textarea name="" id="code" cols="30" rows="10"></textarea>
+</body>
+
+</html>
