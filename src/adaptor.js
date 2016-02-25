@@ -29,15 +29,21 @@
     }
 }(this, function () {
 	'use strict';
-	//= include ../lib/trigger.js
+	//= include ../test/parser.js
+	//= include ../lib/*.js
 	//= include ./global.js
-	//= include ./prototype/case.js
-	//= include ./prototype/!(case).js
+	//= include ./class/dictionary.js
+	//= include ./class/instruction.js
+	//= include ./class/case.js
+	//= include ./class/case_P.js
+	//= include ./class/case_I.js
 	//= include ./instructions.js
 
 	return {
 		Case: Case,
 		setup: setup,
-		Instruction: Instruction
+		Instruction: IF,
+		parse: LP.parse,
+		Dictionary: Dictionary
 	};
 }));
