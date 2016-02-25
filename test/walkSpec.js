@@ -4,10 +4,11 @@ import genExpr from '../src/parser/walk.js';
 test('walk', t => {
 	var string = genExpr({
 		type: 'regexp',
-		raw: '/^abcd/i',
-		value: {
-			pattern: 'abcd',
-			flags: 'i'
+		raw: '|^abcd|i',
+		regexp: {
+			pattern: '^abcd',
+			flags: 'i',
+			gen: true
 		}
 	}).toString();
 	

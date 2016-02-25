@@ -34,7 +34,7 @@ process main {
 		assert <@"sth"/> in 00000;
   assert selector in 3000;
   log "yes";
-  log "fuck\\\' \\"off";
+  console "fuck\\\' \\"off";
   sub_1();
 }
 	`;

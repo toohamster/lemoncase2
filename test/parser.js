@@ -197,8 +197,8 @@ module.exports = function (Parser) {
 
 			case tt.regexp:
 				var value = this.value;
-				node = this.parseLiteral('regexp', value.value);
-				node.regexp = { pattern: value.pattern, flags: value.flags };
+				node = this.parseLiteral('regexp');
+				node.regexp = value;
 
 				return node;
 
@@ -283,10 +283,10 @@ module.exports = function (Parser) {
 // the keywords
 var reserve = ["in", "by"];
 var actions = ["click", "input", "rclick", "dblclick",
-	"movein", "moveout", "scroll", "select", 'jumpTo', 'refresh'];
+	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
 var macros = ["#CLOCK", "#TIMES", "#INTERVAL"];
 
-var keywords = ['wait', 'assert', 'log', 'var', 'process', '#set',
+var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
 'return'].concat(reserve).concat(actions).concat(macros);
 
 var keywordRegexp = new RegExp('^(' + keywords.join('|') + ')$');
@@ -602,8 +602,17 @@ module.exports = function (Parser) {
 	};
 
 	pp.parsePcBlock = function (node) {
+		var statements = this.parseBlock();
+		
+		// no statements or no return
+		if (!statements.length || statements[statements.length - 1].TYPE !== 0x01) {
+			statements.push({
+				LINE: -1,
+				TYPE: 0x01,
+			});
+		}
 		//todo check var list
-		node.BODY.segment = this.parseBlock();
+		node.BODY.segment = statements;
 	};
 
 	pp.parseBlock = function () {
@@ -635,9 +644,9 @@ module.exports = function (Parser) {
 				return this.parseWaitStatement();
 			case tt._assert:
 				return this.parseAssertStatement();
-			case tt._log:
-				return this.parseLogStatement();
-			case tt._jumpTo:
+			case tt._log: case tt._console:
+				return this.parseLogStatement(starttype === tt._log ? 0x20 : 0x21);
+			case tt._jumpto:
 				return this.parseGotoStatement();
 			case tt._refresh:
 				return this.parseRefreshStatement();
@@ -809,8 +818,8 @@ module.exports = function (Parser) {
 		return node;
 	};
 	
-	pp.parseLogStatement = function () {
-		var node = this.startLCNode(0x20);
+	pp.parseLogStatement = function (type) {
+		var node = this.startLCNode(type);
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.msg = genExpr(node.BODY.raw);
@@ -983,7 +992,7 @@ module.exports = function (Parser) {
 		if (this.exprAllowed) {
 			++this.pos;
 
-			return this.readRegexp();
+			return this.readRegexp('/');
 		}
 		// '/='
 		if (next === 61) return this.finishOp(tt.assign, 2);
@@ -1004,6 +1013,11 @@ module.exports = function (Parser) {
 
 	pp.readToken_pipe_amp = function (code) {
 		var next = this.input.charCodeAt(this.pos+1);
+		if (this.exprAllowed) {
+			++this.pos;
+
+			return this.readRegexp('|');
+		}
 		// '&&' '||'
 		if (next === code) return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
 
@@ -1109,7 +1123,7 @@ module.exports = function (Parser) {
 		this.exprAllowed = this.type.beforeExpr;
 	};
 
-	pp.readRegexp = function () {
+	pp.readRegexp = function (close) {
 		var escaped, inClass, start = this.pos;
 		for (;;) {
 			if (this.pos >= this.input.length) this.raise(start, 'Unterminated regular expression');
@@ -1120,7 +1134,7 @@ module.exports = function (Parser) {
 					inClass = true;
 				} else if (ch === ']' && inClass) {
 					inClass = false;
-				} else if (ch === '/' && !inClass) {
+				} else if (ch === close && !inClass) {
 					break;
 				}
 				escaped = ch === '\\';
@@ -1130,15 +1144,21 @@ module.exports = function (Parser) {
 			++this.pos;
 		}
 		var content = this.input.slice(start, this.pos);
-		++this.pos;// skip '/'
+		++this.pos;// skip '/' or '|'
 
 		var mods = this.readWord1();
 		if (mods) {
 			var validFlags = /^[gim]*$/;
 			if (!validFlags.test(mods)) this.raise(start, 'Invalid regular expression flag');
 		}
+		
+		var value = {
+			pattern: content,
+			flags: mods,
+			gen: close === '|'
+		}
 
-		return this.finishToken(tt.regexp, {pattern: content, flags: mods});
+		return this.finishToken(tt.regexp, value);
 	};
 
 	pp.readInt = function(radix, len) {
@@ -1390,10 +1410,11 @@ kw('#INTERVAL', macro);
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);
+kw('console', beforeExpr);
 kw('var');
 kw('process');
 kw('return', beforeExpr);
-kw('jumpTo');
+kw('jumpto');
 kw('refresh');
 
 module.exports = {
@@ -1460,7 +1481,14 @@ var visitors = {
 		return node.raw;
 	},
 	regexp: function (node, c) {
-		return '(' + node.raw + ').gen'; 
+		// regex.gen
+		if (node.regexp.gen) {
+			var val = node.regexp;
+			
+			return '(/' + val.pattern + '/' + val.flags + ').gen'; 
+		}
+		// regular regular expression is fine...
+		return '(' + node.raw + ')';
 	},
 	dictionaryIndex: function (node, c) {
 		return 'd.' + node.value;

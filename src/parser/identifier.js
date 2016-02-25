@@ -1,10 +1,10 @@
 // the keywords
 var reserve = ["in", "by"];
 var actions = ["click", "input", "rclick", "dblclick",
-	"movein", "moveout", "scroll", "select", 'jumpTo', 'refresh'];
+	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
 var macros = ["#CLOCK", "#TIMES", "#INTERVAL"];
 
-var keywords = ['wait', 'assert', 'log', 'var', 'process', '#set',
+var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
 'return'].concat(reserve).concat(actions).concat(macros);
 
 var keywordRegexp = new RegExp('^(' + keywords.join('|') + ')$');

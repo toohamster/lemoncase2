@@ -89,8 +89,17 @@ module.exports = function (Parser) {
 	};
 
 	pp.parsePcBlock = function (node) {
+		var statements = this.parseBlock();
+		
+		// no statements or no return
+		if (!statements.length || statements[statements.length - 1].TYPE !== 0x01) {
+			statements.push({
+				LINE: -1,
+				TYPE: 0x01,
+			});
+		}
 		//todo check var list
-		node.BODY.segment = this.parseBlock();
+		node.BODY.segment = statements;
 	};
 
 	pp.parseBlock = function () {
@@ -122,9 +131,9 @@ module.exports = function (Parser) {
 				return this.parseWaitStatement();
 			case tt._assert:
 				return this.parseAssertStatement();
-			case tt._log:
-				return this.parseLogStatement();
-			case tt._jumpTo:
+			case tt._log: case tt._console:
+				return this.parseLogStatement(starttype === tt._log ? 0x20 : 0x21);
+			case tt._jumpto:
 				return this.parseGotoStatement();
 			case tt._refresh:
 				return this.parseRefreshStatement();
@@ -296,8 +305,8 @@ module.exports = function (Parser) {
 		return node;
 	};
 	
-	pp.parseLogStatement = function () {
-		var node = this.startLCNode(0x20);
+	pp.parseLogStatement = function (type) {
+		var node = this.startLCNode(type);
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.msg = genExpr(node.BODY.raw);

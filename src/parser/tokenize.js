@@ -146,7 +146,7 @@ module.exports = function (Parser) {
 		if (this.exprAllowed) {
 			++this.pos;
 
-			return this.readRegexp();
+			return this.readRegexp('/');
 		}
 		// '/='
 		if (next === 61) return this.finishOp(tt.assign, 2);
@@ -167,6 +167,11 @@ module.exports = function (Parser) {
 
 	pp.readToken_pipe_amp = function (code) {
 		var next = this.input.charCodeAt(this.pos+1);
+		if (this.exprAllowed) {
+			++this.pos;
+
+			return this.readRegexp('|');
+		}
 		// '&&' '||'
 		if (next === code) return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
 
@@ -272,7 +277,7 @@ module.exports = function (Parser) {
 		this.exprAllowed = this.type.beforeExpr;
 	};
 
-	pp.readRegexp = function () {
+	pp.readRegexp = function (close) {
 		var escaped, inClass, start = this.pos;
 		for (;;) {
 			if (this.pos >= this.input.length) this.raise(start, 'Unterminated regular expression');
@@ -283,7 +288,7 @@ module.exports = function (Parser) {
 					inClass = true;
 				} else if (ch === ']' && inClass) {
 					inClass = false;
-				} else if (ch === '/' && !inClass) {
+				} else if (ch === close && !inClass) {
 					break;
 				}
 				escaped = ch === '\\';
@@ -293,15 +298,21 @@ module.exports = function (Parser) {
 			++this.pos;
 		}
 		var content = this.input.slice(start, this.pos);
-		++this.pos;// skip '/'
+		++this.pos;// skip '/' or '|'
 
 		var mods = this.readWord1();
 		if (mods) {
 			var validFlags = /^[gim]*$/;
 			if (!validFlags.test(mods)) this.raise(start, 'Invalid regular expression flag');
 		}
+		
+		var value = {
+			pattern: content,
+			flags: mods,
+			gen: close === '|'
+		}
 
-		return this.finishToken(tt.regexp, {pattern: content, flags: mods});
+		return this.finishToken(tt.regexp, value);
 	};
 
 	pp.readInt = function(radix, len) {

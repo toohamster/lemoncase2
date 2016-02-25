@@ -18,7 +18,8 @@ test('parse process', t => {
 	
 	p.parseStructure();
 	
-	t.is(p.pcs.main.BODY.segment.length, 0);
+	// auto insert
+	t.is(p.pcs.main.BODY.segment.length, 1);
 });
 
 test('parse click', t => {
@@ -60,7 +61,7 @@ test('parse assert', t => {
 });
 
 test('input statement', t => {
-	var p = tokenizer('input [obj] by /abc/;');
+	var p = tokenizer('input [obj] by |abc|;');
 	p.nextToken();
 	
 	t.notThrows(function (){

@@ -16,15 +16,15 @@ var CALL = 0x00,
 
 IF(CALL, {
 	operation: function Call() {
-		var identifer = this.body('identifer');
+		var identifier = this.body('identifier');
 
 		this.$case
-			.$pushScope(identifer)
-			.$pushLog([CALL, identifer], this.line());
+			.$pushScope(identifier)
+			.$pushLog([CALL, identifier], this.line());
 	},
 	bodyFactory: function (name) {
 		return {
-			identifer: name
+			identifier: name
 		};
 	}
 });

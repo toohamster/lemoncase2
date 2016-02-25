@@ -110,10 +110,11 @@ kw('#INTERVAL', macro);
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);
+kw('console', beforeExpr);
 kw('var');
 kw('process');
 kw('return', beforeExpr);
-kw('jumpTo');
+kw('jumpto');
 kw('refresh');
 
 module.exports = {

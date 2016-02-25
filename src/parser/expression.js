@@ -196,8 +196,8 @@ module.exports = function (Parser) {
 
 			case tt.regexp:
 				var value = this.value;
-				node = this.parseLiteral('regexp', value.value);
-				node.regexp = { pattern: value.pattern, flags: value.flags };
+				node = this.parseLiteral('regexp');
+				node.regexp = value;
 
 				return node;
 

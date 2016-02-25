@@ -35,7 +35,14 @@ var visitors = {
 		return node.raw;
 	},
 	regexp: function (node, c) {
-		return '(' + node.raw + ').gen'; 
+		// regex.gen
+		if (node.regexp.gen) {
+			var val = node.regexp;
+			
+			return '(/' + val.pattern + '/' + val.flags + ').gen'; 
+		}
+		// regular regular expression is fine...
+		return '(' + node.raw + ')';
 	},
 	dictionaryIndex: function (node, c) {
 		return 'd.' + node.value;
