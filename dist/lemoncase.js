@@ -467,7 +467,7 @@
 		};
 	
 		pp.semicolon = function () {
-			if (!this.eat(tt.semi)) this.unexpected();
+			if (!this.eat(tt.semi)) this.expected(tt.semi);
 		};
 	
 		pp.expect = function (type) {
@@ -476,6 +476,10 @@
 	
 		pp.unexpected = function (pos) {
 			this.raise(pos != null ? pos : this.start, 'Unexpected token');
+		};
+		
+		pp.expected = function (type) {
+			this.raise(this.lastTokEnd, 'Expect a ' + type.label + ' after');
 		};
 	};
 	},{"./tokentype.js":12}],9:[function(require,module,exports){
@@ -566,12 +570,15 @@
 			//mark main as used but uninitialized at the beginning
 			var pcsTable = this.pcsTable;
 			pcsTable.main = {
-				start: 0,
-				end: 0
+				pos: 0
 			};
 	
 			while (this.type !== tt.eof) {
 				this.parseStructure();
+			}
+			
+			for (var process in pcsTable) {
+				if (pcsTable[process]) this.raise(pcsTable[process].pos, 'Invalid process call at');
 			}
 	
 			//todo check process declaration
@@ -616,8 +623,11 @@
 			this.next(); // process ...
 	
 			var name = this.parseIndent();
+			// check for process name
+			if (pcs[name]) this.raise(this.start, name + ' process was defined already');
 			pcs[name] = node;
-			pcsTable[name] = false;
+			// mark it as initialized
+				pcsTable[name] = false;
 	
 			this.parsePcParam(node);
 	
@@ -744,11 +754,17 @@
 			
 			// fn()
 			if (expr.type === 'CallExpr') {
+				var callee = expr.callee.name;
+				// check for process declaration
+				if (this.pcsTable[callee] !== false) {
+					this.pcsTable[callee] = { pos: this.lastTokStart };
+				}
+				
 				return {
 					LINE: line,
 					TYPE: 0x00,
 					BODY: {
-						identifier: expr.callee.name
+						identifier: callee
 					}
 				};
 			}
@@ -1551,6 +1567,9 @@
 			var inside = '$.' + node.argument;
 			
 			return node.prefix ? node.operator + inside : inside + node.operator;
+		},
+		UnaryExpr: function (node, c) {
+			return node.operator + '(' + c(node.argument) + ')';
 		},
 		
 		// assign

@@ -45,3 +45,12 @@ test('parse shiny ~~', t => {
 		p.parseStatement();
 	});
 });
+
+test('parse unary', t => {
+	var p = tokenizer('assert !<#"h1 > .container"/>;');
+	p.nextToken();
+	
+	t.notThrows(function (){
+		p.parseStatement();
+	});
+})

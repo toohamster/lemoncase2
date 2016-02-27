@@ -13,7 +13,7 @@ module.exports = function (Parser) {
 	};
 
 	pp.semicolon = function () {
-		if (!this.eat(tt.semi)) this.unexpected();
+		if (!this.eat(tt.semi)) this.expected(tt.semi);
 	};
 
 	pp.expect = function (type) {
@@ -22,5 +22,9 @@ module.exports = function (Parser) {
 
 	pp.unexpected = function (pos) {
 		this.raise(pos != null ? pos : this.start, 'Unexpected token');
+	};
+	
+	pp.expected = function (type) {
+		this.raise(this.lastTokEnd, 'Expect a ' + type.label + ' after');
 	};
 };
