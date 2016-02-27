@@ -75,6 +75,9 @@ var visitors = {
 		
 		return node.prefix ? node.operator + inside : inside + node.operator;
 	},
+	UnaryExpr: function (node, c) {
+		return node.operator + '(' + c(node.argument) + ')';
+	},
 	
 	// assign
 	AssignmentExpr: function (node, c) {
