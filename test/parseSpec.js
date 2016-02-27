@@ -37,6 +37,8 @@ process main {
   console "fuck\\\' \\"off";
   sub_1();
 }
+
+process sub_1 (){}
 	`;
 	
 	t.notThrows(function () {

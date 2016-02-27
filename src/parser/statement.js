@@ -22,12 +22,15 @@ module.exports = function (Parser) {
 		//mark main as used but uninitialized at the beginning
 		var pcsTable = this.pcsTable;
 		pcsTable.main = {
-			start: 0,
-			end: 0
+			pos: 0
 		};
 
 		while (this.type !== tt.eof) {
 			this.parseStructure();
+		}
+		
+		for (var process in pcsTable) {
+			if (pcsTable[process]) this.raise(pcsTable[process].pos, 'Invalid process call at');
 		}
 
 		//todo check process declaration
@@ -72,8 +75,11 @@ module.exports = function (Parser) {
 		this.next(); // process ...
 
 		var name = this.parseIndent();
+		// check for process name
+		if (pcs[name]) this.raise(this.start, name + ' process was defined already');
 		pcs[name] = node;
-		pcsTable[name] = false;
+		// mark it as initialized
+			pcsTable[name] = false;
 
 		this.parsePcParam(node);
 
@@ -200,11 +206,17 @@ module.exports = function (Parser) {
 		
 		// fn()
 		if (expr.type === 'CallExpr') {
+			var callee = expr.callee.name;
+			// check for process declaration
+			if (this.pcsTable[callee] !== false) {
+				this.pcsTable[callee] = { pos: this.lastTokStart };
+			}
+			
 			return {
 				LINE: line,
 				TYPE: 0x00,
 				BODY: {
-					identifier: expr.callee.name
+					identifier: callee
 				}
 			};
 		}
