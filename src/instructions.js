@@ -108,7 +108,11 @@ IF(ASSERT, {
 			ins = this;
 
 		function queryHTMLElementByCSS() {
-			if (!CASE.$runExp(exp)) { return; }
+			// Call when timeout defined, and cancel temp instruction
+			// when assert success.
+			if (!CASE.$runExp(exp)) {
+				return;
+			}
 
 			CASE.$setIdleTask()
 				.$setTempInstruction()
@@ -117,14 +121,20 @@ IF(ASSERT, {
 				.$pushLogData(ins.body('key'), _.now() - startTime);
 		}
 
+		CASE.$setTempInstruction(IF(EXIT).create().assignCase(CASE));
+
 		if (timeout && timeout > 2 * settings.defaultClock) {
 			CASE.$setActiveTime(timeout)
-				.$setTempInstruction(IF(EXIT).create().assignCase(this.$case))
 				.$setIdleTask(queryHTMLElementByCSS);
 		}
 
 		if (CASE.$runExp(exp)) {
+			// whatever timeout defined or not, it must be
+			// asserted at first. So canel IdleTask & tempInstruction
+			// when assert success.
 			CASE.$setTempInstruction()
+				.$setActiveTime()
+				.$setIdleTask()
 				.$pushLog([ASSERT], this.line());
 		}
 	},
@@ -162,7 +172,9 @@ IF(LOG, {
 });
 IF(CONSOLE, {
 	operation: function Console() {
-		console.log(this.$case.$runExp(this.body('msg')));
+		var msg = this.$case.$runExp(this.body('msg'));
+		console.log(msg);
+		settings.consoleFn(msg);
 	},
 	bodyFactory: function (msg) {
 		return {

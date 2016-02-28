@@ -22,7 +22,7 @@ $CP.validateObjectList = function (objectList, keysUsed) {
 };
 
 $CP.exportLog = function (type) {
-	return this.$$collector['export2' + type]();
+	return this.$$log['export2' + type]();
 };
 
 $CP.start = function () {
