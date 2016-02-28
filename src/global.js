@@ -79,7 +79,8 @@ settings = {
 	runExceptionHandle: _.noop,
 	successCallback: _.noop,
 	readyCallback: _.noop,
-	nextLoopCallback: _.noop
+	nextLoopCallback: _.noop,
+	consoleFn: _.noop
 };
 
 setup = function (options) {
