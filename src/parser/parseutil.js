@@ -17,7 +17,7 @@ module.exports = function (Parser) {
 	};
 
 	pp.expect = function (type) {
-		this.eat(type) || this.unexpected();
+		this.eat(type) || this.expected(type);
 	};
 
 	pp.unexpected = function (pos) {
