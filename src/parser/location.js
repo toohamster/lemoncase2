@@ -1,4 +1,5 @@
 var getLineInfo = require('./locutil.js').getLineInfo;
+var empowerErrMsg = require('./locutil.js').empowerErrMsg;
 
 // This function is used to raise exceptions on parse errors. It
 // takes an offset integer (into the current `input`) to indicate
@@ -12,8 +13,9 @@ module.exports = function (Parser) {
 	pp.raise = function (pos, msg) {
 		var loc = getLineInfo(this.input, pos);
 		msg += ' (' + loc.line + ':' + loc.column + ')';
+		msg = empowerErrMsg(this.input, loc, msg);
 		var err = new SyntaxError(msg);
 		err.pos = pos; err.loc = loc; err.raisedAt = this.pos;
 		throw err;
-	}
+	};
 };

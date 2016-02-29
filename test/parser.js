@@ -325,6 +325,7 @@ module.exports = {
 };
 },{"./state.js":9}],4:[function(require,module,exports){
 var getLineInfo = require('./locutil.js').getLineInfo;
+var empowerErrMsg = require('./locutil.js').empowerErrMsg;
 
 // This function is used to raise exceptions on parse errors. It
 // takes an offset integer (into the current `input`) to indicate
@@ -338,10 +339,11 @@ module.exports = function (Parser) {
 	pp.raise = function (pos, msg) {
 		var loc = getLineInfo(this.input, pos);
 		msg += ' (' + loc.line + ':' + loc.column + ')';
+		msg = empowerErrMsg(this.input, loc, msg);
 		var err = new SyntaxError(msg);
 		err.pos = pos; err.loc = loc; err.raisedAt = this.pos;
 		throw err;
-	}
+	};
 };
 },{"./locutil.js":5}],5:[function(require,module,exports){
 var lineBreakG = require('./whitespace.js').lineBreakG;
@@ -355,6 +357,7 @@ Position.prototype.offset = function (n) {
 	return new Position(this.line, this.column + n);
 };
 
+// determine the position of error
 function getLineInfo(input, offset) {
 	for (var line = 1, cur = 0;;) {
 		lineBreakG.lastIndex = cur;
@@ -368,8 +371,79 @@ function getLineInfo(input, offset) {
 	}
 }
 
+// provide better error message
+
+function empowerErrMsg (input, loc, msg) {
+	var errLine = input.split(lineBreakG)[loc.line - 1];
+	var strBeforeErr = errLine.substr(0, loc.column);
+	var width = widthOf(strBeforeErr);
+	
+	var arrow = genArrow(width);
+	var positionedMsg = positionMsg(msg, width);
+	
+	return '\n' + errLine + '\n' + arrow + '\n' + positionedMsg;
+}
+
+function genArrow (width) {
+	var i = -1, j = -1, out = '';
+	
+	while (++i < width) {
+		out += ' ';
+	}
+	
+	out += '↑\n';
+	
+	while (++j < width) {
+		out += ' ';
+	}
+	
+	out += '↑';
+	
+	return out;
+}
+
+function positionMsg (msg, width) {
+	// very long message, no need to reposition
+	if (msg.length / 2 > width) {
+		return msg;
+	}
+	
+	var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
+	
+	while (++i < emptyWidth) {
+		newMsg += ' ';
+	}
+	
+	newMsg += msg;
+	
+	return newMsg;
+}
+
+// calculate width of string
+function widthOf (str) {
+	var code, 
+		width = 0,
+		i = -1, len = str.length;
+		
+	while (++i < len) {
+		code = str.charCodeAt(i);
+		
+		switch (code) {
+			case 9: // '\t'
+				width += 4;
+				break;
+			default:
+				width += 1;
+				break;
+		}
+	}
+	
+	return width;
+}
+
 module.exports = {
-	getLineInfo: getLineInfo
+	getLineInfo: getLineInfo,
+	empowerErrMsg: empowerErrMsg
 };
 },{"./whitespace.js":15}],6:[function(require,module,exports){
 var tt = require('./tokentype.js').types;
@@ -448,7 +522,7 @@ module.exports = function (Parser) {
 	};
 	
 	pp.expected = function (type) {
-		this.raise(this.lastTokEnd, 'Expect a ' + type.label + ' after');
+		this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 	};
 };
 },{"./tokentype.js":12}],9:[function(require,module,exports){
