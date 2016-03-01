@@ -13,6 +13,7 @@ test('parse a monsterous thing', t => {
   #CLOCK 12;
 		#TIMES 99;
 		#INTERVAL 999;
+		#SCREEN 1,2
 
 /**
 * main entry

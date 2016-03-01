@@ -448,6 +448,6 @@ module.exports = function (Parser) {
 			ch = this.input.charCodeAt(this.pos);
 		}
 
-		return parseInt(this.input.slice(start, this.pos).trim(), 10);
+		return this.input.slice(start, this.pos).trim();
 	};
 };

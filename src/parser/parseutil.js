@@ -25,6 +25,6 @@ module.exports = function (Parser) {
 	};
 	
 	pp.expected = function (type) {
-		this.raise(this.lastTokEnd, 'Expect a ' + type.label + ' after');
+		this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 	};
 };

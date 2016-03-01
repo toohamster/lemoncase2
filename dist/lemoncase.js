@@ -315,7 +315,7 @@
 	var reserve = ["in", "by"];
 	var actions = ["click", "input", "rclick", "dblclick",
 		"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
-	var macros = ["#CLOCK", "#TIMES", "#INTERVAL"];
+	var macros = ['#CLOCK', '#TIMES', '#INTERVAL', '#SCREEN'];
 	
 	var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
 	'return'].concat(reserve).concat(actions).concat(macros);
@@ -356,6 +356,7 @@
 	};
 	},{"./state.js":9}],4:[function(require,module,exports){
 	var getLineInfo = require('./locutil.js').getLineInfo;
+	var empowerErrMsg = require('./locutil.js').empowerErrMsg;
 	
 	// This function is used to raise exceptions on parse errors. It
 	// takes an offset integer (into the current `input`) to indicate
@@ -369,10 +370,11 @@
 		pp.raise = function (pos, msg) {
 			var loc = getLineInfo(this.input, pos);
 			msg += ' (' + loc.line + ':' + loc.column + ')';
+			msg = empowerErrMsg(this.input, loc, msg);
 			var err = new SyntaxError(msg);
 			err.pos = pos; err.loc = loc; err.raisedAt = this.pos;
 			throw err;
-		}
+		};
 	};
 	},{"./locutil.js":5}],5:[function(require,module,exports){
 	var lineBreakG = require('./whitespace.js').lineBreakG;
@@ -386,6 +388,7 @@
 		return new Position(this.line, this.column + n);
 	};
 	
+	// determine the position of error
 	function getLineInfo(input, offset) {
 		for (var line = 1, cur = 0;;) {
 			lineBreakG.lastIndex = cur;
@@ -399,8 +402,79 @@
 		}
 	}
 	
+	// provide better error message
+	
+	function empowerErrMsg (input, loc, msg) {
+		var errLine = input.split(lineBreakG)[loc.line - 1];
+		var strBeforeErr = errLine.substr(0, loc.column);
+		var width = widthOf(strBeforeErr);
+		
+		var arrow = genArrow(width);
+		var positionedMsg = positionMsg(msg, width);
+		
+		return '\n' + errLine + '\n' + arrow + '\n' + positionedMsg;
+	}
+	
+	function genArrow (width) {
+		var i = -1, j = -1, out = '';
+		
+		while (++i < width) {
+			out += ' ';
+		}
+		
+		out += '↑\n';
+		
+		while (++j < width) {
+			out += ' ';
+		}
+		
+		out += '↑';
+		
+		return out;
+	}
+	
+	function positionMsg (msg, width) {
+		// very long message, no need to reposition
+		if (msg.length / 2 > width) {
+			return msg;
+		}
+		
+		var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
+		
+		while (++i < emptyWidth) {
+			newMsg += ' ';
+		}
+		
+		newMsg += msg;
+		
+		return newMsg;
+	}
+	
+	// calculate width of string
+	function widthOf (str) {
+		var code, 
+			width = 0,
+			i = -1, len = str.length;
+			
+		while (++i < len) {
+			code = str.charCodeAt(i);
+			
+			switch (code) {
+				case 9: // '\t'
+					width += 4;
+					break;
+				default:
+					width += 1;
+					break;
+			}
+		}
+		
+		return width;
+	}
+	
 	module.exports = {
-		getLineInfo: getLineInfo
+		getLineInfo: getLineInfo,
+		empowerErrMsg: empowerErrMsg
 	};
 	},{"./whitespace.js":15}],6:[function(require,module,exports){
 	var tt = require('./tokentype.js').types;
@@ -471,7 +545,7 @@
 		};
 	
 		pp.expect = function (type) {
-			this.eat(type) || this.unexpected();
+			this.eat(type) || this.expected(type);
 		};
 	
 		pp.unexpected = function (pos) {
@@ -479,7 +553,7 @@
 		};
 		
 		pp.expected = function (type) {
-			this.raise(this.lastTokEnd, 'Expect a ' + type.label + ' after');
+			this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 		};
 	};
 	},{"./tokentype.js":12}],9:[function(require,module,exports){
@@ -601,14 +675,37 @@
 	
 			if (!setType.macro) this.unexpected();
 	
-			var confTable = this.conf;
 			var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
-	
-			if (confTable[key]) this.raise(this.start, this.value + ' was defined already');
-	
-			confTable[key] = this.value;
+			
+			this.writeConfig(key);
 	
 			this.next();
+		};
+		
+		pp.writeConfig = function (key) {
+			var val;
+			
+			var confTable = this.conf;
+			if (confTable[key]) this.raise(this.start, this.type.keyword + ' was defined already');
+			
+			switch (key) {
+				case "screen":
+					var x, y, splitVal = this.value.split(',');
+					if (splitVal.length !== 2) this.raise('Invalid arguments');
+					x = ~~parseInt(splitVal[0], 10);
+					y = ~~parseInt(splitVal[1], 10);
+					val = {
+						width: x,
+						height: y
+					}
+					break;
+			
+				default:
+					val = parseInt(this.value, 10);
+					break;
+			}
+			
+			confTable[key] = val;
 		};
 	
 		pp.parseProcess = function () {
@@ -1341,7 +1438,7 @@
 				ch = this.input.charCodeAt(this.pos);
 			}
 	
-			return parseInt(this.input.slice(start, this.pos).trim(), 10);
+			return this.input.slice(start, this.pos).trim();
 		};
 	};
 	},{"./identifier.js":2,"./tokentype.js":12,"./whitespace.js":15}],12:[function(require,module,exports){
@@ -1454,6 +1551,7 @@
 	kw('#CLOCK', macro);
 	kw('#TIMES', macro);
 	kw('#INTERVAL', macro);
+	kw('#SCREEN', macro);
 	kw('wait', beforeExpr);
 	kw('assert', beforeExpr);
 	kw('log', beforeExpr);
@@ -2355,7 +2453,7 @@
 	
 		aUs[INPUT] = function (opts) {
 			this.value = opts.value;
-			this.dispatchEvent(new InputEvent('input', opts));
+			this.dispatchEvent(new UIEvent('input', opts));
 		};
 		aUs[CHANGE] = function () {
 			this.dispatchEvent(new Event('change', {bubbles: true}));
@@ -2540,7 +2638,8 @@
 		runExceptionHandle: _.noop,
 		successCallback: _.noop,
 		readyCallback: _.noop,
-		nextLoopCallback: _.noop
+		nextLoopCallback: _.noop,
+		consoleFn: _.noop
 	};
 	
 	setup = function (options) {
@@ -2958,7 +3057,7 @@
 	};
 	
 	$CP.exportLog = function (type) {
-		return this.$$collector['export2' + type]();
+		return this.$$log['export2' + type]();
 	};
 	
 	$CP.start = function () {
@@ -3279,7 +3378,11 @@
 				ins = this;
 	
 			function queryHTMLElementByCSS() {
-				if (!CASE.$runExp(exp)) { return; }
+				// Call when timeout defined, and cancel temp instruction
+				// when assert success.
+				if (!CASE.$runExp(exp)) {
+					return;
+				}
 	
 				CASE.$setIdleTask()
 					.$setTempInstruction()
@@ -3288,14 +3391,20 @@
 					.$pushLogData(ins.body('key'), _.now() - startTime);
 			}
 	
+			CASE.$setTempInstruction(IF(EXIT).create().assignCase(CASE));
+	
 			if (timeout && timeout > 2 * settings.defaultClock) {
 				CASE.$setActiveTime(timeout)
-					.$setTempInstruction(IF(EXIT).create().assignCase(this.$case))
 					.$setIdleTask(queryHTMLElementByCSS);
 			}
 	
 			if (CASE.$runExp(exp)) {
+				// whatever timeout defined or not, it must be
+				// asserted at first. So canel IdleTask & tempInstruction
+				// when assert success.
 				CASE.$setTempInstruction()
+					.$setActiveTime()
+					.$setIdleTask()
 					.$pushLog([ASSERT], this.line());
 			}
 		},
@@ -3333,7 +3442,9 @@
 	});
 	IF(CONSOLE, {
 		operation: function Console() {
-			console.log(this.$case.$runExp(this.body('msg')));
+			var msg = this.$case.$runExp(this.body('msg'));
+			console.log(msg);
+			settings.consoleFn(msg);
 		},
 		bodyFactory: function (msg) {
 			return {
