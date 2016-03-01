@@ -284,7 +284,7 @@ module.exports = function (Parser) {
 var reserve = ["in", "by"];
 var actions = ["click", "input", "rclick", "dblclick",
 	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
-var macros = ["#CLOCK", "#TIMES", "#INTERVAL"];
+var macros = ['#CLOCK', '#TIMES', '#INTERVAL', '#SCREEN'];
 
 var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
 'return'].concat(reserve).concat(actions).concat(macros);
@@ -644,14 +644,37 @@ module.exports = function (Parser) {
 
 		if (!setType.macro) this.unexpected();
 
-		var confTable = this.conf;
 		var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
-
-		if (confTable[key]) this.raise(this.start, this.value + ' was defined already');
-
-		confTable[key] = this.value;
+		
+		this.writeConfig(key);
 
 		this.next();
+	};
+	
+	pp.writeConfig = function (key) {
+		var val;
+		
+		var confTable = this.conf;
+		if (confTable[key]) this.raise(this.start, this.type.keyword + ' was defined already');
+		
+		switch (key) {
+			case "screen":
+				var x, y, splitVal = this.value.split(',');
+				if (splitVal.length !== 2) this.raise('Invalid arguments');
+				x = ~~parseInt(splitVal[0], 10);
+				y = ~~parseInt(splitVal[1], 10);
+				val = {
+					width: x,
+					height: y
+				}
+				break;
+		
+			default:
+				val = parseInt(this.value, 10);
+				break;
+		}
+		
+		confTable[key] = val;
 	};
 
 	pp.parseProcess = function () {
@@ -1384,7 +1407,7 @@ module.exports = function (Parser) {
 			ch = this.input.charCodeAt(this.pos);
 		}
 
-		return parseInt(this.input.slice(start, this.pos).trim(), 10);
+		return this.input.slice(start, this.pos).trim();
 	};
 };
 },{"./identifier.js":2,"./tokentype.js":12,"./whitespace.js":15}],12:[function(require,module,exports){
@@ -1497,6 +1520,7 @@ kw('select', beforeExpr);
 kw('#CLOCK', macro);
 kw('#TIMES', macro);
 kw('#INTERVAL', macro);
+kw('#SCREEN', macro);
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);

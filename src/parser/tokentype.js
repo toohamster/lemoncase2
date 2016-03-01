@@ -107,6 +107,7 @@ kw('select', beforeExpr);
 kw('#CLOCK', macro);
 kw('#TIMES', macro);
 kw('#INTERVAL', macro);
+kw('#SCREEN', macro);
 kw('wait', beforeExpr);
 kw('assert', beforeExpr);
 kw('log', beforeExpr);

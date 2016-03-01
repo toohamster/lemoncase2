@@ -53,14 +53,37 @@ module.exports = function (Parser) {
 
 		if (!setType.macro) this.unexpected();
 
-		var confTable = this.conf;
 		var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
-
-		if (confTable[key]) this.raise(this.start, this.value + ' was defined already');
-
-		confTable[key] = this.value;
+		
+		this.writeConfig(key);
 
 		this.next();
+	};
+	
+	pp.writeConfig = function (key) {
+		var val;
+		
+		var confTable = this.conf;
+		if (confTable[key]) this.raise(this.start, this.type.keyword + ' was defined already');
+		
+		switch (key) {
+			case "screen":
+				var x, y, splitVal = this.value.split(',');
+				if (splitVal.length !== 2) this.raise('Invalid arguments');
+				x = ~~parseInt(splitVal[0], 10);
+				y = ~~parseInt(splitVal[1], 10);
+				val = {
+					width: x,
+					height: y
+				}
+				break;
+		
+			default:
+				val = parseInt(this.value, 10);
+				break;
+		}
+		
+		confTable[key] = val;
 	};
 
 	pp.parseProcess = function () {

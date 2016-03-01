@@ -2,7 +2,7 @@
 var reserve = ["in", "by"];
 var actions = ["click", "input", "rclick", "dblclick",
 	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
-var macros = ["#CLOCK", "#TIMES", "#INTERVAL"];
+var macros = ['#CLOCK', '#TIMES', '#INTERVAL', '#SCREEN'];
 
 var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
 'return'].concat(reserve).concat(actions).concat(macros);
