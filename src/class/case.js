@@ -27,6 +27,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 
 	eT.config.times = syntaxTree.CONFIG.times;
 	eT.config.interval = syntaxTree.CONFIG.interval;
+	eT.config.screen = syntaxTree.CONFIG.screen;
 
 	return eT;
 }
@@ -67,10 +68,18 @@ $CP.$$getConfig = function (key) {
 };
 
 $CP.$$bootstrap = function () {
+	var frm = settings.contextFrame.style,
+		srnOpt = this.$$getConfig('screen');
+
 	this.$$currentLoop = 0;
 
 	if (this.hasDictionary()) {
 		this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
+	}
+
+	if (srnOpt) {
+		frm.height = srnOpt.height + 'px';
+		frm.width = srnOpt.width + 'px';
 	}
 
 	this.$setActiveTime()
@@ -104,13 +113,13 @@ $CP.$$popInstruction = function () {
 		this.$$instructionBuffer = block.segment[block.counter++];
 		return this.$$instructionBuffer;
 	} else {
-		return IF(EXIT).create().assignCase(this);
+		return IF(EXIT).create(true).assignCase(this);
 	}
 };
 
 $CP.$$run = function () {
 	try {
-		this.$$popInstruction().execute(this);
+		this.$$popInstruction().execute();
 		settings.runCallback.call(this);
 	} catch (error) {
 		console.error(error);
