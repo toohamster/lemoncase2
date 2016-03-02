@@ -57,7 +57,7 @@ test('parse assert', t => {
 		p.parseStatement();
 	});
 	
-	t.is(p.keys[0], '#0');
+	t.true(p.keys['#0']);
 });
 
 test('input statement', t => {

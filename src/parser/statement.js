@@ -316,7 +316,7 @@ module.exports = function (Parser) {
 		this.semicolon();
 		//do not forgot the data key
 		node.BODY.key = UID('#');
-		this.keys.push(node.BODY.key);
+		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
 		return node;
 	}

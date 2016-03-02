@@ -550,9 +550,11 @@ var Parser = function (options, input) {
 
 	// conf - #set
 	this.conf = {};
-	this.keys = [];
+	this.keys = {};
+	// keep track of process body(statements)
 	this.pcs = {};
-	this.pcsTable = {};//keep track of all the unused process
+	//keep track of all the unused process/ declared process
+	this.pcsTable = {};
 
 	//dKey - dictionary field used
 	//obKey - object key used
@@ -907,7 +909,7 @@ module.exports = function (Parser) {
 		this.semicolon();
 		//do not forgot the data key
 		node.BODY.key = UID('#');
-		this.keys.push(node.BODY.key);
+		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
 		return node;
 	}

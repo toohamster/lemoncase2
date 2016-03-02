@@ -22,9 +22,11 @@ var Parser = function (options, input) {
 
 	// conf - #set
 	this.conf = {};
-	this.keys = [];
+	this.keys = {};
+	// keep track of process body(statements)
 	this.pcs = {};
-	this.pcsTable = {};//keep track of all the unused process
+	//keep track of all the unused process/ declared process
+	this.pcsTable = {};
 
 	//dKey - dictionary field used
 	//obKey - object key used
