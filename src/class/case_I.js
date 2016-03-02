@@ -1,5 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, $CP, _, settings, IF */
+/*global Instruction, $CP, _, settings, IF, CALL */
 
 $CP.$setIdleTask = function (taskFn) {
 	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -79,11 +79,7 @@ $CP.$getProcess = function (identifier) {
 };
 
 $CP.$exitLoop = function () {
-	var loger = this.$$log;
-
 	this.$setActiveTime(this.$$getConfig('interval') || 3000);
-
-	loger.log([-1, this.$$currentLoop]).markLog(0, loger.getLength('logs'));
 
 	if ((this.$$currentLoop += 1) >= this.$$getConfig('times')) {
 		this.$$exitCase();

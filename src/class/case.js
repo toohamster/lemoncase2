@@ -104,13 +104,13 @@ $CP.$$popInstruction = function () {
 		this.$$instructionBuffer = block.segment[block.counter++];
 		return this.$$instructionBuffer;
 	} else {
-		return IF(EXIT).create().assignCase(this);
+		return IF(EXIT).create(true).assignCase(this);
 	}
 };
 
 $CP.$$run = function () {
 	try {
-		this.$$popInstruction().execute(this);
+		this.$$popInstruction().execute();
 		settings.runCallback.call(this);
 	} catch (error) {
 		console.error(error);

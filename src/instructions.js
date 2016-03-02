@@ -38,13 +38,17 @@ IF(RETURN, {
 });
 IF(EXIT, {
 	operation: function Exit() {
-		this.$case
-			.$pushLog([EXIT], this.line())
-			.$markLog(EXIT, this.$case.getCurrentLoop())
+		var flag = this.body('isSuccess') ? 'P' : 'F',
+			CASE = this.$case;
+
+		CASE.$pushLog([EXIT], this.line())
+			.$markLog(flag, CASE.getCurrentLoop())
 			.$exitLoop();
 	},
-	bodyFactory: function (delay) {
-		return {};
+	bodyFactory: function (isSuccess) {
+		return {
+			isSuccess: isSuccess
+		};
 	}
 });
 
@@ -82,7 +86,11 @@ IF(TRIGGER, {
 			DOM = _.document().querySelectorAll(cssPath)[0];
 
 		if (!DOM) {
-			throw new Error('Can not find a DOM by cssPath: ' + cssPath);
+			this.$case
+				.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
+
+			console.log('Can not find a DOM by cssPath: ' + cssPath);
+			return;
 		}
 
 		trigger(DOM).does(action, param);
@@ -121,7 +129,7 @@ IF(ASSERT, {
 				.$pushLogData(ins.body('key'), _.now() - startTime);
 		}
 
-		CASE.$setTempInstruction(IF(EXIT).create().assignCase(CASE));
+		CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
 
 		if (timeout && timeout > 2 * settings.defaultClock) {
 			CASE.$setActiveTime(timeout)
