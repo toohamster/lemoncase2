@@ -85,6 +85,8 @@ $CP.$exitLoop = function () {
 		this.$$exitCase();
 		return this;
 	}
+	this.$$blockStack.length = 0;
+	this.$$scopeStack.length = 0;
 	this.$setTempInstruction(IF(CALL).create('main'));
 	(settings.nextLoopCallback || _.noop).call(this);
 

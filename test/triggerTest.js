@@ -604,7 +604,7 @@ var app = angular.module('testPanel', [
 			mode: 'text/x-php'
 		});
 		
-		$codeMirror.setValue("process main {\n\tvar a = '[type=email]';\n\tinput 'input' + a by 1;\n}");
+		$codeMirror.setValue("#TIMES 10\nprocess main {\nvar a = '[type=email]';\ninput 'input' + a by 1;\nclick 'h2';\n}");
 		$codeMirror.refresh();
 		$codeMirror.setSize('100%', '100%');
 	}
