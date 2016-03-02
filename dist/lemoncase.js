@@ -1757,7 +1757,7 @@
 	};
 	
 	Collector.prototype.markLog = function (key, value) {
-		this.$marks.push([key, value]);
+		this.$marks.push([key, value, this.getLength('logs') - 1]);
 	
 		return this;
 	};
@@ -2931,6 +2931,7 @@
 	
 		eT.config.times = syntaxTree.CONFIG.times;
 		eT.config.interval = syntaxTree.CONFIG.interval;
+		eT.config.screen = syntaxTree.CONFIG.screen;
 	
 		return eT;
 	}
@@ -2971,10 +2972,18 @@
 	};
 	
 	$CP.$$bootstrap = function () {
+		var frm = settings.contextFrame.style,
+			srnOpt = this.$$getConfig('screen');
+	
 		this.$$currentLoop = 0;
 	
 		if (this.hasDictionary()) {
 			this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
+		}
+	
+		if (srnOpt) {
+			frm.height = srnOpt.height + 'px';
+			frm.width = srnOpt.width + 'px';
 		}
 	
 		this.$setActiveTime()
@@ -3008,13 +3017,13 @@
 			this.$$instructionBuffer = block.segment[block.counter++];
 			return this.$$instructionBuffer;
 		} else {
-			return IF(EXIT).create().assignCase(this);
+			return IF(EXIT).create(true).assignCase(this);
 		}
 	};
 	
 	$CP.$$run = function () {
 		try {
-			this.$$popInstruction().execute(this);
+			this.$$popInstruction().execute();
 			settings.runCallback.call(this);
 		} catch (error) {
 			console.error(error);
@@ -3141,7 +3150,7 @@
 	};
 	
 	/*jslint vars: true, sloppy: true, nomen: true */
-	/*global Instruction, $CP, _, settings, IF */
+	/*global Instruction, $CP, _, settings, IF, CALL */
 	
 	$CP.$setIdleTask = function (taskFn) {
 		this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -3221,11 +3230,7 @@
 	};
 	
 	$CP.$exitLoop = function () {
-		var loger = this.$$log;
-	
 		this.$setActiveTime(this.$$getConfig('interval') || 3000);
-	
-		loger.log([-1, this.$$currentLoop]).markLog(0, loger.getLength('logs'));
 	
 		if ((this.$$currentLoop += 1) >= this.$$getConfig('times')) {
 			this.$$exitCase();
@@ -3308,13 +3313,17 @@
 	});
 	IF(EXIT, {
 		operation: function Exit() {
-			this.$case
-				.$pushLog([EXIT], this.line())
-				.$markLog(EXIT, this.$case.getCurrentLoop())
+			var flag = this.body('isSuccess') ? 'P' : 'F',
+				CASE = this.$case;
+	
+			CASE.$pushLog([EXIT], this.line())
+				.$markLog(flag, CASE.getCurrentLoop())
 				.$exitLoop();
 		},
-		bodyFactory: function (delay) {
-			return {};
+		bodyFactory: function (isSuccess) {
+			return {
+				isSuccess: isSuccess
+			};
 		}
 	});
 	
@@ -3352,7 +3361,11 @@
 				DOM = _.document().querySelectorAll(cssPath)[0];
 	
 			if (!DOM) {
-				throw new Error('Can not find a DOM by cssPath: ' + cssPath);
+				this.$case
+					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
+	
+				console.log('Can not find a DOM by cssPath: ' + cssPath);
+				return;
 			}
 	
 			trigger(DOM).does(action, param);
@@ -3391,7 +3404,7 @@
 					.$pushLogData(ins.body('key'), _.now() - startTime);
 			}
 	
-			CASE.$setTempInstruction(IF(EXIT).create().assignCase(CASE));
+			CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
 	
 			if (timeout && timeout > 2 * settings.defaultClock) {
 				CASE.$setActiveTime(timeout)

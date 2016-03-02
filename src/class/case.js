@@ -27,6 +27,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 
 	eT.config.times = syntaxTree.CONFIG.times;
 	eT.config.interval = syntaxTree.CONFIG.interval;
+	eT.config.screen = syntaxTree.CONFIG.screen;
 
 	return eT;
 }
@@ -67,10 +68,18 @@ $CP.$$getConfig = function (key) {
 };
 
 $CP.$$bootstrap = function () {
+	var frm = settings.contextFrame.style,
+		srnOpt = this.$$getConfig('screen');
+
 	this.$$currentLoop = 0;
 
 	if (this.hasDictionary()) {
 		this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
+	}
+
+	if (srnOpt) {
+		frm.height = srnOpt.height + 'px';
+		frm.width = srnOpt.width + 'px';
 	}
 
 	this.$setActiveTime()
