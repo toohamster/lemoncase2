@@ -121,3 +121,11 @@ $CP.$pushLogData = function (assertId, delay) {
 
 	return this;
 };
+
+$CP.$clearScope = function () {
+	while (this.$$scopeStack.length) {
+		this.$popScope();
+	}
+
+	return this;
+};

@@ -12,7 +12,10 @@ var CALL = 0x00,
 	REFRESH = 0x15,
 
 	LOG = 0x20,
-	CONSOLE = 0x21;
+	CONSOLE = 0x21,
+
+	PASSED = 1,
+	FAILURE = 0;
 
 IF(CALL, {
 	operation: function Call() {
@@ -30,7 +33,9 @@ IF(CALL, {
 });
 IF(RETURN, {
 	operation: function Return() {
-		this.$case.$popScope();
+		this.$case
+			.$pushLog([RETURN])
+			.$popScope();
 	},
 	bodyFactory: function () {
 		return {};
@@ -38,11 +43,12 @@ IF(RETURN, {
 });
 IF(EXIT, {
 	operation: function Exit() {
-		var flag = this.body('isSuccess') ? 'P' : 'F',
+		var flag = this.body('isSuccess') ? PASSED : FAILURE,
 			CASE = this.$case;
 
-		CASE.$pushLog([EXIT], this.line())
+		CASE.$pushLog([EXIT, flag], this.line())
 			.$markLog(flag, CASE.getCurrentLoop())
+			.$clearScope()
 			.$exitLoop();
 	},
 	bodyFactory: function (isSuccess) {
@@ -87,6 +93,7 @@ IF(TRIGGER, {
 
 		if (!DOM) {
 			this.$case
+				.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 				.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 
 			console.log('Can not find a DOM by cssPath: ' + cssPath);
@@ -97,7 +104,7 @@ IF(TRIGGER, {
 		settings.triggerCallback.call(this.$case, DOM);
 
 		this.$case
-			.$pushLog([TRIGGER, cssPath, action, param], this.line());
+			.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
 	},
 	bodyFactory: function (object, action, param) {
 		return {
@@ -125,7 +132,7 @@ IF(ASSERT, {
 			CASE.$setIdleTask()
 				.$setTempInstruction()
 				.$setActiveTime()
-				.$pushLog([ASSERT], ins.line())
+				.$pushLog([ASSERT, PASSED], ins.line())
 				.$pushLogData(ins.body('key'), _.now() - startTime);
 		}
 
@@ -143,7 +150,13 @@ IF(ASSERT, {
 			CASE.$setTempInstruction()
 				.$setActiveTime()
 				.$setIdleTask()
-				.$pushLog([ASSERT], this.line());
+				.$pushLog([ASSERT, PASSED], this.line());
+
+			if (timeout) {
+				CASE.$pushLogData(ins.body('key'), 0);
+			}
+		} else {
+			CASE.$pushLog([ASSERT, FAILURE], this.line());
 		}
 	},
 	bodyFactory: function (exp, timeout, dataKey) {

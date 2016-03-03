@@ -4,7 +4,13 @@ function linker(syntaxTree, object, dictionary, $case) {
 	var eT = {
 		process: {},
 		config: {}
-	};
+	}, dk = [];
+
+	_.forEach(syntaxTree.DATA_KEYS, function (isWatched, key) {
+		if (isWatched) {
+			dk.push(key);
+		}
+	});
 
 	_.forEach(syntaxTree.DICTIONARY_KEYS, function (v, fieldName) {
 		if (!dictionary.isFieldDefined(fieldName)) {
@@ -29,20 +35,25 @@ function linker(syntaxTree, object, dictionary, $case) {
 	eT.config.interval = syntaxTree.CONFIG.interval;
 	eT.config.screen = syntaxTree.CONFIG.screen;
 
-	return eT;
+
+	return {
+		eT: eT,
+		dK: dk
+	};
 }
 function Case(syntaxTree, object, dictionary) {
 	if (!(this instanceof Case)) {
 		return new Case(syntaxTree);
 	}
 
+	var link = linker(syntaxTree, object, dictionary, this);
 	// executionTree
-	this.$$executionTree = linker(syntaxTree, object, dictionary, this);
+	this.$$executionTree = link.eT;
 
 	// Outside object.
 	this.$dictionary = dictionary;
 	this.$objectList = object;
-	this.$$log = new Collector(syntaxTree.DATA_KEYS);
+	this.$$log = new Collector(link.dK);
 
 	// states
 	this.$$state = 'ready';
