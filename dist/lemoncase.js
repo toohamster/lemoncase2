@@ -581,9 +581,11 @@
 	
 		// conf - #set
 		this.conf = {};
-		this.keys = [];
+		this.keys = {};
+		// keep track of process body(statements)
 		this.pcs = {};
-		this.pcsTable = {};//keep track of all the unused process
+		//keep track of all the unused process/ declared process
+		this.pcsTable = {};
 	
 		//dKey - dictionary field used
 		//obKey - object key used
@@ -938,7 +940,7 @@
 			this.semicolon();
 			//do not forgot the data key
 			node.BODY.key = UID('#');
-			this.keys.push(node.BODY.key);
+			this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 			
 			return node;
 		}
@@ -2908,7 +2910,13 @@
 		var eT = {
 			process: {},
 			config: {}
-		};
+		}, dk = [];
+	
+		_.forEach(syntaxTree.DATA_KEYS, function (isWatched, key) {
+			if (isWatched) {
+				dk.push(key);
+			}
+		});
 	
 		_.forEach(syntaxTree.DICTIONARY_KEYS, function (v, fieldName) {
 			if (!dictionary.isFieldDefined(fieldName)) {
@@ -2933,20 +2941,25 @@
 		eT.config.interval = syntaxTree.CONFIG.interval;
 		eT.config.screen = syntaxTree.CONFIG.screen;
 	
-		return eT;
+	
+		return {
+			eT: eT,
+			dK: dk
+		};
 	}
 	function Case(syntaxTree, object, dictionary) {
 		if (!(this instanceof Case)) {
 			return new Case(syntaxTree);
 		}
 	
+		var link = linker(syntaxTree, object, dictionary, this);
 		// executionTree
-		this.$$executionTree = linker(syntaxTree, object, dictionary, this);
+		this.$$executionTree = link.eT;
 	
 		// Outside object.
 		this.$dictionary = dictionary;
 		this.$objectList = object;
-		this.$$log = new Collector(syntaxTree.DATA_KEYS);
+		this.$$log = new Collector(link.dK);
 	
 		// states
 		this.$$state = 'ready';
@@ -3273,6 +3286,14 @@
 		return this;
 	};
 	
+	$CP.$clearScope = function () {
+		while (this.$$scopeStack.length) {
+			this.$popScope();
+		}
+	
+		return this;
+	};
+	
 	/*jslint sloppy: true, nomen: true */
 	/*global IF, settings, trigger, _, console, exitIns:true, callMainIns:true */
 	var CALL = 0x00,
@@ -3287,7 +3308,10 @@
 		REFRESH = 0x15,
 	
 		LOG = 0x20,
-		CONSOLE = 0x21;
+		CONSOLE = 0x21,
+	
+		PASSED = 1,
+		FAILURE = 0;
 	
 	IF(CALL, {
 		operation: function Call() {
@@ -3305,7 +3329,9 @@
 	});
 	IF(RETURN, {
 		operation: function Return() {
-			this.$case.$popScope();
+			this.$case
+				.$pushLog([RETURN])
+				.$popScope();
 		},
 		bodyFactory: function () {
 			return {};
@@ -3313,11 +3339,12 @@
 	});
 	IF(EXIT, {
 		operation: function Exit() {
-			var flag = this.body('isSuccess') ? 'P' : 'F',
+			var flag = this.body('isSuccess') ? PASSED : FAILURE,
 				CASE = this.$case;
 	
-			CASE.$pushLog([EXIT], this.line())
+			CASE.$pushLog([EXIT, flag], this.line())
 				.$markLog(flag, CASE.getCurrentLoop())
+				.$clearScope()
 				.$exitLoop();
 		},
 		bodyFactory: function (isSuccess) {
@@ -3362,6 +3389,7 @@
 	
 			if (!DOM) {
 				this.$case
+					.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 	
 				console.log('Can not find a DOM by cssPath: ' + cssPath);
@@ -3372,7 +3400,7 @@
 			settings.triggerCallback.call(this.$case, DOM);
 	
 			this.$case
-				.$pushLog([TRIGGER, cssPath, action, param], this.line());
+				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
 		},
 		bodyFactory: function (object, action, param) {
 			return {
@@ -3400,7 +3428,7 @@
 				CASE.$setIdleTask()
 					.$setTempInstruction()
 					.$setActiveTime()
-					.$pushLog([ASSERT], ins.line())
+					.$pushLog([ASSERT, PASSED], ins.line())
 					.$pushLogData(ins.body('key'), _.now() - startTime);
 			}
 	
@@ -3418,7 +3446,13 @@
 				CASE.$setTempInstruction()
 					.$setActiveTime()
 					.$setIdleTask()
-					.$pushLog([ASSERT], this.line());
+					.$pushLog([ASSERT, PASSED], this.line());
+	
+				if (timeout) {
+					CASE.$pushLogData(ins.body('key'), 0);
+				}
+			} else {
+				CASE.$pushLog([ASSERT, FAILURE], this.line());
 			}
 		},
 		bodyFactory: function (exp, timeout, dataKey) {

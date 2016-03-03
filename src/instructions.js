@@ -48,6 +48,7 @@ IF(EXIT, {
 
 		CASE.$pushLog([EXIT, flag], this.line())
 			.$markLog(flag, CASE.getCurrentLoop())
+			.$clearScope()
 			.$exitLoop();
 	},
 	bodyFactory: function (isSuccess) {
@@ -150,8 +151,12 @@ IF(ASSERT, {
 				.$setActiveTime()
 				.$setIdleTask()
 				.$pushLog([ASSERT, PASSED], this.line());
+
+			if (timeout) {
+				CASE.$pushLogData(ins.body('key'), 0);
+			}
 		} else {
-			CASE.$pushBlock([ASSERT, FAILURE], this.line());
+			CASE.$pushLog([ASSERT, FAILURE], this.line());
 		}
 	},
 	bodyFactory: function (exp, timeout, dataKey) {

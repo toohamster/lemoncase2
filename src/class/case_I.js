@@ -85,8 +85,6 @@ $CP.$exitLoop = function () {
 		this.$$exitCase();
 		return this;
 	}
-	this.$$blockStack.length = 0;
-	this.$$scopeStack.length = 0;
 	this.$setTempInstruction(IF(CALL).create('main'));
 	(settings.nextLoopCallback || _.noop).call(this);
 
@@ -120,6 +118,14 @@ $CP.$markLog = function (type, msg) {
 
 $CP.$pushLogData = function (assertId, delay) {
 	this.getLog().data(assertId, delay);
+
+	return this;
+};
+
+$CP.$clearScope = function () {
+	while (this.$$scopeStack.length) {
+		this.$popScope();
+	}
 
 	return this;
 };
