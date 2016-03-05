@@ -23,6 +23,7 @@ var Parser = function (options, input) {
 	// conf - #set
 	this.conf = {};
 	this.keys = {};
+	this.nextID = 0;
 	// keep track of process body(statements)
 	this.pcs = {};
 	//keep track of all the unused process/ declared process

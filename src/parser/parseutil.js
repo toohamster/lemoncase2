@@ -27,4 +27,8 @@ module.exports = function (Parser) {
 	pp.expected = function (type) {
 		this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 	};
+	
+	pp.UID = function (string) {
+		return string + this.nextID++;
+	};
 };
