@@ -6,7 +6,6 @@ var isIdentifierStart = require('./identifier.js').isIdentifierStart;
 var isIdentifierChar = require('./identifier.js').isIdentifierChar;
 
 var getLineInfo = require('./locutil.js').getLineInfo;
-var UID = require('./util.js').UID;
 var genExpr = require('./walk.js');
 
 module.exports = function (Parser) {
@@ -315,7 +314,7 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		//do not forgot the data key
-		node.BODY.key = UID('#');
+		node.BODY.key = this.UID('#');
 		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
 		return node;

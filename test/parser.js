@@ -524,6 +524,10 @@ module.exports = function (Parser) {
 	pp.expected = function (type) {
 		this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 	};
+	
+	pp.UID = function (string) {
+		return string + this.nextID++;
+	};
 };
 },{"./tokentype.js":12}],9:[function(require,module,exports){
 var getOptions = require('./options.js').getOptions;
@@ -551,6 +555,7 @@ var Parser = function (options, input) {
 	// conf - #set
 	this.conf = {};
 	this.keys = {};
+	this.nextID = 0;
 	// keep track of process body(statements)
 	this.pcs = {};
 	//keep track of all the unused process/ declared process
@@ -599,7 +604,6 @@ var isIdentifierStart = require('./identifier.js').isIdentifierStart;
 var isIdentifierChar = require('./identifier.js').isIdentifierChar;
 
 var getLineInfo = require('./locutil.js').getLineInfo;
-var UID = require('./util.js').UID;
 var genExpr = require('./walk.js');
 
 module.exports = function (Parser) {
@@ -908,7 +912,7 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		//do not forgot the data key
-		node.BODY.key = UID('#');
+		node.BODY.key = this.UID('#');
 		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
 		return node;
@@ -958,7 +962,7 @@ module.exports = function (Parser) {
 	};
 	
 };
-},{"./identifier.js":2,"./locutil.js":5,"./tokentype.js":12,"./util.js":13,"./walk.js":14,"./whitespace.js":15}],11:[function(require,module,exports){
+},{"./identifier.js":2,"./locutil.js":5,"./tokentype.js":12,"./walk.js":14,"./whitespace.js":15}],11:[function(require,module,exports){
 var isIdentifierStart = require('./identifier.js').isIdentifierStart;
 var isIdentifierChar = require('./identifier.js').isIdentifierChar;
 
@@ -1551,13 +1555,7 @@ function has(obj, propName) {
 
 module.exports = {
 	isArray: isArray,
-	has: has,
-	UID: (function () {
-		var id = 0;
-		return function (string) {
-			return string + id++;
-		};
-	}())
+	has: has
 };
 },{}],14:[function(require,module,exports){
 // walk a javascript style tree and transform it into a function

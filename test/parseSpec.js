@@ -46,3 +46,13 @@ process sub_1 (){}
 		parse(monster, {});
 	});
 });
+
+test('UID correctness', t => {
+	parse('process main { assert "1"; }', {});
+	parse('process main { assert "1"; }', {});
+	parse('process main { assert "1"; }', {});
+	
+	var p = parse('process main { assert "1" in 1; }', {});
+	
+	t.true(p.DATA_KEYS['#0']);
+});
