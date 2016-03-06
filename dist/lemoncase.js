@@ -1766,7 +1766,7 @@
 		this.$$baseTime = 0;
 		this.$marks.length = 0;
 		this.$logs.length = 0;
-		this.$datas.length = 0;
+		this.$datas = {};
 	
 		return this;
 	};
@@ -3449,7 +3449,7 @@
 				if (timeout) {
 					CASE.$pushLogData(ins.body('key'), 0);
 				}
-			} else {
+			} else if (!timeout) {
 				CASE.$pushLog([ASSERT, FAILURE], this.line());
 			}
 		},

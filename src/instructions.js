@@ -155,7 +155,7 @@ IF(ASSERT, {
 			if (timeout) {
 				CASE.$pushLogData(ins.body('key'), 0);
 			}
-		} else {
+		} else if (!timeout) {
 			CASE.$pushLog([ASSERT, FAILURE], this.line());
 		}
 	},
