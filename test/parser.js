@@ -286,7 +286,7 @@ var actions = ["click", "input", "rclick", "dblclick",
 	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
 var macros = ['#CLOCK', '#TIMES', '#INTERVAL', '#SCREEN'];
 
-var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
+var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process',
 'return'].concat(reserve).concat(actions).concat(macros);
 
 var keywordRegexp = new RegExp('^(' + keywords.join('|') + ')$');
@@ -742,54 +742,57 @@ module.exports = function (Parser) {
 	};
 
 	pp.parseStatement = function (declaration) {
-		var starttype = this.type;
+		var starttype = this.type, node = this.startNode();
 
 		switch (starttype) {
 			case tt._click: case tt._rclick: case tt._dblclick:
-			case tt._movein: case tt._moveout: case tt._select:
+			case tt._movein: case tt._moveout:
+				return this.parseMouseAction(node, starttype.keyword);
+			case tt._select:
+				return this.parseSelectAction();
 			case tt._scroll:
-				return this.parseClickAction(starttype.keyword);
+				return this.parseScrollAction(node, starttype.keyword);
 			case tt._input:
-				return this.parseInputAction();
+				return this.parseInputAction(node, starttype.keyword);
 			case tt._return:
-				return this.parseReturnStatement();
+				return this.parseReturnStatement(node);
 			case tt._wait:
-				return this.parseWaitStatement();
+				return this.parseWaitStatement(node);
 			case tt._assert:
-				return this.parseAssertStatement();
+				return this.parseAssertStatement(node);
 			case tt._log: case tt._console:
-				return this.parseLogStatement(starttype === tt._log ? 0x20 : 0x21);
+				return this.parseLogStatement(node, starttype === tt._log ? 0x20 : 0x21);
 			case tt._jumpto:
-				return this.parseGotoStatement();
+				return this.parseGotoStatement(node);
 			case tt._refresh:
-				return this.parseRefreshStatement();
+				return this.parseRefreshStatement(node);
 			case tt._var:
-				return this.parseVarStatement();
+				return this.parseVarStatement(node);
 			case tt.name:
-				return this.parseExprStatement();
+				return this.parseExprStatement(node);
 			default:
 				this.unexpected();
 		}
 	};
 
-	pp.parseReturnStatement = function () {
-		var node = this.startLCNode(0x01);
+	pp.parseReturnStatement = function (node) {
+		this.next();
 
 		if (this.eat(tt.semi)) node.args = null;
 		else this.raise(this.start, 'Return expression is not supported');
 
-		return node;
+		return this.finishNode(node, 0x01);
 	};
 
-	pp.parseVarStatement = function () {
-		var node = this.startLCNode(0x10);
+	pp.parseVarStatement = function (node) {
+		this.next();
 
 		this.parseVar(node);
 		node.BODY.exp = genExpr(node.BODY.raw);
 
 		this.semicolon();
 
-		return node;
+		return this.finishNode(node, 0x10);
 	};
 
 	//parse a list of variable declaration
@@ -818,8 +821,7 @@ module.exports = function (Parser) {
 		};
 	};
 	
-	pp.parseExprStatement = function () {
-		var line = getLineInfo(this.input, this.start).line;
+	pp.parseExprStatement = function (node) {
 		var expr = this.parseExpression();
 		
 		this.semicolon();
@@ -832,41 +834,33 @@ module.exports = function (Parser) {
 				this.pcsTable[callee] = { pos: this.lastTokStart };
 			}
 			
-			return {
-				LINE: line,
-				TYPE: 0x00,
-				BODY: {
-					identifier: callee
-				}
-			};
+			node.BODY.identifier = callee;
+			
+			return this.finishNode(node, 0x00);
 		}
 		
 		// a = 1
 		var fn = genExpr(expr);
 		
-		return {
-			LINE: line,
-			TYPE: 0x10,
-			BODY: {
-				exp: fn,
-				raw: expr
-			}
-		}
+		node.BODY.raw = expr;
+		node.BODY.exp = fn;
+		
+		return this.finishNode(node, 0x10);
 	}
 	
-	pp.parseWaitStatement = function () {
-		var node = this.startLCNode(0x11);
+	pp.parseWaitStatement = function (node) {
+		this.next();
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.delay = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
-		return node;
+		return this.finishNode(node, 0x11);
 	}
 
-	pp.parseClickAction = function (keyword) {
-		var node = this.startLCNode(0x12);
+	pp.parseMouseAction = function (node, keyword) {
+		this.next();
 
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
@@ -874,11 +868,11 @@ module.exports = function (Parser) {
 
 		this.semicolon();
 
-		return node;
+		return this.finishNode(node, 0x12);
 	};
 	
-	pp.parseInputAction = function () {
-		var node = this.startLCNode(0x12);
+	pp.parseScrollAction = function (node, keyword) {
+		this.next();
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
@@ -887,15 +881,35 @@ module.exports = function (Parser) {
 		
 		node.BODY.raw1 = this.parseExpression();
 		node.BODY.param = genExpr(node.BODY.raw1);
-		node.BODY.action = 'input';
+		
+		node.BODY.action = keyword;
+		
+		return this.finishNode(node, 0x12);
+	};
+	
+	pp.parseSelectAction = function () {
+		this.raise('work in progress...');
+	};
+	
+	pp.parseInputAction = function (node, keyword) {
+		this.next();
+		
+		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
+		
+		this.expect(tt._by);
+		
+		node.BODY.raw1 = this.parseExpression();
+		node.BODY.param = genExpr(node.BODY.raw1);
+		node.BODY.action = keyword;
 		
 		this.semicolon();
 		
-		return node;
+		return this.finishNode(node, 0x12);
 	};
 	
-	pp.parseAssertStatement = function () {
-		var node = this.startLCNode(0x13);
+	pp.parseAssertStatement = function (node) {
+		this.next();
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.exp = genExpr(node.BODY.raw);
@@ -915,52 +929,55 @@ module.exports = function (Parser) {
 		node.BODY.key = this.UID('#');
 		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
-		return node;
+		return this.finishNode(node, 0x13);
 	}
 	
-	pp.parseGotoStatement = function () {
-		var node = this.startLCNode(0x14);
+	pp.parseGotoStatement = function (node) {
+		this.next();
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.url = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
-		return node;
+		return this.finishNode(node, 0x14);
 	};
 
-	pp.parseRefreshStatement = function () {
-		var node = this.startLCNode(0x15);
+	pp.parseRefreshStatement = function (node) {
+		this.next();
 
 		this.semicolon();
 
-		return node;
+		return this.finishNode(node, 0x15);
 	};
 	
-	pp.parseLogStatement = function (type) {
-		var node = this.startLCNode(type);
+	pp.parseLogStatement = function (node, type) {
+		this.next();
 		
 		node.BODY.raw = this.parseExpression();
 		node.BODY.msg = genExpr(node.BODY.raw);
 		
 		this.semicolon();
 		
-		return node;
+		return this.finishNode(node, type);
 	};
 	
-
-	pp.startLCNode = function (type) {
-		var node = {
+	pp.startNode = function () {
+		return {
 			LINE: getLineInfo(this.input, this.start).line,
-			TYPE: type,
-			BODY: {}
-		};
-		
-		this.next();
+			TYPE: 0,
+			BODY: {},
+			start: this.start,
+			end: 0
+		}
+	};
+	
+	pp.finishNode = function (node, type) {
+		node.TYPE = type;
+		node.end = this.lastTokEnd;
 		
 		return node;
 	};
-	
 };
 },{"./identifier.js":2,"./locutil.js":5,"./tokentype.js":12,"./walk.js":14,"./whitespace.js":15}],11:[function(require,module,exports){
 var isIdentifierStart = require('./identifier.js').isIdentifierStart;

@@ -4,7 +4,7 @@ var actions = ["click", "input", "rclick", "dblclick",
 	"movein", "moveout", "scroll", "select", 'jumpto', 'refresh'];
 var macros = ['#CLOCK', '#TIMES', '#INTERVAL', '#SCREEN'];
 
-var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process', '#set',
+var keywords = ['wait', 'assert', 'log', 'console', 'var', 'process',
 'return'].concat(reserve).concat(actions).concat(macros);
 
 var keywordRegexp = new RegExp('^(' + keywords.join('|') + ')$');

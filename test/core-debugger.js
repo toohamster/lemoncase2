@@ -7,8 +7,5 @@
 // console.log(p.parseStatement().BODY.msg.toString());
 
 var parse = require('../src/parser/index.js').parse;
-parse('process main { assert "1"; }', {});
-parse('process main { assert "1"; }', {});
-parse('process main { assert "1"; }', {});
 
-console.log(JSON.stringify(parse('process main { assert "1" in 1; }', {}), null, 2));
+console.log(JSON.stringify(parse('#set ORIGIN http://localhost/;\n', {}), null, 2));
