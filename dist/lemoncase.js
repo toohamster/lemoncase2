@@ -1733,6 +1733,346 @@
 	};
 	},{}]},{},[3])(3)
 	});
+	/*jslint vars: true, plusplus: true */
+	/*global console, Window, HTMLIFrameElement, Event */
+	(function () {
+		'use strict';
+	
+		var t, isECS = true, isTouch = true, hasInput = true;
+		try { t = new MouseEvent('click', {}); } catch ($e) { isECS = false; }
+		try { TouchEvent; } catch ($f) { isTouch = false; }
+		try { InputEvent; } catch ($g) { hasInput = false; }
+	
+		function buildInitEventArgs(type, opts, map) {
+			var optKey, args = [type];
+			for (optKey in map) {
+				if (map.hasOwnProperty(optKey)) {
+					args[map[optKey]] = opts[optKey] || null;
+				}
+			}
+			return args;
+		}
+	
+		var $TouchEvent, $Event = isECS && !isTouch ? Event : function (typeArg, eventInit) {
+			var event = document.createEvent('Event'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2};
+			event.initEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $MouseEvent = isECS && !isTouch ? MouseEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('MouseEvent'),
+				initMap = {
+					'bubbles': 1,
+					'cancelBubble': 2,
+					'view': 3,
+					'detail': 4,
+					'screenX': 5,
+					'screenY': 6,
+					'clientX': 7,
+					'clientY': 8,
+					'ctrlKey': 9,
+					'altKey': 10,
+					'shiftKey': 11,
+					'metaKey': 12,
+					'button': 13,
+					'relatedTarget': 14
+				};
+			event.initMouseEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $UIEvent = isECS && !isTouch ? UIEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('UIEvent'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
+			event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $KeyboardEvent = isECS && !isTouch ? KeyboardEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('KeyboardEvent'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
+					'char': 4, key: 5, location: 6, repeat: 8 };
+			event.initKeyboardEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $InputEvent = hasInput ? InputEvent : $UIEvent;
+	
+		if (isTouch && !isECS) {
+			$TouchEvent = function (typeArg, eventInit) {
+				var event = document.createEvent('TouchEvent'),
+					initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
+				event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+	
+				return event;
+			}
+		}
+	
+	//	alert($MouseEvent);
+	//	alert(isTouch);
+	//	alert(hasInput);
+	//	alert(isECS);
+	
+		var exports, actionRule,
+			config = {
+				contextIframe: null,
+				window: function () {
+					return config.contextIframe ? config.contextIframe.contentWindow : window;
+				}
+			},
+			aUs = [],
+			defaultEventOpts = {bubbles: true, cancelBubble: true},
+	
+		//		MouseEvent = 0x00,
+		//		KeyboardEvent = 0x10,
+		//		UIEvent = 0x20,
+		//		InputEvent = 0x30,
+	
+			MOUSEUP = 0x00,
+			MOUSEDOWN = 0x01,
+			MOUSEENTER = 0x02,
+			MOUSELEAVE = 0x03,
+			MOUSEOUT = 0x04,
+			MOUSEOVER = 0x05,
+			MOUSEMOVE = 0x06,
+			CLICK = 0x07,
+			DBLCLICK = 0x08,
+			CONTEXTMENU = 0x09,
+	
+			KEYUP = 0x10,
+			KEYDOWN = 0X11,
+			KEYPRESS = 0X12,
+	
+			SCROLL = 0x20,
+			RESIZE = 0x21,
+			FOCUS = 0x22,
+			SELECT = 0x24,
+	
+			INPUT = 0x30,
+			CHANGE = 0x31;
+	
+		function noop() {}
+		function isElement(obj) {
+			return obj.nodeType === 1;
+		}
+		function isWindow(obj) {
+			return obj instanceof Window;
+		}
+		function isObject(value) {
+			return value !== null && typeof value === 'object';
+		}
+		function isFunction(value) {
+			return typeof value === 'function';
+		}
+		function setHashKey(obj, h) {
+			if (h) {
+				obj.$$hashKey = h;
+			} else {
+				delete obj.$$hashKey;
+			}
+		}
+		function baseExtend(dst, objs) {
+			var ii, i, jj, j, key, src, obj, keys,
+				h = dst.$$hashKey;
+			if (objs) {
+				for (i = 0, ii = objs.length; i < ii; ++i) {
+					obj = objs[i];
+					if (!isObject(obj) && !isFunction(obj)) {
+						continue;
+					}
+					keys = Object.keys(obj);
+					for (j = 0, jj = keys.length; j < jj; j++) {
+						key = keys[j];
+						src = obj[key];
+						dst[key] = src;
+					}
+				}
+			}
+	
+			setHashKey(dst, h);
+			return dst;
+		}
+		function extend(dst) {
+			return baseExtend(dst, ([]).slice.call(arguments, 1), false);
+		}
+	
+		function dispatchTouchEvent(element, eventName, opts) {
+			if (isTouch) {
+				element.dispatchEvent(new $TouchEvent(eventName, extend({}, defaultEventOpts, opts)));
+			}
+		}
+		function dispatchMouseEvent(element, eventName, opts) {
+			element.dispatchEvent(new $MouseEvent(eventName, extend({}, defaultEventOpts, opts)));
+		}
+		aUs[MOUSEUP] = function (opts) {
+			dispatchTouchEvent(this, 'touchend', opts);
+			dispatchMouseEvent(this, 'mouseup', opts);
+		};
+		aUs[MOUSEDOWN] = function (opts) {
+			dispatchTouchEvent(this, 'touchstart', opts);
+			dispatchMouseEvent(this, 'mousedown', opts);
+		};
+		aUs[MOUSEENTER] = function (opts) {
+			dispatchMouseEvent(this, 'mouseenter', opts);
+		};
+		aUs[MOUSELEAVE] = function (opts) {
+			dispatchMouseEvent(this, 'mouseleave', opts);
+		};
+		aUs[MOUSEOUT] = function (opts) {
+			dispatchMouseEvent(this, 'mouseout', opts);
+		};
+		aUs[MOUSEOVER] = function (opts) {
+			dispatchMouseEvent(this, 'mouseover', opts);
+		};
+		aUs[MOUSEMOVE] = function (opts) {
+			dispatchTouchEvent(this, 'touchmove', opts);
+			dispatchMouseEvent(this, 'mousemove', opts);
+		};
+		aUs[CLICK] = function (opts) {
+			dispatchMouseEvent(this, 'click', opts);
+		};
+		aUs[DBLCLICK] = function (opts) {
+			dispatchMouseEvent(this, 'dblclick', opts);
+		};
+		aUs[CONTEXTMENU] = function (opts) {
+			dispatchMouseEvent(this, 'contextmenu', opts);
+		};
+	
+		function dispatchKeyboardEvent(element, eventName, opts) {
+			element.dispatchEvent(new $KeyboardEvent(eventName, extend({}, defaultEventOpts, opts)));
+		}
+		aUs[KEYDOWN] = function (opts) {
+			dispatchKeyboardEvent(this, 'keydown', opts);
+		};
+		aUs[KEYPRESS] = function (opts) {
+			dispatchKeyboardEvent(this, 'keypress', opts);
+		};
+		aUs[KEYUP] = function (opts) {
+			dispatchKeyboardEvent(this, 'keyup', opts);
+		};
+	
+		aUs[FOCUS] = function () {
+			this.focus();
+		};
+		//aUs[BLUR] not neseseray.
+		aUs[RESIZE] = function (opts) {
+			var s = config.contextIframe.style;
+			s.width = opts.width + 'px';
+			s.height = opts.height + 'px';
+		};
+		aUs[SCROLL] = function (opts) {
+			config.window().scrollTo(opts.x, opts.y);
+			this.dispatchEvent(new $UIEvent('scroll'));
+		};
+		aUs[SELECT] = function (opts) {
+			var optionElement = this[opts.index];
+			aUs[MOUSEDOWN].call(optionElement, opts);
+			aUs[MOUSEUP].call(optionElement, opts);
+			optionElement.selected = true;
+			this.dispatchEvent(new $UIEvent('select'));
+			aUs[CLICK].call(optionElement, opts);
+			aUs[MOUSEOUT].call(optionElement, opts);
+	
+		};
+	
+		aUs[INPUT] = function (opts) {
+			this.value = opts.value;
+			this.dispatchEvent(new $UIEvent('input', opts));
+		};
+		aUs[CHANGE] = function () {
+			this.dispatchEvent(new $Event('change', {bubbles: true}));
+		};
+	
+		function Trigger(element) {
+			this.element = element;
+			this.action = this.getActionRule(element);
+		}
+		Trigger.prototype.getActionRule = function (element) {
+			element = element || this.element;
+	
+			if (element instanceof Window) {
+				return actionRule.window;
+			}
+	
+			if (element.tagName.toLowerCase() === 'input') {
+				return actionRule['input/' + element.type];
+			}
+	
+			if (element.tagName.toLowerCase() === 'textarea') {
+				return actionRule.textarea;
+			}
+	
+	
+			if (element.tagName.toLowerCase() === 'select') {
+				return actionRule.select;
+			}
+	
+			return actionRule.generic;
+		};
+		Trigger.prototype.does = function (actionName, opts) {
+			var i, len, rule;
+	
+			if (this.testAction(actionName) !== true) {
+				throw 'The element:' + this.element.outerHTNL +
+					' can not use action:' + actionName;
+			}
+	
+			rule = this.action[actionName];
+			len = rule.length;
+			for (i = 0; i < len; i += 1) {
+				aUs[rule[i]].call(this.element, opts || {});
+			}
+	
+			return this;
+		};
+		Trigger.prototype.testAction = function (actionName) {
+			return this.action.hasOwnProperty(actionName);
+		};
+	
+		actionRule = (function () {
+			var rule = {};
+	
+			rule['input/checkbox'] = rule['input/radio'] = rule['input/button'] =
+				rule.generic = {
+					click: [MOUSEDOWN, MOUSEMOVE, MOUSEUP, CLICK],
+					dblclick: [MOUSEDOWN, MOUSEUP, CLICK, MOUSEDOWN, MOUSEUP, CLICK, DBLCLICK],
+					rclick: [MOUSEDOWN, MOUSEUP, CONTEXTMENU],
+					movein: [MOUSEOVER, MOUSEOUT],
+					moveout: [MOUSEMOVE, MOUSEOUT],
+					scroll: [SCROLL]
+				};
+	
+			rule.textarea = rule['input/text'] = rule['input/password'] =
+				rule['input/email'] = extend({}, rule.generic, {
+					input: [FOCUS, KEYDOWN, KEYPRESS, INPUT, KEYUP, CHANGE],
+					click: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK],
+					dblclick: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEDOWN,
+							   MOUSEMOVE, MOUSEUP, CLICK, DBLCLICK],
+					rclick: [MOUSEDOWN, FOCUS, MOUSEUP, CONTEXTMENU]
+				});
+	
+			rule.select = extend({}, rule.generic, {
+				select: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEMOVE,
+						 MOUSEOUT, SELECT]
+			});
+	
+			rule.window = {
+				scroll: [SCROLL],
+				resize: [RESIZE]
+			};
+	
+			return rule;
+		}());
+	
+		exports = function (element) {
+			if (!isWindow(element) && !isElement(element)) {
+				throw '"element" for trigger must be a HTMLElement';
+			}
+			return new Trigger(element);
+		};
+		exports.setupIframe = function (iframe) {
+			if (!(iframe instanceof HTMLIFrameElement)) {
+				throw '"element" must be a iframe element.';
+			}
+			config.contextIframe = iframe;
+		};
+	
+		window.trigger = exports;
+	}());
+	
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global now: false, _, instructions */
 	
@@ -2310,270 +2650,6 @@
 		});
 	}());
 	
-		/*jslint sloppy: true, plusplus: true */
-	/*global console, Window */
-	(function () {
-		'use strict';
-		var exports, actionRule,
-			config = {
-				contextIframe: null,
-				window: function () {
-					return config.contextIframe ? config.contextIframe.contentWindow : window;
-				}
-			},
-			aUs = [],
-			defaultEventOpts = {bubbles: true, cancelBubble: true},
-	
-	//		MouseEvent = 0x00,
-	//		KeyboardEvent = 0x10,
-	//		UIEvent = 0x20,
-	//		InputEvent = 0x30,
-	
-			MOUSEUP = 0x00,
-			MOUSEDOWN = 0x01,
-			MOUSEENTER = 0x02,
-			MOUSELEAVE = 0x03,
-			MOUSEOUT = 0x04,
-			MOUSEOVER = 0x05,
-			MOUSEMOVE = 0x06,
-			CLICK = 0x07,
-			DBLCLICK = 0x08,
-			CONTEXTMENU = 0x09,
-	
-			KEYUP = 0x10,
-			KEYDOWN = 0X11,
-			KEYPRESS = 0X12,
-	
-			SCROLL = 0x20,
-			RESIZE = 0x21,
-			FOCUS = 0x22,
-			SELECT = 0x24,
-	
-			INPUT = 0x30,
-			CHANGE = 0x31;
-	
-	
-		function isElement(obj) {
-			return obj.nodeType === 1;
-		}
-		function isWindow(obj) {
-			return obj instanceof Window;
-		}
-		function isObject(value) {
-			return value !== null && typeof value === 'object';
-		}
-		function isFunction(value) {
-			return typeof value === 'function';
-		}
-		function setHashKey(obj, h) {
-			if (h) {
-				obj.$$hashKey = h;
-			} else {
-				delete obj.$$hashKey;
-			}
-		}
-		function baseExtend(dst, objs) {
-			var ii, i, jj, j, key, src, obj, keys,
-				h = dst.$$hashKey;
-			if (objs) {
-				for (i = 0, ii = objs.length; i < ii; ++i) {
-					obj = objs[i];
-					if (!isObject(obj) && !isFunction(obj)) {
-						continue;
-					}
-					keys = Object.keys(obj);
-					for (j = 0, jj = keys.length; j < jj; j++) {
-						key = keys[j];
-						src = obj[key];
-						dst[key] = src;
-					}
-				}
-			}
-	
-			setHashKey(dst, h);
-			return dst;
-		}
-		function extend(dst) {
-			return baseExtend(dst, ([]).slice.call(arguments, 1), false);
-		}
-	
-		function dispatchMouseEvent(element, eventName, opts) {
-			element.dispatchEvent(new MouseEvent(eventName, extend({}, defaultEventOpts, opts)));
-		}
-		aUs[MOUSEUP] = function (opts) {
-			dispatchMouseEvent(this, 'mouseup', opts);
-		};
-		aUs[MOUSEDOWN] = function (opts) {
-			dispatchMouseEvent(this, 'mousedown', opts);
-		};
-		aUs[MOUSEENTER] = function (opts) {
-			dispatchMouseEvent(this, 'mouseenter', opts);
-		};
-		aUs[MOUSELEAVE] = function (opts) {
-			dispatchMouseEvent(this, 'mouseleave', opts);
-		};
-		aUs[MOUSEOUT] = function (opts) {
-			dispatchMouseEvent(this, 'mouseout', opts);
-		};
-		aUs[MOUSEOVER] = function (opts) {
-			dispatchMouseEvent(this, 'mouseover', opts);
-		};
-		aUs[MOUSEMOVE] = function (opts) {
-			dispatchMouseEvent(this, 'mousemove', opts);
-		};
-		aUs[CLICK] = function (opts) {
-			dispatchMouseEvent(this, 'click', opts);
-		};
-		aUs[DBLCLICK] = function (opts) {
-			dispatchMouseEvent(this, 'dblclick', opts);
-		};
-		aUs[CONTEXTMENU] = function (opts) {
-			dispatchMouseEvent(this, 'contextmenu', opts);
-		};
-	
-		function dispatchKeyboardEvent(element, eventName, opts) {
-			element.dispatchEvent(new KeyboardEvent(eventName, extend({}, defaultEventOpts, opts)));
-		}
-		aUs[KEYDOWN] = function (opts) {
-			dispatchKeyboardEvent(this, 'keydown', opts);
-		};
-		aUs[KEYPRESS] = function (opts) {
-			dispatchKeyboardEvent(this, 'keypress', opts);
-		};
-		aUs[KEYUP] = function (opts) {
-			dispatchKeyboardEvent(this, 'keyup', opts);
-		};
-	
-		aUs[FOCUS] = function () {
-			this.focus();
-		};
-		//aUs[BLUR] not neseseray.
-		aUs[RESIZE] = function (opts) {
-			var s = config.contextIframe.style;
-			s.width = opts.width + 'px';
-			s.height = opts.height + 'px';
-		};
-		aUs[SCROLL] = function (opts) {
-			config.window().scrollTo(opts.x, opts.y);
-			this.dispatchEvent(new UIEvent('scroll'));
-		};
-		aUs[SELECT] = function (opts) {
-			var optionElement = this[opts.index];
-			aUs[MOUSEDOWN].call(optionElement, opts);
-			aUs[MOUSEUP].call(optionElement, opts);
-			optionElement.selected = true;
-			this.dispatchEvent(new UIEvent('select'));
-			aUs[CLICK].call(optionElement, opts);
-			aUs[MOUSEOUT].call(optionElement, opts);
-	
-		};
-	
-		aUs[INPUT] = function (opts) {
-			this.value = opts.value;
-			this.dispatchEvent(new UIEvent('input', opts));
-		};
-		aUs[CHANGE] = function () {
-			this.dispatchEvent(new Event('change', {bubbles: true}));
-		};
-	
-		function Trigger(element) {
-			this.element = element;
-			this.action = this.getActionRule(element);
-		}
-		Trigger.prototype.getActionRule = function (element) {
-			element = element || this.element;
-	
-			if (element instanceof Window) {
-				return actionRule.window;
-			}
-	
-			if (element.tagName.toLowerCase() === 'input') {
-				return actionRule['input/' + element.type];
-			}
-	
-			if (element.tagName.toLowerCase() === 'textarea') {
-				return actionRule.textarea;
-			}
-	
-	
-			if (element.tagName.toLowerCase() === 'select') {
-				return actionRule.select;
-			}
-	
-			return actionRule.generic;
-		};
-		Trigger.prototype.does = function (actionName, opts) {
-			var i, len, rule;
-	
-			if (this.testAction(actionName) !== true) {
-				throw 'The element:' + this.element.outerHTNL +
-					' can not use action:' + actionName;
-			}
-	
-			rule = this.action[actionName];
-			len = rule.length;
-			for (i = 0; i < len; i += 1) {
-				aUs[rule[i]].call(this.element, opts || {});
-			}
-	
-			return this;
-		};
-		Trigger.prototype.testAction = function (actionName) {
-			return this.action.hasOwnProperty(actionName);
-		};
-	
-		actionRule = (function () {
-			var rule = {};
-	
-			rule['input/checkbox'] = rule['input/radio'] = rule['input/button'] =
-				rule.generic = {
-					click: [MOUSEDOWN, MOUSEMOVE, MOUSEUP, CLICK],
-					dblclick: [MOUSEDOWN, MOUSEUP, CLICK, MOUSEDOWN, MOUSEUP, CLICK, DBLCLICK],
-					rclick: [MOUSEDOWN, MOUSEUP, CONTEXTMENU],
-					movein: [MOUSEOVER, MOUSEOUT],
-					moveout: [MOUSEMOVE, MOUSEOUT],
-					scroll: [SCROLL]
-				};
-	
-			rule.textarea = rule['input/text'] = rule['input/password'] =
-				rule['input/email'] = extend({}, rule.generic, {
-					input: [FOCUS, KEYDOWN, KEYPRESS, INPUT, KEYUP, CHANGE],
-					click: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK],
-					dblclick: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEDOWN,
-							   MOUSEMOVE, MOUSEUP, CLICK, DBLCLICK],
-					rclick: [MOUSEDOWN, FOCUS, MOUSEUP, CONTEXTMENU]
-				});
-	
-			rule.select = extend({}, rule.generic, {
-				select: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEMOVE,
-						 MOUSEOUT, SELECT]
-			});
-	
-			rule.window = {
-				scroll: [SCROLL],
-				resize: [RESIZE]
-			};
-	
-			return rule;
-		}());
-	
-		exports = function (element) {
-			if (!isWindow(element) && !isElement(element)) {
-				throw '"element" for trigger must be a HTMLElement';
-			}
-			return new Trigger(element);
-		};
-		exports.setupIframe = function (iframe) {
-			if (!(iframe instanceof HTMLIFrameElement)) {
-				throw '"element" must be a iframe element.';
-			}
-			config.contextIframe = iframe;
-		};
-	
-		window.trigger = exports;
-		return exports;
-	}());
-	
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global settings:true */
 	var callMainIns, exitIns, _, settings, setup;
@@ -2638,7 +2714,7 @@
 		getInnerHTML: function (cssPath) {
 			var DOM = _.document().querySelector(cssPath);
 			if (DOM) {
-				return DOM.innerHTML;
+				return DOM[DOM.value ? 'value' : 'innerHTML'];
 			}
 			return 'Error:No such HTMLElement.';
 		}
