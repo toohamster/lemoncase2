@@ -1,0 +1,4 @@
+[submodule "lib/trigger"]
+	path = lib/trigger
+	url = https://git.oschina.net/steambap/trigger.git
+	branch = master
