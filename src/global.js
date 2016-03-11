@@ -62,7 +62,7 @@ _ = {
 	getInnerHTML: function (cssPath) {
 		var DOM = _.document().querySelector(cssPath);
 		if (DOM) {
-			return DOM.innerHTML;
+			return DOM[DOM.value ? 'value' : 'innerHTML'];
 		}
 		return 'Error:No such HTMLElement.';
 	}

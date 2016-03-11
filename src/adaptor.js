@@ -30,6 +30,7 @@
 }(this, function () {
 	'use strict';
 	//= include ../test/parser.js
+	//= include ../lib/trigger/trigger.js
 	//= include ../lib/*.js
 	//= include ./global.js
 	//= include ./class/dictionary.js
