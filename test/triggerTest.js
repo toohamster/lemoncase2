@@ -4,9 +4,11 @@ var app = angular.module('testPanel', [
 
 ]).run(function ($rootScope) {
 	var iframe = document.querySelector('iframe');
-	$rootScope.iframe = iframe;
-	setup.setContextFrame(iframe);
+//	$rootScope.iframe = iframe;
+//	setup.setContextFrame(iframe);
 }).controller('panel', function ($scope, $element) {
+	$scope.iframe = getLemoncaseFrame();
+
 	var object = {
 		button: '[type=button]'
 	}, dictionary = new Dictionary({
@@ -16,6 +18,9 @@ var app = angular.module('testPanel', [
 				pattern: /\w{4,8}/
 			}
 		]
+	});
+	init($element[0].querySelector('#project'), {
+		src: 'test.html'
 	});
 
 	$scope.actionParam = {

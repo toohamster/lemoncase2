@@ -129,7 +129,7 @@ Dictionary.prototype.load = function (length) {
 	};
 	var RandRow = function () {
 		_.forEach(keys, function (field) {
-			this[field.name] = field.pattern.gen;
+			this[field.name] = field.pattern.gen();
 		}, this);
 	};
 

@@ -69,7 +69,7 @@ _ = {
 };
 
 settings = {
-	contextFrame: null,
+	contextFrame: document.createElement('iframe'),
 	defaultNextLoopDelay: 3000,
 	readyTimeout: 3000,
 	defaultClock: 10,
@@ -100,4 +100,20 @@ setup.setContextFrame = function (iframeDOM) {
 	settings.contextFrame = iframeDOM;
 };
 
+function init(wrapDOM, opts) {
+	var e = settings.contextFrame;
 
+	if (opts) {
+		e.id = opts.id || e.id || 'lemoncase';
+		e.src = opts.src || e.src;
+	}
+	console.log(e);
+	e.style.height = '100%';
+	e.style.width = '100%';
+
+	wrapDOM.appendChild(e);
+}
+
+function getLemoncaseFrame() {
+	return settings.contextFrame;
+}
