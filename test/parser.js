@@ -1613,10 +1613,10 @@ var visitors = {
 	},
 	regexp: function (node, c) {
 		// regex.gen
-		if (node.regexp.gen) {
+		if (node.regexp.gen()) {
 			var val = node.regexp;
 			
-			return '(/' + val.pattern + '/' + val.flags + ').gen'; 
+			return '(/' + val.pattern + '/' + val.flags + ').gen()';
 		}
 		// regular regular expression is fine...
 		return '(' + node.raw + ')';
@@ -1687,6 +1687,7 @@ module.exports = function genExpr (node) {
 	
 	return new Function('$,o,d,c,t', 'return ' + string + ';');
 };
+
 },{}],15:[function(require,module,exports){
 // Matches a whole line break (where CRLF is considered a single
 // line break). Used to count lines.

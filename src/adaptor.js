@@ -45,6 +45,7 @@
 		setup: setup,
 		Instruction: IF,
 		parse: LP.parse,
-		Dictionary: Dictionary
+		Dictionary: Dictionary,
+		init: init
 	};
 }));

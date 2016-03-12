@@ -1644,10 +1644,10 @@
 		},
 		regexp: function (node, c) {
 			// regex.gen
-			if (node.regexp.gen) {
+			if (node.regexp.gen()) {
 				var val = node.regexp;
 				
-				return '(/' + val.pattern + '/' + val.flags + ').gen'; 
+				return '(/' + val.pattern + '/' + val.flags + ').gen()';
 			}
 			// regular regular expression is fine...
 			return '(' + node.raw + ')';
@@ -1718,6 +1718,7 @@
 		
 		return new Function('$,o,d,c,t', 'return ' + string + ';');
 	};
+	
 	},{}],15:[function(require,module,exports){
 	// Matches a whole line break (where CRLF is considered a single
 	// line break). Used to count lines.
@@ -2640,14 +2641,14 @@
 		};
 		// add randexp to global RegExp prototype
 		// this enables sugary //.gen syntax
-		RegExp.prototype.__defineGetter__('gen', function () {
+		RegExp.prototype.gen = function () {
 			if (this._randexp === undefined) {
 				this._randexp = tokenize(this.source, this.ignoreCase, this.multiline);
 				this._max = this._max || 100;
 				this._anyRndChar = this._anyRndChar || util.anyRndChar;
 			}
 			return gen(this._randexp, this._max, this._anyRndChar, []);
-		});
+		};
 	}());
 	
 	/*jslint vars: true, sloppy: true, nomen: true */
@@ -2721,7 +2722,7 @@
 	};
 	
 	settings = {
-		contextFrame: null,
+		contextFrame: document.createElement('iframe'),
 		defaultNextLoopDelay: 3000,
 		readyTimeout: 3000,
 		defaultClock: 10,
@@ -2752,7 +2753,23 @@
 		settings.contextFrame = iframeDOM;
 	};
 	
+	function init(wrapDOM, opts) {
+		var e = settings.contextFrame;
 	
+		if (opts) {
+			e.id = opts.id || e.id || 'lemoncase';
+			e.src = opts.src || e.src;
+		}
+		console.log(e);
+		e.style.height = '100%';
+		e.style.width = '100%';
+	
+		wrapDOM.appendChild(e);
+	}
+	
+	function getLemoncaseFrame() {
+		return settings.contextFrame;
+	}
 	
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global workCycle: false, instructions, _: false */
@@ -2885,7 +2902,7 @@
 		};
 		var RandRow = function () {
 			_.forEach(keys, function (field) {
-				this[field.name] = field.pattern.gen;
+				this[field.name] = field.pattern.gen();
 			}, this);
 		};
 	
@@ -3597,6 +3614,7 @@
 		setup: setup,
 		Instruction: IF,
 		parse: LP.parse,
-		Dictionary: Dictionary
+		Dictionary: Dictionary,
+		init: init
 	};
 }));
