@@ -100,18 +100,13 @@ setup.setContextFrame = function (iframeDOM) {
 	settings.contextFrame = iframeDOM;
 };
 
-function init(wrapDOM, opts) {
+function init(wrapDOM, callback) {
 	var e = settings.contextFrame;
-
-	if (opts) {
-		e.id = opts.id || e.id || 'lemoncase';
-		e.src = opts.src || e.src;
-	}
-	console.log(e);
 	e.style.height = '100%';
 	e.style.width = '100%';
 
 	wrapDOM.appendChild(e);
+	(callback || _.noop).call(e);
 }
 
 function getLemoncaseFrame() {
