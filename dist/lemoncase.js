@@ -2753,18 +2753,13 @@
 		settings.contextFrame = iframeDOM;
 	};
 	
-	function init(wrapDOM, opts) {
+	function init(wrapDOM, callback) {
 		var e = settings.contextFrame;
-	
-		if (opts) {
-			e.id = opts.id || e.id || 'lemoncase';
-			e.src = opts.src || e.src;
-		}
-		console.log(e);
 		e.style.height = '100%';
 		e.style.width = '100%';
 	
 		wrapDOM.appendChild(e);
+		(callback || _.noop).call(e);
 	}
 	
 	function getLemoncaseFrame() {
@@ -3206,6 +3201,17 @@
 		} catch (error) {
 			settings.bootExceptionHandle(error);
 		}
+	};
+	
+	$CP.forceCofig = function (config) {
+		var key, eTC = this.$$executionTree.config;
+		for (key in config) {
+			if (config.hasOwnProperty(key)) {
+				eTC[key] = config[key];
+			}
+		}
+	
+		return this;
 	};
 	
 	$CP.suspend = function () {

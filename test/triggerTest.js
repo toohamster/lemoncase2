@@ -19,8 +19,9 @@ var app = angular.module('testPanel', [
 			}
 		]
 	});
-	init($element[0].querySelector('#project'), {
-		src: 'test.html'
+
+	init($element[0].querySelector('#project'), function (){
+		this.src = 'test.html';
 	});
 
 	$scope.actionParam = {

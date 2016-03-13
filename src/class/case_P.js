@@ -43,6 +43,17 @@ $CP.start = function () {
 	}
 };
 
+$CP.forceCofig = function (config) {
+	var key, eTC = this.$$executionTree.config;
+	for (key in config) {
+		if (config.hasOwnProperty(key)) {
+			eTC[key] = config[key];
+		}
+	}
+
+	return this;
+};
+
 $CP.suspend = function () {
 	if (this.$$state !== 'running') {
 		throw new Error('Can not call pause!');
