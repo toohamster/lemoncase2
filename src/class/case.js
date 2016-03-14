@@ -49,7 +49,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 }
 function Case(syntaxTree, object, dictionary) {
 	if (!(this instanceof Case)) {
-		return new Case(syntaxTree);
+		return new Case(syntaxTree, object, dictionary);
 	}
 
 	var link = linker(syntaxTree, object, dictionary, this);
