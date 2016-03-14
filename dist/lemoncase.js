@@ -1644,7 +1644,7 @@
 		},
 		regexp: function (node, c) {
 			// regex.gen
-			if (node.regexp.gen()) {
+			if (node.regexp.gen) {
 				var val = node.regexp;
 				
 				return '(/' + val.pattern + '/' + val.flags + ').gen()';
