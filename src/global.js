@@ -1,5 +1,4 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global settings:true */
 var callMainIns, exitIns, _, settings, setup;
 
 _ = {
@@ -112,3 +111,11 @@ function init(wrapDOM, callback) {
 function getLemoncaseFrame() {
 	return settings.contextFrame;
 }
+
+module.exports = {
+	'_': _,
+	settings: settings,
+	setup: setup,
+	init: init,
+	getLemoncaseFrame: getLemoncaseFrame
+};

@@ -8,7 +8,7 @@ test('walk', t => {
 		regexp: {
 			pattern: '^abcd',
 			flags: 'i',
-			gen: true
+			isGenerate: true
 		}
 	}).toString();
 	

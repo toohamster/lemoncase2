@@ -1,10 +1,13 @@
 {
   "name": "lc2",
-  "version": "1.0.0",
-  "description": "",
-  "main": "./src/parser/index.js",
+  "version": "1.1.0",
+  "description": "browser automation library",
+  "main": "./src/index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "pack": "webpack",
+    "start": "webpack-dev-server",
+    "build": "webpack && webpack -p --config webpack.production.js"
   },
   "repository": {
     "type": "git",
@@ -13,12 +16,14 @@
   "keywords": [
     "test"
   ],
-  "author": "Weilin Shi",
-  "license": "GPL",
+  "maintainers": [
+    "Weilin Shi <934587911@qq.com>"
+  ],
+  "author": "李超",
+  "license": "GPL-v3",
   "devDependencies": {
     "angular": "^1.5.0",
-    "ava": "^0.12.0",
-    "browserify": "^13.0.0",
+    "ava": "^0.13.0",
     "codemirror": "^5.12.0",
     "gulp": "^3.9.1",
     "gulp-include": "^2.1.0",
@@ -26,12 +31,17 @@
     "gulp-uglify": "^1.5.3",
     "gulp-util": "^3.0.7",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
   },
   "ava": {
     "files": [
       "test/*Spec.js"
     ],
     "failFast": true
+  },
+  "dependencies": {
+    "oc-trigger": "^1.0.1"
   }
 }

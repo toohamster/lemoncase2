@@ -45,7 +45,7 @@ test('parse regexp', t => {
 	
 	p.exprAllowed = true;
 	p.nextToken();
-	t.same(p.value, {pattern:'abc', flags: 'iimmgg', gen: false});
+	t.same(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: false});
 });
 
 test('index', t => {

@@ -1,5 +1,9 @@
 /*jslint sloppy: true, nomen: true */
-/*global IF, settings, trigger, _, console, exitIns:true, callMainIns:true */
+
+var IF = require('./class/instruction'),
+	settings = require('./global').settings,
+	_ = require('./global')['_'];	
+
 var CALL = 0x00,
 	RETURN = 0x01,
 	EXIT = 0x02,
@@ -203,3 +207,17 @@ IF(CONSOLE, {
 		};
 	}
 });
+
+module.exports = {
+	CALL: CALL,
+	RETURN: RETURN,
+	EXIT: EXIT,
+	EXPRESSION: EXPRESSION,
+	WAIT: WAIT,
+	TRIGGER: TRIGGER,
+	ASSERT: ASSERT,
+	JUMPTO: JUMPTO,
+	REFRESH: REFRESH,
+	LOG: LOG,
+	CONSOLE: CONSOLE
+}

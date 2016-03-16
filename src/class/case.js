@@ -1,5 +1,11 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
-/*global CALL, EXIT, _, settings, Collector, console, IF */
+var CALL = require('../instructions').CALL,
+	EXIT = require('../instructions').EXIT,
+	_ = require('../global')['_'],
+	settings = require('../global').settings,
+	Collector = require('../../lib/collector'),
+	IF = require('./instruction');
+
 function linker(syntaxTree, object, dictionary, $case) {
 	var eT = {
 		process: {},
@@ -147,4 +153,9 @@ $CP.$$core = function () {
 	}, this.$$getConfig('clock') || settings.defaultClock);
 
 	return this;
+};
+
+module.exports = {
+	Case: Case,
+	$CP: $CP
 };

@@ -569,7 +569,7 @@ var app = angular.module('testPanel', [
 	$scope.linkCase = function () {
 		console.log('--------- Link test case --------------');
 		// var c = new Case(syntaxTree, object, dictionary);
-		var ast = LP.parse($codeMirror.getValue(), {});
+		var ast = parse($codeMirror.getValue(), {});
 		console.log(ast);
 		var c = new Case(ast, object, dictionary);
 		window.$case = c;

@@ -1,5 +1,4 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global workCycle: false, instructions, _: false */
 /**
  * Dictionary use to input action when data type is "index".
  *
@@ -29,6 +28,8 @@
  * @param {object} options.field
  * @param {object} options.assignment
  */
+var _ = require('../global')['_'];
+
 function Dictionary(options) {
 	if (!(this instanceof Dictionary)) {
 		return new Dictionary(options);
@@ -189,3 +190,5 @@ Dictionary.prototype.isFieldDefined = function (name) {
 
 	return false;
 };
+
+module.exports = Dictionary;

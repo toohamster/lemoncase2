@@ -1,5 +1,7 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global $CP, _: false, settings, Dictionary */
+var $CP = require('./case').$CP,
+	settings = require('../global').settings,
+	Dictionary = require('./dictionary');
 
 $CP.hasDictionary = function () {
 	return !!this.$dictionary;
@@ -115,3 +117,5 @@ $CP.getCurrentLoop = function () {
 $CP.getCurrentLine = function () {
 	return this.$$instructionBuffer.$getLine();
 };
+
+module.exports = $CP;

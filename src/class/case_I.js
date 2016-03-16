@@ -1,5 +1,9 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, $CP, _, settings, IF, CALL */
+var $CP = require('./case').$CP,
+	_ = require('../global')['_'],
+	settings = require('../global').settings,
+	IF = require('./instruction'),
+	CALL = require('../instructions').CALL;
 
 $CP.$setIdleTask = function (taskFn) {
 	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -129,3 +133,5 @@ $CP.$clearScope = function () {
 
 	return this;
 };
+
+module.exports = $CP;

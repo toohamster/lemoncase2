@@ -309,7 +309,7 @@ module.exports = function (Parser) {
 		var value = {
 			pattern: content,
 			flags: mods,
-			gen: close === '|'
+			isGenerate: close === '|'
 		}
 
 		return this.finishToken(tt.regexp, value);

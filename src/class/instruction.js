@@ -1,5 +1,4 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global _, settings, $IP, instructionFactories */
 var IF = function InstructionFactory(TYPE, opts) {
 	if (!opts) {
 		var IF = instructionFactories[TYPE];
@@ -46,3 +45,5 @@ var IF = function InstructionFactory(TYPE, opts) {
 
 	return Instruction;
 }, instructionFactories = [];
+
+module.exports = IF;
