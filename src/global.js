@@ -1,4 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
+/*global require, console, trigger, module */
 var callMainIns, exitIns, _, settings, setup;
 
 _ = {

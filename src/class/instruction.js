@@ -1,4 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
+/*global require, console, trigger, module */
 var IF = function InstructionFactory(TYPE, opts) {
 	if (!opts) {
 		var IF = instructionFactories[TYPE];

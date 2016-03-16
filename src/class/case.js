@@ -1,4 +1,5 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
+/*global require, console, trigger, module */
 var CALL = require('../instructions').CALL,
 	EXIT = require('../instructions').EXIT,
 	_ = require('../global')['_'],

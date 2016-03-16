@@ -1,4 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
+/*global require, console, trigger, module */
 var $CP = require('./case').$CP,
 	_ = require('../global')['_'],
 	settings = require('../global').settings,

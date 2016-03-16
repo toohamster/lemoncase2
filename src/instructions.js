@@ -1,8 +1,9 @@
 /*jslint sloppy: true, nomen: true */
+/*global require, console, trigger, module */
 
 var IF = require('./class/instruction'),
 	settings = require('./global').settings,
-	_ = require('./global')['_'];	
+	_ = require('./global')['_'];
 
 var CALL = 0x00,
 	RETURN = 0x01,
@@ -220,4 +221,4 @@ module.exports = {
 	REFRESH: REFRESH,
 	LOG: LOG,
 	CONSOLE: CONSOLE
-}
+};
