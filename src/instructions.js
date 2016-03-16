@@ -3,21 +3,23 @@
 
 var IF = require('./class/instruction'),
 	settings = require('./global').settings,
-	_ = require('./global')['_'];
+	_ = require('./global')['_'],
 
-var CALL = 0x00,
-	RETURN = 0x01,
-	EXIT = 0x02,
+	CALL = require('./instructionType').CALL,
+	RETURN = require('./instructionType').RETURN,
+	EXIT = require('./instructionType').EXIT,
 
-	EXPRESSION = 0x10,
-	WAIT = 0x11,
-	TRIGGER = 0x12,
-	ASSERT = 0x13,
-	JUMPTO = 0x14,
-	REFRESH = 0x15,
+	EXPRESSION = require('./instructionType').EXPRESSION,
+	WAIT = require('./instructionType').WAIT,
+	TRIGGER = require('./instructionType').TRIGGER,
+	ASSERT = require('./instructionType').ASSERT,
+	JUMPTO = require('./instructionType').JUMPTO,
+	REFRESH = require('./instructionType').REFRESH,
 
-	LOG = 0x20,
-	CONSOLE = 0x21,
+	LOG = require('./instructionType').LOG,
+	CONSOLE = require('./instructionType').CONSOLE,
+	
+	PROCESS = require('./instructionType').PROCESS,
 
 	PASSED = 1,
 	FAILURE = 0;
@@ -208,17 +210,3 @@ IF(CONSOLE, {
 		};
 	}
 });
-
-module.exports = {
-	CALL: CALL,
-	RETURN: RETURN,
-	EXIT: EXIT,
-	EXPRESSION: EXPRESSION,
-	WAIT: WAIT,
-	TRIGGER: TRIGGER,
-	ASSERT: ASSERT,
-	JUMPTO: JUMPTO,
-	REFRESH: REFRESH,
-	LOG: LOG,
-	CONSOLE: CONSOLE
-};

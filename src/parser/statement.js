@@ -1,12 +1,14 @@
-var tt = require('./tokentype.js').types;
+var tt = require('./tokentype').types;
 
-var lineBreak = require('./whitespace.js').lineBreak;
+var lineBreak = require('./whitespace').lineBreak;
 
-var isIdentifierStart = require('./identifier.js').isIdentifierStart;
-var isIdentifierChar = require('./identifier.js').isIdentifierChar;
+var isIdentifierStart = require('./identifier').isIdentifierStart;
+var isIdentifierChar = require('./identifier').isIdentifierChar;
 
-var getLineInfo = require('./locutil.js').getLineInfo;
-var genExpr = require('./walk.js');
+var getLineInfo = require('./locutil').getLineInfo;
+var genExpr = require('./walk');
+
+var insDefinition = require('../instructionType');
 
 module.exports = function (Parser) {
 	var pp = Parser.prototype;
@@ -88,7 +90,7 @@ module.exports = function (Parser) {
 	pp.parseProcess = function () {
 		var node = {
 			LINE: getLineInfo(this.input, this.start),
-			TYPE: 0xAA,
+			TYPE: insDefinition.PROCESS,
 			BODY: {}
 		},
 			pcs = this.pcs,
@@ -120,10 +122,10 @@ module.exports = function (Parser) {
 		var statements = this.parseBlock();
 		
 		// no statements or no return
-		if (!statements.length || statements[statements.length - 1].TYPE !== 0x01) {
+		if (!statements.length || statements[statements.length - 1].TYPE !== insDefinition.RETURN) {
 			statements.push({
 				LINE: -1,
-				TYPE: 0x01,
+				TYPE: insDefinition.RETURN,
 			});
 		}
 		//todo check var list
@@ -163,7 +165,10 @@ module.exports = function (Parser) {
 			case tt._assert:
 				return this.parseAssertStatement(node);
 			case tt._log: case tt._console:
-				return this.parseLogStatement(node, starttype === tt._log ? 0x20 : 0x21);
+				return this.parseLogStatement(node,
+					starttype === tt._log
+					? insDefinition.LOG
+					: insDefinition.CONSOLE);
 			case tt._jumpto:
 				return this.parseGotoStatement(node);
 			case tt._refresh:
@@ -183,7 +188,7 @@ module.exports = function (Parser) {
 		if (this.eat(tt.semi)) node.args = null;
 		else this.raise(this.start, 'Return expression is not supported');
 
-		return this.finishNode(node, 0x01);
+		return this.finishNode(node, insDefinition.RETURN);
 	};
 
 	pp.parseVarStatement = function (node) {
@@ -194,7 +199,7 @@ module.exports = function (Parser) {
 
 		this.semicolon();
 
-		return this.finishNode(node, 0x10);
+		return this.finishNode(node, insDefinition.EXPRESSION);
 	};
 
 	//parse a list of variable declaration
@@ -238,7 +243,7 @@ module.exports = function (Parser) {
 			
 			node.BODY.identifier = callee;
 			
-			return this.finishNode(node, 0x00);
+			return this.finishNode(node, insDefinition.CALL);
 		}
 		
 		// a = 1
@@ -247,7 +252,7 @@ module.exports = function (Parser) {
 		node.BODY.raw = expr;
 		node.BODY.exp = fn;
 		
-		return this.finishNode(node, 0x10);
+		return this.finishNode(node, insDefinition.EXPRESSION);
 	}
 	
 	pp.parseWaitStatement = function (node) {
@@ -258,7 +263,7 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		
-		return this.finishNode(node, 0x11);
+		return this.finishNode(node, insDefinition.WAIT);
 	}
 
 	pp.parseMouseAction = function (node, keyword) {
@@ -270,7 +275,7 @@ module.exports = function (Parser) {
 
 		this.semicolon();
 
-		return this.finishNode(node, 0x12);
+		return this.finishNode(node, insDefinition.TRIGGER);
 	};
 	
 	pp.parseScrollAction = function (node, keyword) {
@@ -286,7 +291,7 @@ module.exports = function (Parser) {
 		
 		node.BODY.action = keyword;
 		
-		return this.finishNode(node, 0x12);
+		return this.finishNode(node, insDefinition.TRIGGER);
 	};
 	
 	pp.parseSelectAction = function () {
@@ -307,7 +312,7 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		
-		return this.finishNode(node, 0x12);
+		return this.finishNode(node, insDefinition.TRIGGER);
 	};
 	
 	pp.parseAssertStatement = function (node) {
@@ -331,7 +336,7 @@ module.exports = function (Parser) {
 		node.BODY.key = this.UID('#');
 		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
 		
-		return this.finishNode(node, 0x13);
+		return this.finishNode(node, insDefinition.ASSERT);
 	}
 	
 	pp.parseGotoStatement = function (node) {
@@ -342,7 +347,7 @@ module.exports = function (Parser) {
 		
 		this.semicolon();
 		
-		return this.finishNode(node, 0x14);
+		return this.finishNode(node, insDefinition.JUMPTO);
 	};
 
 	pp.parseRefreshStatement = function (node) {
@@ -350,7 +355,7 @@ module.exports = function (Parser) {
 
 		this.semicolon();
 
-		return this.finishNode(node, 0x15);
+		return this.finishNode(node, insDefinition.REFRESH);
 	};
 	
 	pp.parseLogStatement = function (node, type) {

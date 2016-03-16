@@ -1,17 +1,17 @@
 /*jslint vars: true, sloppy: true, nomen: true */
 /*global angular, Case, setup, trigger, syntaxTree, console, LP */
 var app = angular.module('testPanel', [
-
+	'lemoncase'
 ]).run(function ($rootScope) {
 	var iframe = document.querySelector('iframe');
 //	$rootScope.iframe = iframe;
 //	setup.setContextFrame(iframe);
-}).controller('panel', function ($scope, $element) {
-	$scope.iframe = getLemoncaseFrame();
+}).controller('panel', function ($scope, $element, LC) {
+	$scope.iframe = LC.getLemoncaseFrame();
 
 	var object = {
 		button: '[type=button]'
-	}, dictionary = new Dictionary({
+	}, dictionary = new LC.Dictionary({
 		field: [
 			{
 				name: 'word',
@@ -20,7 +20,7 @@ var app = angular.module('testPanel', [
 		]
 	});
 
-	init($element[0].querySelector('#project'), function (){
+	LC.init($element[0].querySelector('#project'), function (){
 		this.src = 'test.html';
 	});
 
@@ -568,10 +568,10 @@ var app = angular.module('testPanel', [
 
 	$scope.linkCase = function () {
 		console.log('--------- Link test case --------------');
-		// var c = new Case(syntaxTree, object, dictionary);
-		var ast = parse($codeMirror.getValue(), {});
+		
+		var ast = LC.parse($codeMirror.getValue(), {});
 		console.log(ast);
-		var c = new Case(ast, object, dictionary);
+		var c = new LC.Case(ast, object, dictionary);
 		window.$case = c;
 	};
 
@@ -610,7 +610,7 @@ var app = angular.module('testPanel', [
 			mode: 'text/x-php'
 		});
 		
-		$codeMirror.setValue("#TIMES 10\nprocess main {\nvar a = '[type=email]';\ninput 'input' + a by 1;\nclick 'h2';\n}");
+		$codeMirror.setValue("#TIMES 10\nprocess main {\nvar a = '[type=email]';\ninput 'input' + a by |\\d|;\nclick 'body > input:nth-child(5)';\n}");
 		$codeMirror.refresh();
 		$codeMirror.setSize('100%', '100%');
 	}

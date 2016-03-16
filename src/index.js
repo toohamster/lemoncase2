@@ -9,13 +9,7 @@ var parse = require('./parser/index').parse,
 require('./class/case_I');
 require('./class/case_P');
 require('../lib/ranexp');
-	
-window.getLemoncaseFrame = getLemoncaseFrame;
-window.Dictionary = Dictionary;
-window.init = init;
-window.setup = setup;
-window.parse = parse;
-window.Case = Case;
+require('./instructions');
 
 var exports = {
 	Case: Case,

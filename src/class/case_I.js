@@ -4,7 +4,7 @@ var $CP = require('./case').$CP,
 	_ = require('../global')['_'],
 	settings = require('../global').settings,
 	IF = require('./instruction'),
-	CALL = require('../instructions').CALL;
+	CALL = require('../instructionType').CALL;
 
 $CP.$setIdleTask = function (taskFn) {
 	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;

@@ -1,7 +1,7 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
-var CALL = require('../instructions').CALL,
-	EXIT = require('../instructions').EXIT,
+var CALL = require('../instructionType').CALL,
+	EXIT = require('../instructionType').EXIT,
 	_ = require('../global')['_'],
 	settings = require('../global').settings,
 	Collector = require('../../lib/collector'),
