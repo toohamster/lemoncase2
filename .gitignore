@@ -1,0 +1,6 @@
+/yuidoc.json
+.idea
+.vscode
+bower_components
+node_modules
+*.log
