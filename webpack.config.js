@@ -7,7 +7,8 @@ module.exports = {
 	},
 	output: {
 		filename: 'lemoncase.js',
-		publicPath: "debug/",
-		path: __dirname + '/dist'
+		path: __dirname + '/dist',
+		library: 'LC',
+		libraryTarget: 'umd'
 	}
 };

@@ -63,8 +63,6 @@ module.exports = function (Parser) {
 	// Parse a ternary conditional (`?:`) operator.
 
 	pp.parseMaybeConditional = function () {
-
-
 		// maybe we will need '?' in the future?
 
 		return this.parseExprOps();
@@ -173,7 +171,7 @@ module.exports = function (Parser) {
 				};
 
 				this.expect(tt.parenR);
-				
+
 				return node;
 			} else {
 				return base;
@@ -203,7 +201,7 @@ module.exports = function (Parser) {
 
 			case tt.num: case tt.string:
 				return this.parseLiteral('literal', this.value);
-			
+
 			case tt.objectAt: case tt.dict:
 				return this.parseExtLiteral(this.type);
 
@@ -229,15 +227,15 @@ module.exports = function (Parser) {
 
 		return node;
 	};
-	
+
 	pp.parseExtLiteral = function (type) {
 		var node = {
 			type: type.label,
 			value: this.value
 		};
-		
+
 		this.next();
-		
+
 		return node;
 	};
 
@@ -276,5 +274,5 @@ module.exports = function (Parser) {
 		this.next();
 
 		return name;
-	}
+	};
 };

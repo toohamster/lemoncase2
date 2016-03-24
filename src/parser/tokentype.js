@@ -12,8 +12,8 @@
 
 //no startsExpr or isLoop
 
-var TokenType = function (label, conf) {
-	if (conf === undefined) { conf = {} }
+var TokenType = function(label, conf) {
+	if (conf === undefined) { conf = {}; }
 
 	this.label = label;
 	this.keyword = conf.keyword;
@@ -25,7 +25,7 @@ var TokenType = function (label, conf) {
 	this.macro = !!conf.macro;
 };
 
-function binop (name, prec) {
+function binop(name, prec) {
 	return new TokenType(name, { beforeExpr: true, binop: prec });
 }
 

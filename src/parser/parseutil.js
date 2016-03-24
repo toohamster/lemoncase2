@@ -23,11 +23,11 @@ module.exports = function (Parser) {
 	pp.unexpected = function (pos) {
 		this.raise(pos != null ? pos : this.start, 'Unexpected token');
 	};
-	
+
 	pp.expected = function (type) {
 		this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 	};
-	
+
 	pp.UID = function (string) {
 		return string + this.nextID++;
 	};

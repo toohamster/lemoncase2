@@ -1,8 +1,12 @@
 /*jslint vars: true, sloppy: true, nomen: true */
 /*global angular, Case, setup, trigger, syntaxTree, console, LP */
-var app = angular.module('testPanel', [
-	'lemoncase'
-]).run(function ($rootScope) {
+var app = angular.module('testPanel', []).provider('LC', function () {
+	this.setup = LC.setup;
+
+	this.$get = [function () {
+		return LC;
+	}];
+}).run(function ($rootScope) {
 	var iframe = document.querySelector('iframe');
 //	$rootScope.iframe = iframe;
 //	setup.setContextFrame(iframe);

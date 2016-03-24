@@ -53,8 +53,9 @@ module.exports = function (Parser) {
 	pp.skipLineComment = function (startSkip) {
 		var start = this.pos;
 		var ch = this.input.charCodeAt(this.pos+=startSkip);
-		while (this.pos < this.input.length && ch !== 10 && ch !== 13
-			&& ch !== 8232 && ch !== 8233) {
+		while (this.pos < this.input.length && 
+			ch !== 10 && ch !== 13 && 
+			ch !== 8232 && ch !== 8233) {
 			++this.pos;
 			ch = this.input.charCodeAt(this.pos);
 		}
@@ -72,15 +73,15 @@ module.exports = function (Parser) {
 			var ch = this.input.charCodeAt(this.pos);
 			switch (ch) {
 				case 32: case 160: // ' '
-				++this.pos;
-				break;
+					++this.pos;
+					break;
 				case 13:
 					if (this.input.charCodeAt(this.pos + 1) === 10) {
 						++this.pos;
 					}
 				case 10: case 8232: case 8233: //new line
-				++this.pos;
-				break;
+					++this.pos;
+					break;
 				case 47: // '/'
 					switch (this.input.charCodeAt(this.pos + 1)) {
 						case 42: // '*'
@@ -252,9 +253,9 @@ module.exports = function (Parser) {
 				var next = this.input.charCodeAt(this.pos+1);
 				if (next !== 126) this.raise(this.pos, 'bitwise operator is not allowed');
 				return this.finishOp(tt.match, 2);
+			default:
+				this.raise(this.pos, 'Unexpected character "' + this.input[this.pos] + '"');	
 		}
-
-		this.raise(this.pos, 'Unexpected character "' + this.input[this.pos] + '"');
 	};
 
 	pp.finishOp = function (type, size) {
@@ -305,17 +306,17 @@ module.exports = function (Parser) {
 			var validFlags = /^[gim]*$/;
 			if (!validFlags.test(mods)) this.raise(start, 'Invalid regular expression flag');
 		}
-		
+
 		var value = {
 			pattern: content,
 			flags: mods,
 			isGenerate: close === '|'
-		}
+		};
 
 		return this.finishToken(tt.regexp, value);
 	};
 
-	pp.readInt = function(radix, len) {
+	pp.readInt = function (radix, len) {
 		var start = this.pos, total = 0;
 		for (var i = 0, e = len == null ? Infinity : len; i < e; ++i) {
 			var code = this.fullCharCodeAtPos(), val;
@@ -344,7 +345,7 @@ module.exports = function (Parser) {
 		}
 		if (next === 69 || next === 101) { //eE
 			next = this.input.charCodeAt(++this.pos);
-			if (next === 43 || next === 45) ++ this.pos; // +/-
+			if (next === 43 || next === 45) ++this.pos; // +/-
 			if (this.readInt(10) === null) this.raise(start, 'Invalid number');
 			isFloat = true;
 		}
@@ -387,7 +388,7 @@ module.exports = function (Parser) {
 			case 98: return '\b';
 			case 118: return '\u000b';
 			case 102: return '\f';
-			case 13: if (this.fullCharCodeAtPos() === 10) ++ this.pos; // '\r\n'
+			case 13: if (this.fullCharCodeAtPos() === 10) ++this.pos; // '\r\n'
 			case 10: return '';
 			default:
 				return String.fromCharCode(ch);
@@ -402,7 +403,7 @@ module.exports = function (Parser) {
 				++this.pos;
 			} else if (first && ch === 35) {
 				++this.pos;//for #set
-			} else{
+			} else {
 				break;
 			}
 
@@ -442,8 +443,9 @@ module.exports = function (Parser) {
 	pp.readMacro = function () {
 		var start = this.pos;
 		var ch = this.fullCharCodeAtPos();
-		while (this.pos < this.input.length && ch !== 10 && ch !== 13
-		&& ch !== 8232 && ch !== 8233) {
+		while (this.pos < this.input.length && 
+			ch !== 10 && ch !== 13 && 
+			ch !== 8232 && ch !== 8233) {
 			++this.pos;
 			ch = this.input.charCodeAt(this.pos);
 		}

@@ -1,4 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["LC"] = factory();
+	else
+		root["LC"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -34,7 +44,7 @@
 /******/ 	__webpack_require__.c = installedModules;
 
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "debug/";
+/******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(0);
@@ -52,23 +62,17 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var parse = __webpack_require__(2).parse,
-		Case = __webpack_require__(17).Case,
-		setup = __webpack_require__(20).setup,
-		IF = __webpack_require__(19),
+		Case = __webpack_require__(18).Case,
+		setup = __webpack_require__(19).setup,
+		IF = __webpack_require__(21),
 		Dictionary = __webpack_require__(22),
-		init = __webpack_require__(20).init,
-		getLemoncaseFrame = __webpack_require__(20).getLemoncaseFrame;
+		init = __webpack_require__(19).init,
+		getLemoncaseFrame = __webpack_require__(19).getLemoncaseFrame;
 
 	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
-		
-	window.getLemoncaseFrame = getLemoncaseFrame;
-	window.Dictionary = Dictionary;
-	window.init = init;
-	window.setup = setup;
-	window.parse = parse;
-	window.Case = Case;
+	__webpack_require__(26);
 
 	var exports = {
 		Case: Case,
@@ -79,16 +83,6 @@
 		init: init,
 		getLemoncaseFrame: getLemoncaseFrame
 	};
-
-	if (typeof angular !== 'undefined') {
-		angular.module('lemoncase', []).provider('LC', function () {
-			this.setup = exports.setup;
-
-			this.$get = [function () {
-				return exports;
-			}];
-		});
-	}
 
 	module.exports = exports;
 
@@ -107,6 +101,7 @@
 		}
 	};
 
+
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
@@ -116,7 +111,7 @@
 	var tt = __webpack_require__(7).types;
 
 	var Parser = function (options, input) {
-		this.options  = getOptions(options);
+		this.options = getOptions(options);
 		this.keywords = keywordRegexp;
 		this.input = String(input);
 
@@ -170,12 +165,12 @@
 	extend(__webpack_require__(8));
 	extend(__webpack_require__(11));
 	extend(__webpack_require__(12));
-	extend(__webpack_require__(14));
 	extend(__webpack_require__(15));
 	extend(__webpack_require__(16));
-
+	extend(__webpack_require__(17));
 
 	module.exports = Parser;
+
 
 /***/ },
 /* 4 */
@@ -185,11 +180,11 @@
 
 	var defaultOptions = {
 		insertReturn: true,
-		onComment: function (){},
+		onComment: function () {},
 		plugins: {}
 	};
 
-	function getOptions (options) {
+	function getOptions(options) {
 		var result = {};
 		for (var op in defaultOptions) {
 			result[op] = options && has(options, op) ? options[op] : defaultOptions[op];
@@ -203,6 +198,7 @@
 		getOptions: getOptions
 	};
 
+
 /***/ },
 /* 5 */
 /***/ function(module, exports) {
@@ -214,13 +210,14 @@
 	// Checks if an object has a property.
 
 	function has(obj, propName) {
-		return Object.prototype.hasOwnProperty.call(obj, propName)
+		return Object.prototype.hasOwnProperty.call(obj, propName);
 	}
 
 	module.exports = {
 		isArray: isArray,
 		has: has
 	};
+
 
 /***/ },
 /* 6 */
@@ -259,6 +256,7 @@
 		isIdentifierChar: isIdentifierChar
 	};
 
+
 /***/ },
 /* 7 */
 /***/ function(module, exports) {
@@ -277,8 +275,8 @@
 
 	//no startsExpr or isLoop
 
-	var TokenType = function (label, conf) {
-		if (conf === undefined) { conf = {} }
+	var TokenType = function(label, conf) {
+		if (conf === undefined) { conf = {}; }
 
 		this.label = label;
 		this.keyword = conf.keyword;
@@ -290,7 +288,7 @@
 		this.macro = !!conf.macro;
 	};
 
-	function binop (name, prec) {
+	function binop(name, prec) {
 		return new TokenType(name, { beforeExpr: true, binop: prec });
 	}
 
@@ -389,6 +387,7 @@
 		keywordTypes: keywords
 	};
 
+
 /***/ },
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
@@ -414,6 +413,7 @@
 			throw err;
 		};
 	};
+
 
 /***/ },
 /* 9 */
@@ -446,7 +446,7 @@
 
 	// provide better error message
 
-	function empowerErrMsg (input, loc, msg) {
+	function empowerErrMsg(input, loc, msg) {
 		var errLine = input.split(lineBreakG)[loc.line - 1];
 		var strBeforeErr = errLine.substr(0, loc.column);
 		var width = widthOf(strBeforeErr);
@@ -457,30 +457,30 @@
 		return '\n' + errLine + '\n' + arrow + '\n' + positionedMsg;
 	}
 
-	function genArrow (width) {
+	function genArrow(width) {
 		var i = -1, j = -1, out = '';
-		
+
 		while (++i < width) {
 			out += ' ';
 		}
-		
+
 		out += '↑\n';
-		
+
 		while (++j < width) {
 			out += ' ';
 		}
-		
+
 		out += '↑';
-		
+
 		return out;
 	}
 
-	function positionMsg (msg, width) {
+	function positionMsg(msg, width) {
 		// very long message, no need to reposition
 		if (msg.length / 2 > width) {
 			return msg;
 		}
-		
+
 		var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
 		
 		while (++i < emptyWidth) {
@@ -493,14 +493,14 @@
 	}
 
 	// calculate width of string
-	function widthOf (str) {
-		var code, 
+	function widthOf(str) {
+		var code,
 			width = 0,
 			i = -1, len = str.length;
-			
+
 		while (++i < len) {
 			code = str.charCodeAt(i);
-			
+
 			switch (code) {
 				case 9: // '\t'
 					width += 4;
@@ -510,7 +510,7 @@
 					break;
 			}
 		}
-		
+
 		return width;
 	}
 
@@ -518,6 +518,7 @@
 		getLineInfo: getLineInfo,
 		empowerErrMsg: empowerErrMsg
 	};
+
 
 /***/ },
 /* 10 */
@@ -531,10 +532,11 @@
 	module.exports = {
 		lineBreak: lineBreak,
 		lineBreakG: new RegExp(lineBreak.source, 'g'),
-		isNewLine: function isNewLine (code) {
-			return code === 10 || code === 13 || code === 0x2028 || code == 0x2029;
+		isNewLine: function isNewLine(code) {
+			return code === 10 || code === 13 || code === 0x2028 || code === 0x2029;
 		}
 	};
+
 
 /***/ },
 /* 11 */
@@ -595,8 +597,9 @@
 		pp.skipLineComment = function (startSkip) {
 			var start = this.pos;
 			var ch = this.input.charCodeAt(this.pos+=startSkip);
-			while (this.pos < this.input.length && ch !== 10 && ch !== 13
-				&& ch !== 8232 && ch !== 8233) {
+			while (this.pos < this.input.length && 
+				ch !== 10 && ch !== 13 && 
+				ch !== 8232 && ch !== 8233) {
 				++this.pos;
 				ch = this.input.charCodeAt(this.pos);
 			}
@@ -614,15 +617,15 @@
 				var ch = this.input.charCodeAt(this.pos);
 				switch (ch) {
 					case 32: case 160: // ' '
-					++this.pos;
-					break;
+						++this.pos;
+						break;
 					case 13:
 						if (this.input.charCodeAt(this.pos + 1) === 10) {
 							++this.pos;
 						}
 					case 10: case 8232: case 8233: //new line
-					++this.pos;
-					break;
+						++this.pos;
+						break;
 					case 47: // '/'
 						switch (this.input.charCodeAt(this.pos + 1)) {
 							case 42: // '*'
@@ -794,9 +797,9 @@
 					var next = this.input.charCodeAt(this.pos+1);
 					if (next !== 126) this.raise(this.pos, 'bitwise operator is not allowed');
 					return this.finishOp(tt.match, 2);
+				default:
+					this.raise(this.pos, 'Unexpected character "' + this.input[this.pos] + '"');	
 			}
-
-			this.raise(this.pos, 'Unexpected character "' + this.input[this.pos] + '"');
 		};
 
 		pp.finishOp = function (type, size) {
@@ -847,17 +850,17 @@
 				var validFlags = /^[gim]*$/;
 				if (!validFlags.test(mods)) this.raise(start, 'Invalid regular expression flag');
 			}
-			
+
 			var value = {
 				pattern: content,
 				flags: mods,
 				isGenerate: close === '|'
-			}
+			};
 
 			return this.finishToken(tt.regexp, value);
 		};
 
-		pp.readInt = function(radix, len) {
+		pp.readInt = function (radix, len) {
 			var start = this.pos, total = 0;
 			for (var i = 0, e = len == null ? Infinity : len; i < e; ++i) {
 				var code = this.fullCharCodeAtPos(), val;
@@ -886,7 +889,7 @@
 			}
 			if (next === 69 || next === 101) { //eE
 				next = this.input.charCodeAt(++this.pos);
-				if (next === 43 || next === 45) ++ this.pos; // +/-
+				if (next === 43 || next === 45) ++this.pos; // +/-
 				if (this.readInt(10) === null) this.raise(start, 'Invalid number');
 				isFloat = true;
 			}
@@ -929,7 +932,7 @@
 				case 98: return '\b';
 				case 118: return '\u000b';
 				case 102: return '\f';
-				case 13: if (this.fullCharCodeAtPos() === 10) ++ this.pos; // '\r\n'
+				case 13: if (this.fullCharCodeAtPos() === 10) ++this.pos; // '\r\n'
 				case 10: return '';
 				default:
 					return String.fromCharCode(ch);
@@ -944,7 +947,7 @@
 					++this.pos;
 				} else if (first && ch === 35) {
 					++this.pos;//for #set
-				} else{
+				} else {
 					break;
 				}
 
@@ -984,8 +987,9 @@
 		pp.readMacro = function () {
 			var start = this.pos;
 			var ch = this.fullCharCodeAtPos();
-			while (this.pos < this.input.length && ch !== 10 && ch !== 13
-			&& ch !== 8232 && ch !== 8233) {
+			while (this.pos < this.input.length && 
+				ch !== 10 && ch !== 13 && 
+				ch !== 8232 && ch !== 8233) {
 				++this.pos;
 				ch = this.input.charCodeAt(this.pos);
 			}
@@ -993,6 +997,7 @@
 			return this.input.slice(start, this.pos).trim();
 		};
 	};
+
 
 /***/ },
 /* 12 */
@@ -1007,6 +1012,8 @@
 
 	var getLineInfo = __webpack_require__(9).getLineInfo;
 	var genExpr = __webpack_require__(13);
+
+	var insDefinition = __webpack_require__(14);
 
 	module.exports = function (Parser) {
 		var pp = Parser.prototype;
@@ -1027,7 +1034,7 @@
 			while (this.type !== tt.eof) {
 				this.parseStructure();
 			}
-			
+
 			for (var process in pcsTable) {
 				if (pcsTable[process]) this.raise(pcsTable[process].pos, 'Invalid process call at');
 			}
@@ -1036,7 +1043,7 @@
 
 			return program;
 		};
-		
+
 		pp.parseStructure = function () {
 			var globaltype = this.type;
 
@@ -1053,18 +1060,18 @@
 			if (!setType.macro) this.unexpected();
 
 			var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
-			
+
 			this.writeConfig(key);
 
 			this.next();
 		};
-		
+
 		pp.writeConfig = function (key) {
 			var val;
-			
+
 			var confTable = this.conf;
 			if (confTable[key]) this.raise(this.start, this.type.keyword + ' was defined already');
-			
+
 			switch (key) {
 				case "screen":
 					var x, y, splitVal = this.value.split(',');
@@ -1076,21 +1083,21 @@
 						height: y
 					}
 					break;
-			
+
 				default:
 					val = parseInt(this.value, 10);
 					break;
 			}
-			
+
 			confTable[key] = val;
 		};
 
 		pp.parseProcess = function () {
 			var node = {
-				LINE: getLineInfo(this.input, this.start),
-				TYPE: 0xAA,
-				BODY: {}
-			},
+					LINE: getLineInfo(this.input, this.start),
+					TYPE: insDefinition.PROCESS,
+					BODY: {}
+				},
 				pcs = this.pcs,
 				pcsTable = this.pcsTable;
 
@@ -1101,7 +1108,7 @@
 			if (pcs[name]) this.raise(this.start, name + ' process was defined already');
 			pcs[name] = node;
 			// mark it as initialized
-				pcsTable[name] = false;
+			pcsTable[name] = false;
 
 			this.parsePcParam(node);
 
@@ -1118,12 +1125,12 @@
 
 		pp.parsePcBlock = function (node) {
 			var statements = this.parseBlock();
-			
+
 			// no statements or no return
-			if (!statements.length || statements[statements.length - 1].TYPE !== 0x01) {
+			if (!statements.length || statements[statements.length - 1].TYPE !== insDefinition.RETURN) {
 				statements.push({
 					LINE: -1,
-					TYPE: 0x01,
+					TYPE: insDefinition.RETURN,
 				});
 			}
 			//todo check var list
@@ -1143,7 +1150,7 @@
 			return args;
 		};
 
-		pp.parseStatement = function (declaration) {
+		pp.parseStatement = function () {
 			var starttype = this.type, node = this.startNode();
 
 			switch (starttype) {
@@ -1163,7 +1170,10 @@
 				case tt._assert:
 					return this.parseAssertStatement(node);
 				case tt._log: case tt._console:
-					return this.parseLogStatement(node, starttype === tt._log ? 0x20 : 0x21);
+					return this.parseLogStatement(node,
+						starttype === tt._log
+						? insDefinition.LOG
+						: insDefinition.CONSOLE);
 				case tt._jumpto:
 					return this.parseGotoStatement(node);
 				case tt._refresh:
@@ -1183,7 +1193,7 @@
 			if (this.eat(tt.semi)) node.args = null;
 			else this.raise(this.start, 'Return expression is not supported');
 
-			return this.finishNode(node, 0x01);
+			return this.finishNode(node, insDefinition.RETURN);
 		};
 
 		pp.parseVarStatement = function (node) {
@@ -1194,7 +1204,7 @@
 
 			this.semicolon();
 
-			return this.finishNode(node, 0x10);
+			return this.finishNode(node, insDefinition.EXPRESSION);
 		};
 
 		//parse a list of variable declaration
@@ -1222,12 +1232,12 @@
 				type: 'varDecl'
 			};
 		};
-		
+
 		pp.parseExprStatement = function (node) {
 			var expr = this.parseExpression();
-			
+
 			this.semicolon();
-			
+
 			// fn()
 			if (expr.type === 'CallExpr') {
 				var callee = expr.callee.name;
@@ -1235,31 +1245,31 @@
 				if (this.pcsTable[callee] !== false) {
 					this.pcsTable[callee] = { pos: this.lastTokStart };
 				}
-				
+
 				node.BODY.identifier = callee;
-				
-				return this.finishNode(node, 0x00);
+
+				return this.finishNode(node, insDefinition.CALL);
 			}
-			
+
 			// a = 1
 			var fn = genExpr(expr);
-			
+
 			node.BODY.raw = expr;
 			node.BODY.exp = fn;
-			
-			return this.finishNode(node, 0x10);
-		}
-		
+
+			return this.finishNode(node, insDefinition.EXPRESSION);
+		};
+
 		pp.parseWaitStatement = function (node) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.delay = genExpr(node.BODY.raw);
-			
+
 			this.semicolon();
-			
-			return this.finishNode(node, 0x11);
-		}
+
+			return this.finishNode(node, insDefinition.WAIT);
+		};
 
 		pp.parseMouseAction = function (node, keyword) {
 			this.next();
@@ -1270,79 +1280,79 @@
 
 			this.semicolon();
 
-			return this.finishNode(node, 0x12);
+			return this.finishNode(node, insDefinition.TRIGGER);
 		};
-		
+
 		pp.parseScrollAction = function (node, keyword) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.object = genExpr(node.BODY.raw);
-			
+
 			this.expect(tt._by);
-			
+
 			node.BODY.raw1 = this.parseExpression();
 			node.BODY.param = genExpr(node.BODY.raw1);
-			
+
 			node.BODY.action = keyword;
-			
-			return this.finishNode(node, 0x12);
+
+			return this.finishNode(node, insDefinition.TRIGGER);
 		};
-		
+
 		pp.parseSelectAction = function () {
 			this.raise('work in progress...');
 		};
-		
+
 		pp.parseInputAction = function (node, keyword) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.object = genExpr(node.BODY.raw);
-			
+
 			this.expect(tt._by);
-			
+
 			node.BODY.raw1 = this.parseExpression();
 			node.BODY.param = genExpr(node.BODY.raw1);
 			node.BODY.action = keyword;
-			
+
 			this.semicolon();
-			
-			return this.finishNode(node, 0x12);
+
+			return this.finishNode(node, insDefinition.TRIGGER);
 		};
-		
+
 		pp.parseAssertStatement = function (node) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.exp = genExpr(node.BODY.raw);
-			
+
 			if (this.eat(tt._in)) {
 				if (this.type === tt.num) {
 					node.BODY.timeout = this.value;
 				} else {
 					this.unexpected();
 				}
-				
+
 				this.next();
 			}
-			
+
 			this.semicolon();
 			//do not forgot the data key
 			node.BODY.key = this.UID('#');
 			this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
-			
-			return this.finishNode(node, 0x13);
-		}
-		
+
+			return this.finishNode(node, insDefinition.ASSERT);
+		};
+
 		pp.parseGotoStatement = function (node) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.url = genExpr(node.BODY.raw);
-			
+
 			this.semicolon();
-			
-			return this.finishNode(node, 0x14);
+
+			return this.finishNode(node, insDefinition.JUMPTO);
 		};
 
 		pp.parseRefreshStatement = function (node) {
@@ -1350,20 +1360,20 @@
 
 			this.semicolon();
 
-			return this.finishNode(node, 0x15);
+			return this.finishNode(node, insDefinition.REFRESH);
 		};
-		
+
 		pp.parseLogStatement = function (node, type) {
 			this.next();
-			
+
 			node.BODY.raw = this.parseExpression();
 			node.BODY.msg = genExpr(node.BODY.raw);
-			
+
 			this.semicolon();
-			
+
 			return this.finishNode(node, type);
 		};
-		
+
 		pp.startNode = function () {
 			return {
 				LINE: getLineInfo(this.input, this.start).line,
@@ -1371,16 +1381,17 @@
 				BODY: {},
 				start: this.start,
 				end: 0
-			}
+			};
 		};
-		
+
 		pp.finishNode = function (node, type) {
 			node.TYPE = type;
 			node.end = this.lastTokEnd;
-			
+
 			return node;
 		};
 	};
+
 
 /***/ },
 /* 13 */
@@ -1391,57 +1402,57 @@
 	var visitors = {
 		varDecl: function (node, c) {
 			var out = '', first = true;
-			
+
 			node.declarations.forEach(function (decl) {
 				if (decl.init) {
 					if (!first) out += ',';
-					
+
 					out += '$.' + decl.id + ' = ' + c(decl.init);
-					
+
 					first = false;
 				}
 			});
-			
+
 			return '(' + out + ')';
 		},
 		SequenceExpr: function (node, c) {
 			var out = '', first = true;
-			
+
 			node.expressions.forEach(function (expr) {
 				if (!first) out += ',';
-				
+
 				out += c(expr);
-				
+
 				first = false;
 			});
 			
 			return '(' + out + ')';
 		},
-		
+
 		// end point node
-		literal: function (node, c) {
+		literal: function (node) {
 			return node.raw;
 		},
-		regexp: function (node, c) {
+		regexp: function (node) {
 			// regex.gen
 			if (node.regexp.isGenerate) {
 				var val = node.regexp;
-				
+
 				return '(/' + val.pattern + '/' + val.flags + ').gen()';
 			}
 			// regular regular expression is fine...
 			return '(' + node.raw + ')';
 		},
-		dictionaryIndex: function (node, c) {
+		dictionaryIndex: function (node) {
 			return 'd.' + node.value;
 		},
-		objectStore: function (node, c) {
+		objectStore: function (node) {
 			return 'o.' + node.value;
 		},
-		Identifier: function (node, c) {
+		Identifier: function (node) {
 			return '$.' + node.name;
 		},
-		
+
 		// binary operator
 		LogicalExpr: function (node, c) {
 			return c(node.left) + node.operator + c(node.right);
@@ -1451,14 +1462,14 @@
 		},
 		MatchExpr: function (node, c) {
 			var out = '';
-			
+
 			if (node.operator === '~~') out += '!';
-			
+
 			return out + '!(' + c(node.left) + ').match(' + c(node.right) + ').length';
 		},
-		
+
 		// unary
-		UpdateExpr: function (node, c) {
+		UpdateExpr: function (node) {
 			var inside = '$.' + node.argument;
 			
 			return node.prefix ? node.operator + inside : inside + node.operator;
@@ -1466,42 +1477,62 @@
 		UnaryExpr: function (node, c) {
 			return node.operator + '(' + c(node.argument) + ')';
 		},
-		
+
 		// assign
 		AssignmentExpr: function (node, c) {
 			return c(node.left) + node.operator + c(node.right);
 		},
-		
+
 		// ()
 		ParenthesizedExpr: function (node, c) {
 			return '(' + c(node.expression) + ')';
 		},
-		
+
 		TextExpr: function (node, c) {
 			var inside = 'String(' + c(node.val) + ')';
-			
+
 			return 't(' + inside + ')';
 		},
 		CountExpr: function (node, c) {
 			var inside = 'String(' + c(node.val) + ')';
-			
+
 			return 'c(' + inside + ')';
 		}
 	};
 
-	module.exports = function genExpr (node) {
-		var string = (function c(node){
+	module.exports = function genExpr(node) {
+		var string = (function c(node) {
 			var type = node.type;
-			
+
 			return visitors[type](node, c);
 		})(node);
-		
+
 		return new Function('$,o,d,c,t', 'return ' + string + ';');
 	};
 
 
 /***/ },
 /* 14 */
+/***/ function(module, exports) {
+
+	module.exports = {
+		CALL: 0x00,
+		RETURN: 0x01,
+		EXIT: 0x02,
+		EXPRESSION: 0x10,
+		WAIT: 0x11,
+		TRIGGER: 0x12,
+		ASSERT: 0x13,
+		JUMPTO: 0x14,
+		REFRESH: 0x15,
+		LOG: 0x20,
+		CONSOLE: 0x21,
+		PROCESS: 0xFF
+	};
+
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var tt = __webpack_require__(7).types;
@@ -1529,18 +1560,19 @@
 		pp.unexpected = function (pos) {
 			this.raise(pos != null ? pos : this.start, 'Unexpected token');
 		};
-		
+
 		pp.expected = function (type) {
 			this.raise(this.lastTokEnd, 'Expect a "' + type.label + '" after');
 		};
-		
+
 		pp.UID = function (string) {
 			return string + this.nextID++;
 		};
 	};
 
+
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var tt = __webpack_require__(7).types;
@@ -1608,8 +1640,6 @@
 		// Parse a ternary conditional (`?:`) operator.
 
 		pp.parseMaybeConditional = function () {
-
-
 			// maybe we will need '?' in the future?
 
 			return this.parseExprOps();
@@ -1718,7 +1748,7 @@
 					};
 
 					this.expect(tt.parenR);
-					
+
 					return node;
 				} else {
 					return base;
@@ -1748,7 +1778,7 @@
 
 				case tt.num: case tt.string:
 					return this.parseLiteral('literal', this.value);
-				
+
 				case tt.objectAt: case tt.dict:
 					return this.parseExtLiteral(this.type);
 
@@ -1774,15 +1804,15 @@
 
 			return node;
 		};
-		
+
 		pp.parseExtLiteral = function (type) {
 			var node = {
 				type: type.label,
 				value: this.value
 			};
-			
+
 			this.next();
-			
+
 			return node;
 		};
 
@@ -1821,11 +1851,12 @@
 			this.next();
 
 			return name;
-		}
+		};
 	};
 
+
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var tt = __webpack_require__(7).types;
@@ -1852,20 +1883,22 @@
 			}
 
 			return elts;
-		}
+		};
 	};
 
+
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint plusplus: true, sloppy: true, nomen: true */
-	var CALL = __webpack_require__(18).CALL,
-		EXIT = __webpack_require__(18).EXIT,
-		_ = __webpack_require__(20)['_'],
-		settings = __webpack_require__(20).settings,
-		Collector = __webpack_require__(21),
-		IF = __webpack_require__(19);
+	/*global require, console, trigger, module */
+	var CALL = __webpack_require__(14).CALL,
+		EXIT = __webpack_require__(14).EXIT,
+		_ = __webpack_require__(19)['_'],
+		settings = __webpack_require__(19).settings,
+		Collector = __webpack_require__(20),
+		IF = __webpack_require__(21);
 
 	function linker(syntaxTree, object, dictionary, $case) {
 		var eT = {
@@ -1910,7 +1943,7 @@
 	}
 	function Case(syntaxTree, object, dictionary) {
 		if (!(this instanceof Case)) {
-			return new Case(syntaxTree);
+			return new Case(syntaxTree, object, dictionary);
 		}
 
 		var link = linker(syntaxTree, object, dictionary, this);
@@ -2021,293 +2054,13 @@
 		$CP: $CP
 	};
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jslint sloppy: true, nomen: true */
-
-	var IF = __webpack_require__(19),
-		settings = __webpack_require__(20).settings,
-		_ = __webpack_require__(20)['_'];	
-
-	var CALL = 0x00,
-		RETURN = 0x01,
-		EXIT = 0x02,
-
-		EXPRESSION = 0x10,
-		WAIT = 0x11,
-		TRIGGER = 0x12,
-		ASSERT = 0x13,
-		JUMPTO = 0x14,
-		REFRESH = 0x15,
-
-		LOG = 0x20,
-		CONSOLE = 0x21,
-
-		PASSED = 1,
-		FAILURE = 0;
-
-	IF(CALL, {
-		operation: function Call() {
-			var identifier = this.body('identifier');
-
-			this.$case
-				.$pushScope(identifier)
-				.$pushLog([CALL, identifier], this.line());
-		},
-		bodyFactory: function (name) {
-			return {
-				identifier: name
-			};
-		}
-	});
-	IF(RETURN, {
-		operation: function Return() {
-			this.$case
-				.$pushLog([RETURN])
-				.$popScope();
-		},
-		bodyFactory: function () {
-			return {};
-		}
-	});
-	IF(EXIT, {
-		operation: function Exit() {
-			var flag = this.body('isSuccess') ? PASSED : FAILURE,
-				CASE = this.$case;
-
-			CASE.$pushLog([EXIT, flag], this.line())
-				.$markLog(flag, CASE.getCurrentLoop())
-				.$clearScope()
-				.$exitLoop();
-		},
-		bodyFactory: function (isSuccess) {
-			return {
-				isSuccess: isSuccess
-			};
-		}
-	});
-
-	IF(EXPRESSION, {
-		operation: function Expression() {
-			this.$case.$runExp(this.body('exp'));
-		},
-		bodyFactory: function (expFn) {
-			return {
-				exp: expFn
-			};
-		}
-	});
-	IF(WAIT, {
-		operation: function Wait() {
-			var delay = this.$case.$runExp(this.body('delay'));
-
-			this.$case
-				.$setActiveTime(delay)
-				.$pushLog([WAIT, delay], this.line());
-		},
-		bodyFactory: function (delay) {
-			return {
-				delay: delay
-			};
-		}
-	});
-	IF(TRIGGER, {
-		operation: function Trigger() {
-			var cssPath = this.$case.$runExp(this.body('object')),
-				param = {
-					value: this.$case.$runExp(this.body('param'))
-				},
-				action = this.body('action'),
-				DOM = _.document().querySelectorAll(cssPath)[0];
-
-			if (!DOM) {
-				this.$case
-					.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
-					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
-
-				console.log('Can not find a DOM by cssPath: ' + cssPath);
-				return;
-			}
-
-			trigger(DOM).does(action, param);
-			settings.triggerCallback.call(this.$case, DOM);
-
-			this.$case
-				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
-		},
-		bodyFactory: function (object, action, param) {
-			return {
-				object: object,
-				action: action,
-				param: param
-			};
-		}
-	});
-	IF(ASSERT, {
-		operation: function Assert() {
-			var startTime = _.now(),
-				exp = this.body('exp'),
-				timeout = this.body('timeout'),
-				CASE = this.$case,
-				ins = this;
-
-			function queryHTMLElementByCSS() {
-				// Call when timeout defined, and cancel temp instruction
-				// when assert success.
-				if (!CASE.$runExp(exp)) {
-					return;
-				}
-
-				CASE.$setIdleTask()
-					.$setTempInstruction()
-					.$setActiveTime()
-					.$pushLog([ASSERT, PASSED], ins.line())
-					.$pushLogData(ins.body('key'), _.now() - startTime);
-			}
-
-			CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
-
-			if (timeout && timeout > 2 * settings.defaultClock) {
-				CASE.$setActiveTime(timeout)
-					.$setIdleTask(queryHTMLElementByCSS);
-			}
-
-			if (CASE.$runExp(exp)) {
-				// whatever timeout defined or not, it must be
-				// asserted at first. So canel IdleTask & tempInstruction
-				// when assert success.
-				CASE.$setTempInstruction()
-					.$setActiveTime()
-					.$setIdleTask()
-					.$pushLog([ASSERT, PASSED], this.line());
-
-				if (timeout) {
-					CASE.$pushLogData(ins.body('key'), 0);
-				}
-			} else if (!timeout) {
-				CASE.$pushLog([ASSERT, FAILURE], this.line());
-			}
-		},
-		bodyFactory: function (exp, timeout, dataKey) {
-			return {
-				exp: exp,
-				timeout: timeout,
-				key: dataKey
-			};
-		}
-	});
-	IF(JUMPTO, {
-		operation: function JumpTo() {
-			var url = this.$case.$runExp(this.body('url'));
-			settings.contextFrame.src = url;
-			this.$case.$pushLog([JUMPTO, url], this.line());
-		}
-	});
-	IF(REFRESH, {
-		operation: function Refresh() {
-			settings.contextFrame.src = _.document().location.href;
-			this.$case.$pushLog([REFRESH], this.line());
-		}
-	});
-
-	IF(LOG, {
-		operation: function Log() {
-			this.$case.$pushLog([LOG, this.$case.$runExp(this.body('msg'))]);
-		},
-		bodyFactory: function (msg) {
-			return {
-				msg: msg
-			};
-		}
-	});
-	IF(CONSOLE, {
-		operation: function Console() {
-			var msg = this.$case.$runExp(this.body('msg'));
-			console.log(msg);
-			settings.consoleFn(msg);
-		},
-		bodyFactory: function (msg) {
-			return {
-				msg: msg
-			};
-		}
-	});
-
-	module.exports = {
-		CALL: CALL,
-		RETURN: RETURN,
-		EXIT: EXIT,
-		EXPRESSION: EXPRESSION,
-		WAIT: WAIT,
-		TRIGGER: TRIGGER,
-		ASSERT: ASSERT,
-		JUMPTO: JUMPTO,
-		REFRESH: REFRESH,
-		LOG: LOG,
-		CONSOLE: CONSOLE
-	}
 
 /***/ },
 /* 19 */
 /***/ function(module, exports) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
-	var IF = function InstructionFactory(TYPE, opts) {
-		if (!opts) {
-			var IF = instructionFactories[TYPE];
-			if (!IF) {
-				throw new Error('TYPE:' + TYPE + ' instruction is not existed.');
-			}
-			return IF;
-		}
-
-		if (instructionFactories[TYPE]) {
-			throw new Error('The instruction factory: TYPE=' + TYPE + ' is existed.');
-		}
-
-		function Instruction(opts, $case) {
-			this.$case = $case;
-			this.$body = opts.BODY;
-			this.$line = opts.LINE;
-		}
-		Instruction.prototype.execute = opts.operation;
-		Instruction.prototype.line = function () {
-			return this.$line;
-		};
-		Instruction.prototype.body = function (key) {
-			if (key) {
-				return this.$body[key];
-			}
-			return this.$body;
-		};
-		Instruction.prototype.assignCase = function ($case) {
-			this.$case = $case;
-
-			return this;
-		};
-		Instruction.create = function () {
-			return new Instruction({
-				BODY: opts.bodyFactory.apply(null, arguments)
-			});
-		};
-		Instruction.$new = function (opts, $case) {
-			return new Instruction(opts, $case);
-		};
-
-		instructionFactories[TYPE] = Instruction;
-
-		return Instruction;
-	}, instructionFactories = [];
-
-	module.exports = IF;
-
-/***/ },
-/* 20 */
-/***/ function(module, exports) {
-
-	/*jslint vars: true, sloppy: true, nomen: true */
+	/*global require, console, trigger, module */
 	var callMainIns, exitIns, _, settings, setup;
 
 	_ = {
@@ -2429,14 +2182,15 @@
 		getLemoncaseFrame: getLemoncaseFrame
 	};
 
+
 /***/ },
-/* 21 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global now: false, _, instructions */
 
-	var _ = __webpack_require__(20)['_'];
+	var _ = __webpack_require__(19)['_'];
 
 	//1_SYSTEM 2_USER -1_ERROR 0_NOTICE
 	var Collector = function (dataKeys) {
@@ -2506,6 +2260,62 @@
 	module.exports = Collector;
 
 /***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+	/*jslint vars: true, sloppy: true, nomen: true */
+	/*global require, console, trigger, module */
+	var IF = function InstructionFactory(TYPE, opts) {
+		if (!opts) {
+			var IF = instructionFactories[TYPE];
+			if (!IF) {
+				throw new Error('TYPE:' + TYPE + ' instruction is not existed.');
+			}
+			return IF;
+		}
+
+		if (instructionFactories[TYPE]) {
+			throw new Error('The instruction factory: TYPE=' + TYPE + ' is existed.');
+		}
+
+		function Instruction(opts, $case) {
+			this.$case = $case;
+			this.$body = opts.BODY;
+			this.$line = opts.LINE;
+		}
+		Instruction.prototype.execute = opts.operation;
+		Instruction.prototype.line = function () {
+			return this.$line;
+		};
+		Instruction.prototype.body = function (key) {
+			if (key) {
+				return this.$body[key];
+			}
+			return this.$body;
+		};
+		Instruction.prototype.assignCase = function ($case) {
+			this.$case = $case;
+
+			return this;
+		};
+		Instruction.create = function () {
+			return new Instruction({
+				BODY: opts.bodyFactory.apply(null, arguments)
+			});
+		};
+		Instruction.$new = function (opts, $case) {
+			return new Instruction(opts, $case);
+		};
+
+		instructionFactories[TYPE] = Instruction;
+
+		return Instruction;
+	}, instructionFactories = [];
+
+	module.exports = IF;
+
+
+/***/ },
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -2539,7 +2349,7 @@
 	 * @param {object} options.field
 	 * @param {object} options.assignment
 	 */
-	var _ = __webpack_require__(20)['_'];
+	var _ = __webpack_require__(19)['_'];
 
 	function Dictionary(options) {
 		if (!(this instanceof Dictionary)) {
@@ -2709,11 +2519,12 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
-	var $CP = __webpack_require__(17).$CP,
-		_ = __webpack_require__(20)['_'],
-		settings = __webpack_require__(20).settings,
-		IF = __webpack_require__(19),
-		CALL = __webpack_require__(18).CALL;
+	/*global require, console, trigger, module */
+	var $CP = __webpack_require__(18).$CP,
+		_ = __webpack_require__(19)['_'],
+		settings = __webpack_require__(19).settings,
+		IF = __webpack_require__(21),
+		CALL = __webpack_require__(14).CALL;
 
 	$CP.$setIdleTask = function (taskFn) {
 		this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -2846,13 +2657,15 @@
 
 	module.exports = $CP;
 
+
 /***/ },
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
-	var $CP = __webpack_require__(17).$CP,
-		settings = __webpack_require__(20).settings,
+	/*global require, console, trigger, module */
+	var $CP = __webpack_require__(18).$CP,
+		settings = __webpack_require__(19).settings,
 		Dictionary = __webpack_require__(22);
 
 	$CP.hasDictionary = function () {
@@ -2970,7 +2783,16 @@
 		return this.$$instructionBuffer.$getLine();
 	};
 
+	$CP.getStatus = function () {
+		return {
+			loop: this.$$currentLoop,
+			line: this.getCurrentLine(),
+			state: this.$$state
+		};
+	};
+
 	module.exports = $CP;
+
 
 /***/ },
 /* 25 */
@@ -3488,5 +3310,572 @@
 	}());
 
 
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*jslint sloppy: true, nomen: true */
+
+	var IF = __webpack_require__(21),
+		settings = __webpack_require__(19).settings,
+		_ = __webpack_require__(19)['_'],
+
+		CALL = __webpack_require__(14).CALL,
+		RETURN = __webpack_require__(14).RETURN,
+		EXIT = __webpack_require__(14).EXIT,
+
+		EXPRESSION = __webpack_require__(14).EXPRESSION,
+		WAIT = __webpack_require__(14).WAIT,
+		TRIGGER = __webpack_require__(14).TRIGGER,
+		ASSERT = __webpack_require__(14).ASSERT,
+		JUMPTO = __webpack_require__(14).JUMPTO,
+		REFRESH = __webpack_require__(14).REFRESH,
+
+		LOG = __webpack_require__(14).LOG,
+		CONSOLE = __webpack_require__(14).CONSOLE,
+		
+		PROCESS = __webpack_require__(14).PROCESS,
+
+		PASSED = 1,
+		FAILURE = 0
+		
+		trigger = __webpack_require__(27);
+
+	IF(CALL, {
+		operation: function Call() {
+			var identifier = this.body('identifier');
+
+			this.$case
+				.$pushScope(identifier)
+				.$pushLog([CALL, identifier], this.line());
+		},
+		bodyFactory: function (name) {
+			return {
+				identifier: name
+			};
+		}
+	});
+	IF(RETURN, {
+		operation: function Return() {
+			this.$case
+				.$pushLog([RETURN])
+				.$popScope();
+		},
+		bodyFactory: function () {
+			return {};
+		}
+	});
+	IF(EXIT, {
+		operation: function Exit() {
+			var flag = this.body('isSuccess') ? PASSED : FAILURE,
+				CASE = this.$case;
+
+			CASE.$pushLog([EXIT, flag], this.line())
+				.$markLog(flag, CASE.getCurrentLoop())
+				.$clearScope()
+				.$exitLoop();
+		},
+		bodyFactory: function (isSuccess) {
+			return {
+				isSuccess: isSuccess
+			};
+		}
+	});
+
+	IF(EXPRESSION, {
+		operation: function Expression() {
+			this.$case.$runExp(this.body('exp'));
+		},
+		bodyFactory: function (expFn) {
+			return {
+				exp: expFn
+			};
+		}
+	});
+	IF(WAIT, {
+		operation: function Wait() {
+			var delay = this.$case.$runExp(this.body('delay'));
+
+			this.$case
+				.$setActiveTime(delay)
+				.$pushLog([WAIT, delay], this.line());
+		},
+		bodyFactory: function (delay) {
+			return {
+				delay: delay
+			};
+		}
+	});
+	IF(TRIGGER, {
+		operation: function Trigger() {
+			var cssPath = this.$case.$runExp(this.body('object')),
+				param = {
+					value: this.$case.$runExp(this.body('param'))
+				},
+				action = this.body('action'),
+				DOM = _.document().querySelectorAll(cssPath)[0];
+
+			if (!DOM) {
+				this.$case
+					.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
+					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
+
+				console.log('Can not find a DOM by cssPath: ' + cssPath);
+				return;
+			}
+
+			trigger(DOM).does(action, param);
+			settings.triggerCallback.call(this.$case, DOM);
+
+			this.$case
+				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
+		},
+		bodyFactory: function (object, action, param) {
+			return {
+				object: object,
+				action: action,
+				param: param
+			};
+		}
+	});
+	IF(ASSERT, {
+		operation: function Assert() {
+			var startTime = _.now(),
+				exp = this.body('exp'),
+				timeout = this.body('timeout'),
+				CASE = this.$case,
+				ins = this;
+
+			function queryHTMLElementByCSS() {
+				// Call when timeout defined, and cancel temp instruction
+				// when assert success.
+				if (!CASE.$runExp(exp)) {
+					return;
+				}
+
+				CASE.$setIdleTask()
+					.$setTempInstruction()
+					.$setActiveTime()
+					.$pushLog([ASSERT, PASSED], ins.line())
+					.$pushLogData(ins.body('key'), _.now() - startTime);
+			}
+
+			CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
+
+			if (timeout && timeout > 2 * settings.defaultClock) {
+				CASE.$setActiveTime(timeout)
+					.$setIdleTask(queryHTMLElementByCSS);
+			}
+
+			if (CASE.$runExp(exp)) {
+				// whatever timeout defined or not, it must be
+				// asserted at first. So canel IdleTask & tempInstruction
+				// when assert success.
+				CASE.$setTempInstruction()
+					.$setActiveTime()
+					.$setIdleTask()
+					.$pushLog([ASSERT, PASSED], this.line());
+
+				if (timeout) {
+					CASE.$pushLogData(ins.body('key'), 0);
+				}
+			} else if (!timeout) {
+				CASE.$pushLog([ASSERT, FAILURE], this.line());
+			}
+		},
+		bodyFactory: function (exp, timeout, dataKey) {
+			return {
+				exp: exp,
+				timeout: timeout,
+				key: dataKey
+			};
+		}
+	});
+	IF(JUMPTO, {
+		operation: function JumpTo() {
+			var url = this.$case.$runExp(this.body('url'));
+			settings.contextFrame.src = url;
+			this.$case.$pushLog([JUMPTO, url], this.line());
+		}
+	});
+	IF(REFRESH, {
+		operation: function Refresh() {
+			settings.contextFrame.src = _.document().location.href;
+			this.$case.$pushLog([REFRESH], this.line());
+		}
+	});
+
+	IF(LOG, {
+		operation: function Log() {
+			this.$case.$pushLog([LOG, this.$case.$runExp(this.body('msg'))]);
+		},
+		bodyFactory: function (msg) {
+			return {
+				msg: msg
+			};
+		}
+	});
+	IF(CONSOLE, {
+		operation: function Console() {
+			var msg = this.$case.$runExp(this.body('msg'));
+			console.log(msg);
+			settings.consoleFn(msg);
+		},
+		bodyFactory: function (msg) {
+			return {
+				msg: msg
+			};
+		}
+	});
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports) {
+
+	/*jslint vars: true, plusplus: true */
+	/*global console, Window, HTMLIFrameElement, Event */
+	(function () {
+		'use strict';
+
+		var t, isECS = true, isTouch = true, hasInput = true;
+		try { t = new MouseEvent('click', {}); } catch ($e) { isECS = false; }
+		try { TouchEvent; } catch ($f) { isTouch = false; }
+		try { InputEvent; } catch ($g) { hasInput = false; }
+
+		function buildInitEventArgs(type, opts, map) {
+			var optKey, args = [type];
+			for (optKey in map) {
+				if (map.hasOwnProperty(optKey)) {
+					args[map[optKey]] = opts[optKey] || null;
+				}
+			}
+			return args;
+		}
+
+		var $TouchEvent = function (typeArg, eventInit) {
+				var event = document.createEvent('UIEvent'),
+					initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
+				event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+
+				return event;
+			}, $Event = isECS && !isTouch ? Event : function (typeArg, eventInit) {
+			var event = document.createEvent('Event'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2};
+			event.initEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $MouseEvent = isECS && !isTouch ? MouseEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('MouseEvent'),
+				initMap = {
+					'bubbles': 1,
+					'cancelBubble': 2,
+					'view': 3,
+					'detail': 4,
+					'screenX': 5,
+					'screenY': 6,
+					'clientX': 7,
+					'clientY': 8,
+					'ctrlKey': 9,
+					'altKey': 10,
+					'shiftKey': 11,
+					'metaKey': 12,
+					'button': 13,
+					'relatedTarget': 14
+				};
+			event.initMouseEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $UIEvent = isECS && !isTouch ? UIEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('UIEvent'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
+			event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $KeyboardEvent = isECS && !isTouch ? KeyboardEvent : function (typeArg, eventInit) {
+			var event = document.createEvent('KeyboardEvent'),
+				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
+					'char': 4, key: 5, location: 6, repeat: 8 };
+			event.initKeyboardEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+			return event;
+		}, $InputEvent = hasInput ? InputEvent : $UIEvent;
+
+	//	alert($MouseEvent);
+	//	alert(isTouch);
+	//	alert(hasInput);
+	//	alert(isECS);
+
+		var exports, actionRule,
+			config = {
+				contextIframe: null,
+				window: function () {
+					return config.contextIframe ? config.contextIframe.contentWindow : window;
+				}
+			},
+			aUs = [],
+			defaultEventOpts = {bubbles: true, cancelBubble: true},
+
+		//		MouseEvent = 0x00,
+		//		KeyboardEvent = 0x10,
+		//		UIEvent = 0x20,
+		//		InputEvent = 0x30,
+
+			MOUSEUP = 0x00,
+			MOUSEDOWN = 0x01,
+			MOUSEENTER = 0x02,
+			MOUSELEAVE = 0x03,
+			MOUSEOUT = 0x04,
+			MOUSEOVER = 0x05,
+			MOUSEMOVE = 0x06,
+			CLICK = 0x07,
+			DBLCLICK = 0x08,
+			CONTEXTMENU = 0x09,
+
+			KEYUP = 0x10,
+			KEYDOWN = 0X11,
+			KEYPRESS = 0X12,
+
+			SCROLL = 0x20,
+			RESIZE = 0x21,
+			FOCUS = 0x22,
+			SELECT = 0x24,
+
+			INPUT = 0x30,
+			CHANGE = 0x31;
+
+		function noop() {}
+		function isElement(obj) {
+			return obj.nodeType === 1;
+		}
+		function isWindow(obj) {
+			return obj instanceof Window;
+		}
+		function isObject(value) {
+			return value !== null && typeof value === 'object';
+		}
+		function isFunction(value) {
+			return typeof value === 'function';
+		}
+		function setHashKey(obj, h) {
+			if (h) {
+				obj.$$hashKey = h;
+			} else {
+				delete obj.$$hashKey;
+			}
+		}
+		function baseExtend(dst, objs) {
+			var ii, i, jj, j, key, src, obj, keys,
+				h = dst.$$hashKey;
+			if (objs) {
+				for (i = 0, ii = objs.length; i < ii; ++i) {
+					obj = objs[i];
+					if (!isObject(obj) && !isFunction(obj)) {
+						continue;
+					}
+					keys = Object.keys(obj);
+					for (j = 0, jj = keys.length; j < jj; j++) {
+						key = keys[j];
+						src = obj[key];
+						dst[key] = src;
+					}
+				}
+			}
+
+			setHashKey(dst, h);
+			return dst;
+		}
+		function extend(dst) {
+			return baseExtend(dst, ([]).slice.call(arguments, 1), false);
+		}
+
+		function dispatchTouchEvent(element, eventName, opts) {
+			if (isTouch) {
+				element.dispatchEvent(new $TouchEvent(eventName, extend({}, defaultEventOpts, opts)));
+			}
+		}
+		function dispatchMouseEvent(element, eventName, opts) {
+			element.dispatchEvent(new $MouseEvent(eventName, extend({}, defaultEventOpts, opts)));
+		}
+		aUs[MOUSEUP] = function (opts) {
+			dispatchTouchEvent(this, 'touchend', opts);
+			dispatchMouseEvent(this, 'mouseup', opts);
+		};
+		aUs[MOUSEDOWN] = function (opts) {
+			dispatchTouchEvent(this, 'touchstart', opts);
+			dispatchMouseEvent(this, 'mousedown', opts);
+		};
+		aUs[MOUSEENTER] = function (opts) {
+			dispatchMouseEvent(this, 'mouseenter', opts);
+		};
+		aUs[MOUSELEAVE] = function (opts) {
+			dispatchMouseEvent(this, 'mouseleave', opts);
+		};
+		aUs[MOUSEOUT] = function (opts) {
+			dispatchMouseEvent(this, 'mouseout', opts);
+		};
+		aUs[MOUSEOVER] = function (opts) {
+			dispatchMouseEvent(this, 'mouseover', opts);
+		};
+		aUs[MOUSEMOVE] = function (opts) {
+			dispatchTouchEvent(this, 'touchmove', opts);
+			dispatchMouseEvent(this, 'mousemove', opts);
+		};
+		aUs[CLICK] = function (opts) {
+			dispatchMouseEvent(this, 'click', opts);
+		};
+		aUs[DBLCLICK] = function (opts) {
+			dispatchMouseEvent(this, 'dblclick', opts);
+		};
+		aUs[CONTEXTMENU] = function (opts) {
+			dispatchMouseEvent(this, 'contextmenu', opts);
+		};
+
+		function dispatchKeyboardEvent(element, eventName, opts) {
+			element.dispatchEvent(new $KeyboardEvent(eventName, extend({}, defaultEventOpts, opts)));
+		}
+		aUs[KEYDOWN] = function (opts) {
+			dispatchKeyboardEvent(this, 'keydown', opts);
+		};
+		aUs[KEYPRESS] = function (opts) {
+			dispatchKeyboardEvent(this, 'keypress', opts);
+		};
+		aUs[KEYUP] = function (opts) {
+			dispatchKeyboardEvent(this, 'keyup', opts);
+		};
+
+		aUs[FOCUS] = function () {
+			this.focus();
+		};
+		//aUs[BLUR] not neseseray.
+		aUs[RESIZE] = function (opts) {
+			var s = config.contextIframe.style;
+			s.width = opts.width + 'px';
+			s.height = opts.height + 'px';
+		};
+		aUs[SCROLL] = function (opts) {
+			config.window().scrollTo(opts.x, opts.y);
+			this.dispatchEvent(new $UIEvent('scroll'));
+		};
+		aUs[SELECT] = function (opts) {
+			var optionElement = this[opts.index];
+			aUs[MOUSEDOWN].call(optionElement, opts);
+			aUs[MOUSEUP].call(optionElement, opts);
+			optionElement.selected = true;
+			this.dispatchEvent(new $UIEvent('select'));
+			aUs[CLICK].call(optionElement, opts);
+			aUs[MOUSEOUT].call(optionElement, opts);
+
+		};
+
+		aUs[INPUT] = function (opts) {
+			this.value = opts.value;
+			this.dispatchEvent(new $UIEvent('input', opts));
+		};
+		aUs[CHANGE] = function () {
+			this.dispatchEvent(new $Event('change', {bubbles: true}));
+		};
+
+		function Trigger(element) {
+			this.element = element;
+			this.action = this.getActionRule(element);
+		}
+		Trigger.prototype.getActionRule = function (element) {
+			element = element || this.element;
+
+			if (element instanceof Window) {
+				return actionRule.window;
+			}
+
+			if (element.tagName.toLowerCase() === 'input') {
+				return actionRule['input/' + element.type];
+			}
+
+			if (element.tagName.toLowerCase() === 'textarea') {
+				return actionRule.textarea;
+			}
+
+
+			if (element.tagName.toLowerCase() === 'select') {
+				return actionRule.select;
+			}
+
+			return actionRule.generic;
+		};
+		Trigger.prototype.does = function (actionName, opts) {
+			var i, len, rule;
+
+			if (this.testAction(actionName) !== true) {
+				throw 'The element:' + this.element.outerHTNL +
+					' can not use action:' + actionName;
+			}
+
+			rule = this.action[actionName];
+			len = rule.length;
+			for (i = 0; i < len; i += 1) {
+				aUs[rule[i]].call(this.element, opts || {});
+			}
+
+			return this;
+		};
+		Trigger.prototype.testAction = function (actionName) {
+			return this.action.hasOwnProperty(actionName);
+		};
+
+		actionRule = (function () {
+			var rule = {};
+
+			rule['input/checkbox'] = rule['input/radio'] = rule['input/button'] =
+				rule.generic = {
+					click: [MOUSEDOWN, MOUSEMOVE, MOUSEUP, CLICK],
+					dblclick: [MOUSEDOWN, MOUSEUP, CLICK, MOUSEDOWN, MOUSEUP, CLICK, DBLCLICK],
+					rclick: [MOUSEDOWN, MOUSEUP, CONTEXTMENU],
+					movein: [MOUSEOVER, MOUSEOUT],
+					moveout: [MOUSEMOVE, MOUSEOUT],
+					scroll: [SCROLL]
+				};
+
+			rule.textarea = rule['input/text'] = rule['input/password'] =
+				rule['input/email'] = extend({}, rule.generic, {
+					input: [FOCUS, KEYDOWN, KEYPRESS, INPUT, KEYUP, CHANGE],
+					click: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK],
+					dblclick: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEDOWN,
+							   MOUSEMOVE, MOUSEUP, CLICK, DBLCLICK],
+					rclick: [MOUSEDOWN, FOCUS, MOUSEUP, CONTEXTMENU]
+				});
+
+			rule.select = extend({}, rule.generic, {
+				select: [MOUSEDOWN, FOCUS, MOUSEMOVE, MOUSEUP, CLICK, MOUSEMOVE,
+						 MOUSEOUT, SELECT]
+			});
+
+			rule.window = {
+				scroll: [SCROLL],
+				resize: [RESIZE]
+			};
+
+			return rule;
+		}());
+
+		exports = function (element) {
+			if (!isWindow(element) && !isElement(element)) {
+				throw '"element" for trigger must be a HTMLElement';
+			}
+			return new Trigger(element);
+		};
+		exports.setupIframe = function (iframe) {
+			if (!(iframe instanceof HTMLIFrameElement)) {
+				throw '"element" must be a iframe element.';
+			}
+			config.contextIframe = iframe;
+		};
+
+		//make it available in node.js as well
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = exports;
+		} else {
+			window.trigger = exports;
+		}
+	}());
+
+
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;

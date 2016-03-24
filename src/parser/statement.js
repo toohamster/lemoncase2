@@ -29,7 +29,7 @@ module.exports = function (Parser) {
 		while (this.type !== tt.eof) {
 			this.parseStructure();
 		}
-		
+
 		for (var process in pcsTable) {
 			if (pcsTable[process]) this.raise(pcsTable[process].pos, 'Invalid process call at');
 		}
@@ -38,7 +38,7 @@ module.exports = function (Parser) {
 
 		return program;
 	};
-	
+
 	pp.parseStructure = function () {
 		var globaltype = this.type;
 
@@ -55,18 +55,18 @@ module.exports = function (Parser) {
 		if (!setType.macro) this.unexpected();
 
 		var key = setType.label.substr(1).toLowerCase(); // #CLOCK --> clock
-		
+
 		this.writeConfig(key);
 
 		this.next();
 	};
-	
+
 	pp.writeConfig = function (key) {
 		var val;
-		
+
 		var confTable = this.conf;
 		if (confTable[key]) this.raise(this.start, this.type.keyword + ' was defined already');
-		
+
 		switch (key) {
 			case "screen":
 				var x, y, splitVal = this.value.split(',');
@@ -78,21 +78,21 @@ module.exports = function (Parser) {
 					height: y
 				}
 				break;
-		
+
 			default:
 				val = parseInt(this.value, 10);
 				break;
 		}
-		
+
 		confTable[key] = val;
 	};
 
 	pp.parseProcess = function () {
 		var node = {
-			LINE: getLineInfo(this.input, this.start),
-			TYPE: insDefinition.PROCESS,
-			BODY: {}
-		},
+				LINE: getLineInfo(this.input, this.start),
+				TYPE: insDefinition.PROCESS,
+				BODY: {}
+			},
 			pcs = this.pcs,
 			pcsTable = this.pcsTable;
 
@@ -103,7 +103,7 @@ module.exports = function (Parser) {
 		if (pcs[name]) this.raise(this.start, name + ' process was defined already');
 		pcs[name] = node;
 		// mark it as initialized
-			pcsTable[name] = false;
+		pcsTable[name] = false;
 
 		this.parsePcParam(node);
 
@@ -120,7 +120,7 @@ module.exports = function (Parser) {
 
 	pp.parsePcBlock = function (node) {
 		var statements = this.parseBlock();
-		
+
 		// no statements or no return
 		if (!statements.length || statements[statements.length - 1].TYPE !== insDefinition.RETURN) {
 			statements.push({
@@ -145,7 +145,7 @@ module.exports = function (Parser) {
 		return args;
 	};
 
-	pp.parseStatement = function (declaration) {
+	pp.parseStatement = function () {
 		var starttype = this.type, node = this.startNode();
 
 		switch (starttype) {
@@ -227,12 +227,12 @@ module.exports = function (Parser) {
 			type: 'varDecl'
 		};
 	};
-	
+
 	pp.parseExprStatement = function (node) {
 		var expr = this.parseExpression();
-		
+
 		this.semicolon();
-		
+
 		// fn()
 		if (expr.type === 'CallExpr') {
 			var callee = expr.callee.name;
@@ -240,31 +240,31 @@ module.exports = function (Parser) {
 			if (this.pcsTable[callee] !== false) {
 				this.pcsTable[callee] = { pos: this.lastTokStart };
 			}
-			
+
 			node.BODY.identifier = callee;
-			
+
 			return this.finishNode(node, insDefinition.CALL);
 		}
-		
+
 		// a = 1
 		var fn = genExpr(expr);
-		
+
 		node.BODY.raw = expr;
 		node.BODY.exp = fn;
-		
+
 		return this.finishNode(node, insDefinition.EXPRESSION);
-	}
-	
+	};
+
 	pp.parseWaitStatement = function (node) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.delay = genExpr(node.BODY.raw);
-		
+
 		this.semicolon();
-		
+
 		return this.finishNode(node, insDefinition.WAIT);
-	}
+	};
 
 	pp.parseMouseAction = function (node, keyword) {
 		this.next();
@@ -277,76 +277,76 @@ module.exports = function (Parser) {
 
 		return this.finishNode(node, insDefinition.TRIGGER);
 	};
-	
+
 	pp.parseScrollAction = function (node, keyword) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
-		
+
 		this.expect(tt._by);
-		
+
 		node.BODY.raw1 = this.parseExpression();
 		node.BODY.param = genExpr(node.BODY.raw1);
-		
+
 		node.BODY.action = keyword;
-		
+
 		return this.finishNode(node, insDefinition.TRIGGER);
 	};
-	
+
 	pp.parseSelectAction = function () {
 		this.raise('work in progress...');
 	};
-	
+
 	pp.parseInputAction = function (node, keyword) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.object = genExpr(node.BODY.raw);
-		
+
 		this.expect(tt._by);
-		
+
 		node.BODY.raw1 = this.parseExpression();
 		node.BODY.param = genExpr(node.BODY.raw1);
 		node.BODY.action = keyword;
-		
+
 		this.semicolon();
-		
+
 		return this.finishNode(node, insDefinition.TRIGGER);
 	};
-	
+
 	pp.parseAssertStatement = function (node) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.exp = genExpr(node.BODY.raw);
-		
+
 		if (this.eat(tt._in)) {
 			if (this.type === tt.num) {
 				node.BODY.timeout = this.value;
 			} else {
 				this.unexpected();
 			}
-			
+
 			this.next();
 		}
-		
+
 		this.semicolon();
 		//do not forgot the data key
 		node.BODY.key = this.UID('#');
 		this.keys[node.BODY.key] = node.BODY.timeout ? true : false;
-		
+
 		return this.finishNode(node, insDefinition.ASSERT);
-	}
-	
+	};
+
 	pp.parseGotoStatement = function (node) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.url = genExpr(node.BODY.raw);
-		
+
 		this.semicolon();
-		
+
 		return this.finishNode(node, insDefinition.JUMPTO);
 	};
 
@@ -357,18 +357,18 @@ module.exports = function (Parser) {
 
 		return this.finishNode(node, insDefinition.REFRESH);
 	};
-	
+
 	pp.parseLogStatement = function (node, type) {
 		this.next();
-		
+
 		node.BODY.raw = this.parseExpression();
 		node.BODY.msg = genExpr(node.BODY.raw);
-		
+
 		this.semicolon();
-		
+
 		return this.finishNode(node, type);
 	};
-	
+
 	pp.startNode = function () {
 		return {
 			LINE: getLineInfo(this.input, this.start).line,
@@ -376,13 +376,13 @@ module.exports = function (Parser) {
 			BODY: {},
 			start: this.start,
 			end: 0
-		}
+		};
 	};
-	
+
 	pp.finishNode = function (node, type) {
 		node.TYPE = type;
 		node.end = this.lastTokEnd;
-		
+
 		return node;
 	};
 };

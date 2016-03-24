@@ -1,5 +1,4 @@
 /*jslint sloppy: true, nomen: true */
-/*global require, console, trigger, module */
 
 var IF = require('./class/instruction'),
 	settings = require('./global').settings,
@@ -22,7 +21,9 @@ var IF = require('./class/instruction'),
 	PROCESS = require('./instructionType').PROCESS,
 
 	PASSED = 1,
-	FAILURE = 0;
+	FAILURE = 0
+	
+	trigger = require('oc-trigger');
 
 IF(CALL, {
 	operation: function Call() {

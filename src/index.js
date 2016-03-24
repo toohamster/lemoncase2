@@ -21,14 +21,4 @@ var exports = {
 	getLemoncaseFrame: getLemoncaseFrame
 };
 
-if (typeof angular !== 'undefined') {
-	angular.module('lemoncase', []).provider('LC', function () {
-		this.setup = exports.setup;
-
-		this.$get = [function () {
-			return exports;
-		}];
-	});
-}
-
 module.exports = exports;

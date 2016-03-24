@@ -22,5 +22,5 @@ module.exports = function (Parser) {
 		}
 
 		return elts;
-	}
+	};
 };
