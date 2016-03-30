@@ -1,4 +1,4 @@
-var lineBreakG = require('./whitespace.js').lineBreakG;
+var lineBreakG = require('./whitespace').lineBreakG;
 
 var Position = function (line, col) {
 	this.line = line;
@@ -8,6 +8,10 @@ var Position = function (line, col) {
 Position.prototype.offset = function (n) {
 	return new Position(this.line, this.column + n);
 };
+
+// these function 'power up' the error message
+// by draw an arrow point to the error position
+// with the actual error message under the arrow
 
 // determine the position of error
 function getLineInfo(input, offset) {
@@ -61,13 +65,13 @@ function positionMsg(msg, width) {
 	}
 
 	var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
-	
+
 	while (++i < emptyWidth) {
 		newMsg += ' ';
 	}
-	
+
 	newMsg += msg;
-	
+
 	return newMsg;
 }
 

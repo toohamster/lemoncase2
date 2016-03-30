@@ -1,4 +1,4 @@
-var tt = require('./tokentype.js').types;
+var tt = require('./tokentype').types;
 
 module.exports = function (Parser) {
 	var pp = Parser.prototype;

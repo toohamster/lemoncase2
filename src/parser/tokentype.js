@@ -12,25 +12,25 @@
 
 //no startsExpr or isLoop
 
-var TokenType = function(label, conf) {
-	if (conf === undefined) { conf = {}; }
+var TokenType = function (label, conf) {
+	if (conf === undefined) conf = {};
 
 	this.label = label;
 	this.keyword = conf.keyword;
-	this.beforeExpr = !!conf.beforeExpr;
-	this.isAssign = !!conf.isAssign;
-	this.prefix = !!conf.prefix;
-	this.postfix = !!conf.postfix;
+	this.beforeExpr = Boolean(conf.beforeExpr);
+	this.isAssign = Boolean(conf.isAssign);
+	this.prefix = Boolean(conf.prefix);
+	this.postfix = Boolean(conf.postfix);
 	this.binop = conf.binop || null;
-	this.macro = !!conf.macro;
+	this.macro = Boolean(conf.macro);
 };
 
 function binop(name, prec) {
-	return new TokenType(name, { beforeExpr: true, binop: prec });
+	return new TokenType(name, {beforeExpr: true, binop: prec});
 }
 
-var beforeExpr = { beforeExpr: true };
-var macro = { macro: true };
+var beforeExpr = {beforeExpr: true};
+var macro = {macro: true};
 
 var types = {
 	num: new TokenType('num'),
@@ -71,9 +71,9 @@ var types = {
 	// binary operators with a very low precedence, that should result
 	// in AssignmentExpression nodes.
 
-	eq: new TokenType('=', { beforeExpr: true, isAssign: true }),
-	assign: new TokenType('_=', { beforeExpr: true, isAssign: true }),
-	incDec: new TokenType('++/--', { prefix: true, postfix: true }),
+	eq: new TokenType('=', {beforeExpr: true, isAssign: true}),
+	assign: new TokenType('_=', {beforeExpr: true, isAssign: true}),
+	incDec: new TokenType('++/--', {prefix: true, postfix: true}),
 	prefix: new TokenType('prefix', {beforeExpr: true, prefix: true}),
 	logicalOR: binop('||', 1),
 	logicalAND: binop('&&', 2),

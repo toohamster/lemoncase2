@@ -3,8 +3,9 @@ var parse = require('./parser/index').parse,
 	setup = require('./global').setup,
 	IF = require('./class/instruction'),
 	Dictionary = require('./class/dictionary'),
-	init = require('./global').init,
-	getLemoncaseFrame = require('./global').getLemoncaseFrame;
+	global = require('./global'),
+	init = global.init,
+	getLemoncaseFrame = global.getLemoncaseFrame;
 
 require('./class/case_I');
 require('./class/case_P');

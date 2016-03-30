@@ -2,7 +2,8 @@
 
 var visitors = {
 	varDecl: function (node, c) {
-		var out = '', first = true;
+		var out = '';
+		var first = true;
 
 		node.declarations.forEach(function (decl) {
 			if (decl.init) {
@@ -17,7 +18,8 @@ var visitors = {
 		return '(' + out + ')';
 	},
 	SequenceExpr: function (node, c) {
-		var out = '', first = true;
+		var out = '';
+		var first = true;
 
 		node.expressions.forEach(function (expr) {
 			if (!first) out += ',';
@@ -26,7 +28,7 @@ var visitors = {
 
 			first = false;
 		});
-		
+
 		return '(' + out + ')';
 	},
 
@@ -72,7 +74,7 @@ var visitors = {
 	// unary
 	UpdateExpr: function (node) {
 		var inside = '$.' + node.argument;
-		
+
 		return node.prefix ? node.operator + inside : inside + node.operator;
 	},
 	UnaryExpr: function (node, c) {

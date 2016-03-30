@@ -1,5 +1,6 @@
-var getLineInfo = require('./locutil.js').getLineInfo;
-var empowerErrMsg = require('./locutil.js').empowerErrMsg;
+var locutil = require('./locutil');
+var getLineInfo = locutil.getLineInfo;
+var empowerErrMsg = locutil.empowerErrMsg;
 
 // This function is used to raise exceptions on parse errors. It
 // takes an offset integer (into the current `input`) to indicate

@@ -2,8 +2,9 @@
 /*global require, console, trigger, module */
 var CALL = require('../instructionType').CALL,
 	EXIT = require('../instructionType').EXIT,
-	_ = require('../global')['_'],
-	settings = require('../global').settings,
+	global = require('../global'),
+	_ = global['_'],
+	settings = global.settings,
 	Collector = require('../../lib/collector'),
 	IF = require('./instruction');
 

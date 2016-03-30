@@ -1,24 +1,27 @@
 /*jslint sloppy: true, nomen: true */
 
 var IF = require('./class/instruction'),
-	settings = require('./global').settings,
-	_ = require('./global')['_'],
+	global = require('./global'),
+	settings = global.settings,
+	_ = global['_'],
 
-	CALL = require('./instructionType').CALL,
-	RETURN = require('./instructionType').RETURN,
-	EXIT = require('./instructionType').EXIT,
-
-	EXPRESSION = require('./instructionType').EXPRESSION,
-	WAIT = require('./instructionType').WAIT,
-	TRIGGER = require('./instructionType').TRIGGER,
-	ASSERT = require('./instructionType').ASSERT,
-	JUMPTO = require('./instructionType').JUMPTO,
-	REFRESH = require('./instructionType').REFRESH,
-
-	LOG = require('./instructionType').LOG,
-	CONSOLE = require('./instructionType').CONSOLE,
+	instructionType = require('./instructionType'),
 	
-	PROCESS = require('./instructionType').PROCESS,
+	CALL = instructionType.CALL,
+	RETURN = instructionType.RETURN,
+	EXIT = instructionType.EXIT,
+
+	EXPRESSION = instructionType.EXPRESSION,
+	WAIT = instructionType.WAIT,
+	TRIGGER = instructionType.TRIGGER,
+	ASSERT = instructionType.ASSERT,
+	JUMPTO = instructionType.JUMPTO,
+	REFRESH = instructionType.REFRESH,
+
+	LOG = instructionType.LOG,
+	CONSOLE = instructionType.CONSOLE,
+	
+	PROCESS = instructionType.PROCESS,
 
 	PASSED = 1,
 	FAILURE = 0

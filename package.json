@@ -39,6 +39,11 @@
     ],
     "failFast": true
   },
+  "xo": {
+    "rules": {
+      "linebreak-style": 0
+    }
+  },
   "dependencies": {
     "oc-trigger": "^1.0.2"
   }

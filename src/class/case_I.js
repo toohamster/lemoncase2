@@ -1,8 +1,9 @@
 /*jslint vars: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
 var $CP = require('./case').$CP,
-	_ = require('../global')['_'],
-	settings = require('../global').settings,
+	global = require('../global'),
+	_ = global['_'],
+	settings = global.settings,
 	IF = require('./instruction'),
 	CALL = require('../instructionType').CALL;
 

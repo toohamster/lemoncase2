@@ -1,11 +1,13 @@
-var isIdentifierStart = require('./identifier.js').isIdentifierStart;
-var isIdentifierChar = require('./identifier.js').isIdentifierChar;
+var identifier = require('./identifier');
+var isIdentifierStart = identifier.isIdentifierStart;
+var isIdentifierChar = identifier.isIdentifierChar;
 
-var tt = require('./tokentype.js').types;
-var keywordTypes = require('./tokentype.js').keywordTypes;
+var tt = require('./tokentype').types;
+var keywordTypes = require('./tokentype').keywordTypes;
 
-var isNewLine = require('./whitespace.js').isNewLine;
-var lineBreak = require('./whitespace.js').lineBreak;
+var whitespace = require('./whitespace');
+var isNewLine = whitespace.isNewLine;
+var lineBreak = whitespace.lineBreak;
 
 module.exports = function (Parser) {
 	var pp = Parser.prototype;
@@ -53,7 +55,7 @@ module.exports = function (Parser) {
 	pp.skipLineComment = function (startSkip) {
 		var start = this.pos;
 		var ch = this.input.charCodeAt(this.pos+=startSkip);
-		while (this.pos < this.input.length && 
+		while (this.pos < this.input.length &&
 			ch !== 10 && ch !== 13 && 
 			ch !== 8232 && ch !== 8233) {
 			++this.pos;
@@ -443,7 +445,7 @@ module.exports = function (Parser) {
 	pp.readMacro = function () {
 		var start = this.pos;
 		var ch = this.fullCharCodeAtPos();
-		while (this.pos < this.input.length && 
+		while (this.pos < this.input.length &&
 			ch !== 10 && ch !== 13 && 
 			ch !== 8232 && ch !== 8233) {
 			++this.pos;

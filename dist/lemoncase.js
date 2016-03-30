@@ -66,8 +66,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		setup = __webpack_require__(19).setup,
 		IF = __webpack_require__(21),
 		Dictionary = __webpack_require__(22),
-		init = __webpack_require__(19).init,
-		getLemoncaseFrame = __webpack_require__(19).getLemoncaseFrame;
+		global = __webpack_require__(19),
+		init = global.init,
+		getLemoncaseFrame = global.getLemoncaseFrame;
 
 	__webpack_require__(23);
 	__webpack_require__(24);
@@ -235,19 +236,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	var keywordRegexp = new RegExp('^(' + keywords.join('|') + ')$');
 
 	function isIdentifierStart(code) {
-		if (code < 65) return code === 36;//$
-		if (code < 91) return true;//A-Z
-		if (code < 97) return code === 95;//_
-		return code < 123;//a-z
+		if (code < 65) return code === 36; // $
+		if (code < 91) return true; // A-Z
+		if (code < 97) return code === 95; // _
+		return code < 123; // a-z
 	}
 
 	function isIdentifierChar(code) {
-		if (code < 48) return code === 36;//$
-		if (code < 58) return true;//0-9
+		if (code < 48) return code === 36; // $
+		if (code < 58) return true; // 0-9
 		if (code < 65) return false;
-		if (code < 91) return true;//A-Z
-		if (code < 97) return code === 95;//_
-		return code < 123;//a-z
+		if (code < 91) return true; // A-Z
+		if (code < 97) return code === 95; // _
+		return code < 123; // a-z
 	}
 
 	module.exports = {
@@ -275,25 +276,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	//no startsExpr or isLoop
 
-	var TokenType = function(label, conf) {
-		if (conf === undefined) { conf = {}; }
+	var TokenType = function (label, conf) {
+		if (conf === undefined) conf = {};
 
 		this.label = label;
 		this.keyword = conf.keyword;
-		this.beforeExpr = !!conf.beforeExpr;
-		this.isAssign = !!conf.isAssign;
-		this.prefix = !!conf.prefix;
-		this.postfix = !!conf.postfix;
+		this.beforeExpr = Boolean(conf.beforeExpr);
+		this.isAssign = Boolean(conf.isAssign);
+		this.prefix = Boolean(conf.prefix);
+		this.postfix = Boolean(conf.postfix);
 		this.binop = conf.binop || null;
-		this.macro = !!conf.macro;
+		this.macro = Boolean(conf.macro);
 	};
 
 	function binop(name, prec) {
-		return new TokenType(name, { beforeExpr: true, binop: prec });
+		return new TokenType(name, {beforeExpr: true, binop: prec});
 	}
 
-	var beforeExpr = { beforeExpr: true };
-	var macro = { macro: true };
+	var beforeExpr = {beforeExpr: true};
+	var macro = {macro: true};
 
 	var types = {
 		num: new TokenType('num'),
@@ -334,9 +335,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		// binary operators with a very low precedence, that should result
 		// in AssignmentExpression nodes.
 
-		eq: new TokenType('=', { beforeExpr: true, isAssign: true }),
-		assign: new TokenType('_=', { beforeExpr: true, isAssign: true }),
-		incDec: new TokenType('++/--', { prefix: true, postfix: true }),
+		eq: new TokenType('=', {beforeExpr: true, isAssign: true}),
+		assign: new TokenType('_=', {beforeExpr: true, isAssign: true}),
+		incDec: new TokenType('++/--', {prefix: true, postfix: true}),
 		prefix: new TokenType('prefix', {beforeExpr: true, prefix: true}),
 		logicalOR: binop('||', 1),
 		logicalAND: binop('&&', 2),
@@ -392,8 +393,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var getLineInfo = __webpack_require__(9).getLineInfo;
-	var empowerErrMsg = __webpack_require__(9).empowerErrMsg;
+	var locutil = __webpack_require__(9);
+	var getLineInfo = locutil.getLineInfo;
+	var empowerErrMsg = locutil.empowerErrMsg;
 
 	// This function is used to raise exceptions on parse errors. It
 	// takes an offset integer (into the current `input`) to indicate
@@ -429,6 +431,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	Position.prototype.offset = function (n) {
 		return new Position(this.line, this.column + n);
 	};
+
+	// these function 'power up' the error message
+	// by draw an arrow point to the error position
+	// with the actual error message under the arrow
 
 	// determine the position of error
 	function getLineInfo(input, offset) {
@@ -482,13 +488,13 @@ return /******/ (function(modules) { // webpackBootstrap
 		}
 
 		var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
-		
+
 		while (++i < emptyWidth) {
 			newMsg += ' ';
 		}
-		
+
 		newMsg += msg;
-		
+
 		return newMsg;
 	}
 
@@ -542,14 +548,16 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var isIdentifierStart = __webpack_require__(6).isIdentifierStart;
-	var isIdentifierChar = __webpack_require__(6).isIdentifierChar;
+	var identifier = __webpack_require__(6);
+	var isIdentifierStart = identifier.isIdentifierStart;
+	var isIdentifierChar = identifier.isIdentifierChar;
 
 	var tt = __webpack_require__(7).types;
 	var keywordTypes = __webpack_require__(7).keywordTypes;
 
-	var isNewLine = __webpack_require__(10).isNewLine;
-	var lineBreak = __webpack_require__(10).lineBreak;
+	var whitespace = __webpack_require__(10);
+	var isNewLine = whitespace.isNewLine;
+	var lineBreak = whitespace.lineBreak;
 
 	module.exports = function (Parser) {
 		var pp = Parser.prototype;
@@ -597,7 +605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		pp.skipLineComment = function (startSkip) {
 			var start = this.pos;
 			var ch = this.input.charCodeAt(this.pos+=startSkip);
-			while (this.pos < this.input.length && 
+			while (this.pos < this.input.length &&
 				ch !== 10 && ch !== 13 && 
 				ch !== 8232 && ch !== 8233) {
 				++this.pos;
@@ -987,7 +995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		pp.readMacro = function () {
 			var start = this.pos;
 			var ch = this.fullCharCodeAtPos();
-			while (this.pos < this.input.length && 
+			while (this.pos < this.input.length &&
 				ch !== 10 && ch !== 13 && 
 				ch !== 8232 && ch !== 8233) {
 				++this.pos;
@@ -1004,11 +1012,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var tt = __webpack_require__(7).types;
-
-	var lineBreak = __webpack_require__(10).lineBreak;
-
-	var isIdentifierStart = __webpack_require__(6).isIdentifierStart;
-	var isIdentifierChar = __webpack_require__(6).isIdentifierChar;
 
 	var getLineInfo = __webpack_require__(9).getLineInfo;
 	var genExpr = __webpack_require__(13);
@@ -1050,7 +1053,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (globaltype.macro) return this.parseSet();
 			if (globaltype === tt._process) return this.parseProcess();
 
-			this.raise(this.start, 'Expect a #set or process');
+			this.raise(this.start, 'Expect a macro or process');
 		};
 
 		pp.parseSet = function () {
@@ -1087,7 +1090,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				default:
 					val = parseInt(this.value, 10);
 					break;
-			}
+			};
 
 			confTable[key] = val;
 		};
@@ -1401,7 +1404,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var visitors = {
 		varDecl: function (node, c) {
-			var out = '', first = true;
+			var out = '';
+			var first = true;
 
 			node.declarations.forEach(function (decl) {
 				if (decl.init) {
@@ -1416,7 +1420,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			return '(' + out + ')';
 		},
 		SequenceExpr: function (node, c) {
-			var out = '', first = true;
+			var out = '';
+			var first = true;
 
 			node.expressions.forEach(function (expr) {
 				if (!first) out += ',';
@@ -1425,7 +1430,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				first = false;
 			});
-			
+
 			return '(' + out + ')';
 		},
 
@@ -1471,7 +1476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		// unary
 		UpdateExpr: function (node) {
 			var inside = '$.' + node.argument;
-			
+
 			return node.prefix ? node.operator + inside : inside + node.operator;
 		},
 		UnaryExpr: function (node, c) {
@@ -1895,8 +1900,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*global require, console, trigger, module */
 	var CALL = __webpack_require__(14).CALL,
 		EXIT = __webpack_require__(14).EXIT,
-		_ = __webpack_require__(19)['_'],
-		settings = __webpack_require__(19).settings,
+		global = __webpack_require__(19),
+		_ = global['_'],
+		settings = global.settings,
 		Collector = __webpack_require__(20),
 		IF = __webpack_require__(21);
 
@@ -2521,8 +2527,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global require, console, trigger, module */
 	var $CP = __webpack_require__(18).$CP,
-		_ = __webpack_require__(19)['_'],
-		settings = __webpack_require__(19).settings,
+		global = __webpack_require__(19),
+		_ = global['_'],
+		settings = global.settings,
 		IF = __webpack_require__(21),
 		CALL = __webpack_require__(14).CALL;
 
@@ -3317,24 +3324,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*jslint sloppy: true, nomen: true */
 
 	var IF = __webpack_require__(21),
-		settings = __webpack_require__(19).settings,
-		_ = __webpack_require__(19)['_'],
+		global = __webpack_require__(19),
+		settings = global.settings,
+		_ = global['_'],
 
-		CALL = __webpack_require__(14).CALL,
-		RETURN = __webpack_require__(14).RETURN,
-		EXIT = __webpack_require__(14).EXIT,
-
-		EXPRESSION = __webpack_require__(14).EXPRESSION,
-		WAIT = __webpack_require__(14).WAIT,
-		TRIGGER = __webpack_require__(14).TRIGGER,
-		ASSERT = __webpack_require__(14).ASSERT,
-		JUMPTO = __webpack_require__(14).JUMPTO,
-		REFRESH = __webpack_require__(14).REFRESH,
-
-		LOG = __webpack_require__(14).LOG,
-		CONSOLE = __webpack_require__(14).CONSOLE,
+		instructionType = __webpack_require__(14),
 		
-		PROCESS = __webpack_require__(14).PROCESS,
+		CALL = instructionType.CALL,
+		RETURN = instructionType.RETURN,
+		EXIT = instructionType.EXIT,
+
+		EXPRESSION = instructionType.EXPRESSION,
+		WAIT = instructionType.WAIT,
+		TRIGGER = instructionType.TRIGGER,
+		ASSERT = instructionType.ASSERT,
+		JUMPTO = instructionType.JUMPTO,
+		REFRESH = instructionType.REFRESH,
+
+		LOG = instructionType.LOG,
+		CONSOLE = instructionType.CONSOLE,
+		
+		PROCESS = instructionType.PROCESS,
 
 		PASSED = 1,
 		FAILURE = 0

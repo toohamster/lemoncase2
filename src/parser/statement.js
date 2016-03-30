@@ -1,10 +1,5 @@
 var tt = require('./tokentype').types;
 
-var lineBreak = require('./whitespace').lineBreak;
-
-var isIdentifierStart = require('./identifier').isIdentifierStart;
-var isIdentifierChar = require('./identifier').isIdentifierChar;
-
 var getLineInfo = require('./locutil').getLineInfo;
 var genExpr = require('./walk');
 
@@ -45,7 +40,7 @@ module.exports = function (Parser) {
 		if (globaltype.macro) return this.parseSet();
 		if (globaltype === tt._process) return this.parseProcess();
 
-		this.raise(this.start, 'Expect a #set or process');
+		this.raise(this.start, 'Expect a macro or process');
 	};
 
 	pp.parseSet = function () {
@@ -82,7 +77,7 @@ module.exports = function (Parser) {
 			default:
 				val = parseInt(this.value, 10);
 				break;
-		}
+		};
 
 		confTable[key] = val;
 	};
