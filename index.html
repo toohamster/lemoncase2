@@ -1,11 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>LemonCase 2</title>
 	<meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="css/style.css" />
 </head>
-<body>
-	<p>Welcome to LemonCase 2 project page</p>
+
+<body style="padding-top:50px">
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">
+					<img alt="LemonCase" src="...">
+				</a>
+			</div>
+			<ul class="nav navbar-nav">
+				<li role="presentation"><a href="#">欢迎</a>
+				</li>
+				<li role="presentation"><a href="doc.html">文档</a>
+				</li>
+				<li role="presentation"><a href="install.html">安装</a>
+				</li>
+				<li role="presentation"><a href="#">贡献</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8">
+				<p>
+					<strong>LemonCase</strong> 是一款用于编写WEB工程前端测试用例的编程语言。
+					简单的仿真指令（动作、等待与断言）语法能更加流畅的描述测试用例。 
+					项目变量与字典变量特性显著提升测试的可维护性。
+				</p>
+			</div>
+	  </div>
+	</div>
+	<div class="container">
+		<div class="row">
+			<div class="page-header">
+				<h2><small>语法特性：</small></h2>
+			</div>
+			<div class="col-md-4">
+				<ul>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+					<li>简单，什么样的语句</li>
+				</ul>
+			</div>
+			<div class="col-md-7 col-md-offset-1">
+				<pre>
+#TIMES 5
+#INTERVAL 3000
+
+process main {
+	//需要先登陆后
+	//测试创建n个测试项目
+	jumpto '/lemonser';
+	wait 2000;
+	//跳转到我的项目界面
+	click "div.selfCard > div.card";
+	wait 2000;
+	//记录一下当前有几个项目卡
+	var projectCard=<#"div.card-container > div.card"/>;
+	console projectCard;
+	click "span.ico-addRound";
+	wait 1000;
+	input "div.grid > input.ng-pristine" by |[a-zA-Z]{8}|;
+	input "textarea.ng-pristine" by "项目描述"+ |\d{4}|;
+	click "div.grid > button:nth-child(5)";
+	wait 1000;
+	assert <#"div.card-container > div.card"/> > projectCard;
+	console "创建项目成功";
+}
+				</pre>
+			</div>
+		</div>
+		<div class="row">
+			<div class="page-header">
+					<h2><small>版本号说明：</small></h2>
+				</div>
+				<p>当前版本为2.0</p>
+		</div>
+	</div>
 </body>
+
 </html>

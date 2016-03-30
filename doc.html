@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>LemonCase 2</title>
+	<meta name="viewport" content="width=device-width,height=device-height,inital-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+	<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body style="padding-top:50px">
+	<nav class="navbar navbar-default navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#">
+					<img alt="LemonCase" src="...">
+				</a>
+			</div>
+			<ul class="nav navbar-nav">
+				<li role="presentation"><a href="index.html">欢迎</a>
+				</li>
+				<li role="presentation"><a href="doc.html">文档</a>
+				</li>
+				<li role="presentation"><a href="install.html">安装</a>
+				</li>
+				<li role="presentation"><a href="#">贡献</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8">
+				<div class="page-header">
+					<h2>开始安装</h2>
+					<p>文案是什么？文案在哪里呢？嗯嗯嗯，呵呵呵呵呵呵。
+					文案是什么？文案在哪里呢？嗯嗯嗯，呵呵呵呵呵呵。</p>
+				</div>
+				<div class="page-header">
+					<h2>执行语句</h2>
+					<p>动作语句、延迟语句、断言语句、记录日志语句、调用过程和     
+
+返回过程</p>
+				</div>
+				<h4>动作语句</h4>
+				<p><strong>写法：</strong>动作名 "执行对象" by 动作参数</p>
+				<small>对执行对象仿真动作。执行对象是用css选择器表达的唯一结果。input动作的参数</small>
+				<p>目前已经实现的动作包括：</p>
+				<ul>
+					
+					<li>mousein, 鼠标移入</li>
+					<li>mouseout, 鼠标移出</li>
+					<li>click, 左键单击</li>
+					<li>dblclick, 双击</li>
+					<li>rclick, 右键单击</li>
+					<li>input, 输入</li>
+					<li>select, 选择下拉菜单</li>
+				</ul>
+				<strong>示例代码：</strong>
+				<pre>
+click "input#test"; //单机输入框
+input "input#test" by "abced"; //在输入框里输入 abced
+input "input#test" by [username]; //在输入框里输入 源自数据用例的username字段的值
+input "input#test" by /[0-9]{4,8}/; //在输入框里输入 4~8位长的数字组成的字符串
+dblclick "input#test"; //双击这个输入框
+mousein "input#test"; //鼠标移入这个输入框
+				</pre>
+				
+				<div class="page-header">
+					<h2>结构语句</h2>
+					<p>过程定义</p>
+				</div>
+				<div class="page-header">
+					<h2>宏</h2>
+					<p>环境变量设定语句</p>
+				</div>
+				<div class="page-header">
+					<h2>样例及其说明</h2>
+					<p>下面是一个具体的案例，您可以通过这个样例完整了解LemonCase的编写规则。</p>
+				</div>
+				<pre>
+	//需要先登陆后
+	//测试创建n个测试项目
+	jumpto '/lemonser';
+	wait 2000;
+	//跳转到我的项目界面
+	click "div.selfCard > div.card";
+	wait 2000;
+	//记录一下当前有几个项目卡
+	var projectCard=<#"div.card-container > div.card"/>;
+	console projectCard;
+	click "span.ico-addRound";
+	wait 1000;
+	input "div.grid > input.ng-pristine" by |[a-zA-Z]{8}|;
+	input "textarea.ng-pristine" by "项目描述"+ |\d{4}|;
+	click "div.grid > button:nth-child(5)";
+	wait 1000;
+	assert <#"div.card-container > div.card"/> > projectCard;
+	console "创建项目成功";
+				</pre>
+				<p>实例说明：</p>
+				<p>这是一个XXX的测试用例，用户的操作流程是。。。。。如果使用LemonCase语言将用户操作流程
+				描述出来，那么应该怎么写呢？</p>
+				<p>
+					首先使用jumpto跳转到用户操作界面。页面需要一些时间加载，所以需要wait给这次跳转一些延迟时间。
+					然后接下来模拟用户操作动作‘点击’。
+				</p>
+			</div>
+			<div class="col-md-3 col-md-offset-1" style="color:#666">
+				<div style="position:fixed">
+					<div class="page-header" style="border:none">
+						<h3>快速索引</h3>
+					</div>
+					<p>开始安装</p>
+					<p>执行语句</p>
+					<ol>
+						<li>动作语句</li>
+						<li>延迟语句</li>
+						<li>断言语句</li>
+						<li>记录日志语句</li>
+						<li>调用过程</li>
+						<li>返回过程</li>
+					</ol>
+					<p>结构语句</p>
+						<ol>
+							<li>过程定义</li>
+						</ol>
+					<p>宏</p>
+						<ol>
+							<li>环境变量设定语句</li>
+						</ol>
+					<p>样例及其说明</p>
+					<div class="page-header">
+						<h4>其他</h4>
+					</div>
+					<p>LemonCase团队的项目</p>
+						<ul>
+							<li>lemonceResultViewer</li>
+							<li>oc-Dialog</li>
+							<li>Lemonce 灵萌测官网</li>
+						</ul>
+					<p>回到顶部</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>
