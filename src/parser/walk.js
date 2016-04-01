@@ -68,7 +68,7 @@ var visitors = {
 
 		if (node.operator === '~~') out += '!';
 
-		return out + '!(' + c(node.left) + ').match(' + c(node.right) + ').length';
+		return out + '!(' + c(node.left) + ').match(' + c(node.right) + ')';
 	},
 
 	// unary
