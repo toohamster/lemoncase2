@@ -1,3 +1,12 @@
 body{
 	font-family: "Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
 }
+#big-banner{
+	padding: 260px 0;
+}
+#big-banner h1{
+	margin-bottom: 50px;
+}
+#big-banner h1 span{
+	font-size: 18px;
+}
