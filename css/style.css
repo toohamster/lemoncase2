@@ -1,12 +1,27 @@
 body{
 	font-family: "Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
 }
-#big-banner{
-	padding: 260px 0;
+#max-banner{
 }
-#big-banner h1{
-	margin-bottom: 50px;
+#banner-content{
+	padding: 240px 0;
 }
-#big-banner h1 span{
+#banner-content h1{
+	margin-bottom: 80px;
+	position: relative;
+}
+#banner-content h1 span{
+	position: absolute;
+	margin: 10px 0 0 10px;
 	font-size: 18px;
+}
+#banner-content p{
+	font-size: 18px;
+}
+
+#grammaticalFeatures .media{
+	margin-bottom: 30px;
+}
+#grammaticalFeatures .media .media-body h4{
+	margin-bottom: 12px;
 }
