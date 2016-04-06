@@ -33,7 +33,7 @@
 		<div class="row">
 			<div class="col-sm-8">
 				<div class="page-header">
-					<h2>概览</h2>
+					<h2 id="overview">概览</h2>
 					<p>LemonCase2 是用于编写WEB工程前端测试用例的编程语言。
 					</p>
 					<p>
@@ -45,7 +45,7 @@
 						http://git.oschina.net/increase/lemoncase2</a>。
 					</p>
 				</div>
-				<h3>关键字&特殊表达式&宏 - 速查表</h3>
+				<h3 id="table">关键字&特殊表达式&宏 - 速查表</h3>
 				<div class="row">
 					<div class="col-md-6">
 						<table class="table table-bordered table-hover">
@@ -217,7 +217,7 @@
 返回过程</p>
 				</div>
 <!-------------------动作语句-------------------------->
-				<h3>动作语句</h3>
+				<h3 id="z1">动作语句</h3>
 				<p><strong>写法：</strong>动作名&nbsp;&nbsp;"执行对象"&nbsp;&nbsp;by&nbsp;&nbsp;输入参数;<br/>
 				<small>*注：执行对象是用css选择器表达的唯一结果。</small></p>
 				<table class="table table-bordered table-striped table-hover">
@@ -277,14 +277,16 @@ dblclick "input#test"; //双击这个输入框
 mousein "input#test"; //鼠标移入这个输入框
 				</pre>
 <!-------------------------延迟语句----------------------->
-				<h3>延迟语句</h3>
+
+				<h3 id="z2">延迟语句</h3>
 				<p><strong>写法：</strong>wait&nbsp;&nbsp;1000;</p>
 				<strong>示例代码：</strong>
 				<pre>
 wait:3000; //等待3秒钟
 				</pre>
 <!-------------------------断言语句----------------------->
-				<h3>断言语句</h3>
+
+				<h3 id="z3">断言语句</h3>
 				<p><strong>写法：</strong>assert&nbsp;&nbsp;断言条件表达式&nbsp;&nbsp;in&nbsp;&nbsp; 时间参数;</p>
 				<strong>示例代码：</strong>
 				<pre>
@@ -292,28 +294,28 @@ assert <#"textarea#test"/>; //断言存在一个id为test的输入框
 assert <#"textarea#test"/> in 2000; //断言在2秒内会出现一个id为test的输入框
 				</pre>
 <!---------------------跳转语句--------------------->
-				<h3>跳转语句</h3>
+				<h3 id="z4">跳转语句</h3>
 				<p><strong>写法：</strong>jumpto&nbsp;&nbsp;'跳转地址'</p>
 				<strong>示例代码：</strong>
 				<pre>
 jumpto '/#/login'; //跳转到某个项目的登录页
 				</pre>
 <!---------------------日志输出语句--------------------->
-				<h3>日志输出语句</h3>
+				<h3 id="z5">日志输出语句</h3>
 				<p><strong>写法：</strong>log&nbsp;&nbsp;直接量|表达式;</p>
 				<strong>示例代码：</strong>
 				<pre>
 log "Hello Word"; //手动记录一条日志
 				</pre>
 <!---------------------控制台输出语句--------------------->
-				<h3>控制台输出语句</h3>
+				<h3 id="z6">控制台输出语句</h3>
 				<p><strong>写法：</strong>log&nbsp;&nbsp;直接量|表达式;</p>
 				<strong>示例代码：</strong>
 				<pre>
 log "Hello Word"; //手动输出一条语句
 				</pre>
 <!---------------------调用过程语句--------------------->
-				<h3>调用过程语句</h3>
+				<h3 id="z7">调用过程语句</h3>
 				<p><strong>写法：</strong>过程名();</p>
 				<strong>示例代码：</strong>
 				<pre>
@@ -327,7 +329,7 @@ return;
 }
 				</pre>
 <!---------------------返回过程语句--------------------->
-				<h3>返回过程语句</h3>
+				<h3 id="z8">返回过程语句</h3>
 				<p><strong>写法：</strong>return;</p>
 				<strong>示例代码：</strong>
 				<pre>
@@ -342,7 +344,7 @@ return;
 					<p>过程定义</p>
 				</div>
 <!---------------------过程定义语句--------------------->
-				<h3>过程定义语句</h3>
+				<h3 id="gc">过程定义语句</h3>
 				<p><strong>写法：</strong>prosess&nbsp;&nbsp;过程名&nbsp;&nbsp;{代码段}</p>
 				<strong>示例代码：</strong>
 				<pre>
@@ -352,7 +354,7 @@ return;
 }
 				</pre>
 				<div class="page-header">
-					<h2>宏</h2>
+					<h2 id="bl">宏</h2>
 					<p>环境变量设定语句</p>
 				</div>
 <!---------------------环境变量设定语句--------------------->
@@ -363,65 +365,73 @@ return;
 #set TIME 10  //整个case的执行次数为10次
 #set INTERVAL 10  //case每次执行的时间间隔
 				</pre>
-				<div class="page-header">
+				<div id="demo" class="page-header">
 					<h2>样例及其说明</h2>
 					<p>下面是一个具体的案例，您可以通过这个样例完整了解LemonCase的编写规则。</p>
 				</div>
 				<pre>
+	#set TIME 1 //整个case的执行次数为1次
+	#set INTERVAL 1000  //case每次执行的时间间隔
 	//需要先登陆后
-	//测试创建n个测试项目
-	jumpto '/lemonser';
+	//测试创建测试项目
+	jumpto 'lemonser/project/add';
 	wait 2000;
 	//跳转到我的项目界面
 	click "div.selfCard > div.card";
-	wait 2000;
-	//记录一下当前有几个项目卡
-	var projectCard=<#"div.card-container > div.card"/>;
-	console projectCard;
-	click "span.ico-addRound";
 	wait 1000;
-	input "div.grid > input.ng-pristine" by |[a-zA-Z]{8}|;
-	input "textarea.ng-pristine" by "项目描述"+ |\d{4}|;
-	click "div.grid > button:nth-child(5)";
-	wait 1000;
-	assert <#"div.card-container > div.card"/> > projectCard;
-	console "创建项目成功";
+	//记录一下当前有几个项目
+	var projectNum=<#"div.card-container > div.card"/>;
+	console projectNum;  //控制台输出一下项目个数，这里只是为了检查调试用
+	click "span.ico-addRound";  //点击添加按钮去创建测试项目页面
+	wait 1000; //加1000毫秒跳转时间
+	input "div.grid > input.ng-pristine" by |[a-zA-Z]{8}|; //输入项目名称，by后面是根据正则表达式
+	input "textarea.ng-pristine" by "项目描述"+ |\d{4}|;  //输入项目信息
+	click "div.grid > button:nth-child(5)";  //点击创建按钮创建这个测试项目
+	assert <#"div.card-container > div.card"/> == projectNum+1 ; //断言当前项目个数比上一次多1个
+	console "创建项目成功";  //控制台输出创建成功的提示信息，检查用
 				</pre>
 				<p>实例说明：</p>
-				<p>这是一个XXX的测试用例，用户的操作流程是。。。。。如果使用LemonCase语言将用户操作流程
-				描述出来，那么应该怎么写呢？</p>
-				<p>
-					首先使用jumpto跳转到用户操作界面。页面需要一些时间加载，所以需要wait给这次跳转一些延迟时间。
-					然后接下来模拟用户操作动作‘点击’。
-				</p>
+				<p>这是一个用于测试 创建测试用例功能的测试用例，首先用户的操作流程是：</pp>
+				<ol>
+					<li>创建测试项目的页面为测试页面，所以对应 case 写法是 jumpto 'lemonser/project/add'。</li>
+					<li>页面跳转需要响应时间，所以这里添加了一个等待指令wait 2000，用于设定跳转等待时间。</li>
+					<li>点击创建测试项目按钮，这个点击按钮的写法是 click "按钮cssPath";</li>
+					<li>点击这个按钮会跳转到创建项目填写的页面，所以为了安全起见给一个跳转时间 wait 1000;</li>
+					<li>接下来要填写一些项目基本信息，项目名字和描述什么的。接下来输入的指令写法为：input "输入表单组件cssPath" by 输入参数表达式；</li>
+					<li>输入完毕以后点击确认创建按钮。写法是 click "按钮cssPath";</li>
+					<li>最重要的这一步就是断言项目创建是否成功了，所以我们可以通过检查项目个数是否比上一次多了一个来确定之前的操作是否成功。所以在点击创建项目按钮之前
+				要记录一下当前项目个数并存在一个变量中，以便后面用于比较实用，写法是：var projectNum=<# "项目cssPath"/>;</li>
+					<li>接下来就可以写断言创建成功的指令了，写法是：assert <#"项目cssPath"/> == projectNum+1;</li>
+					<li>如果需要一些控制台提示，可以使用语句：console "提示信息"；</li>
+				</ol>
 			</div>
 			<div class="col-sm-3 col-sm-offset-1" style="color:#666">
 				<div style="position:fixed">
 					<div class="page-header" style="border:none">
 						<h3>目录</h3>
 					</div>
-					<p>概览</p>
-					<p>关键字&特殊表达式&宏 - 速查表</p>
+					<p><a href="#overview">概览</a></p>
+					<p><a href="#table">关键字&特殊表达式&宏 - 速查表</a></p>
 					<p>执行语句</p>
 					<ol>
-						<li>动作</li>
-						<li>延迟</li>
-						<li>断言</li>
-						<li>跳转</li>
-						<li>日志输出</li>
-						<li>控制台输出</li>
-						<li>调用过程</li>
-						<li>返回过程</li>
+						<li><a href="#z1">动作</a></li>
+						<li><a href="#z2">延迟</a></li>
+						<li><a href="#z3">断言</a></li>
+						<li><a href="#z4">跳转</a></li>
+						<li><a href="#z5">日志输出</a></li>
+						<li><a href="#z6">控制台输出</a></li>
+						<li><a href="#z7">调用过程</a></li>
+						<li><a href="#z8">返回过程</a></li>
 					</ol>
 					<p>结构语句</p>
 						<ol>
-							<li>过程定义</li>
+							<li><a href="#gc">过程定义</a></li>
 						</ol>
 					<p>宏</p>
 						<ol>
-							<li>环境变量设定语句</li>
+							<li><a href="#bl">环境变量设定语句</a></li>
 						</ol>
-					<p>样例及其说明</p>
+					<p><a href="#demo">样例及其说明</a></p>
 					<div class="page-header">
 						<h4>其他</h4>
 					</div>
