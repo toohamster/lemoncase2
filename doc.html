@@ -14,7 +14,7 @@
 		<div class="container">
 			<div class="navbar-header">
 				<a class="navbar-brand" href="#">
-					<img alt="LemonCase" src="...">
+					LemonCase2
 				</a>
 			</div>
 			<ul class="nav navbar-nav">
@@ -31,11 +31,184 @@
 	</nav>
 	<div class="container">
 		<div class="row">
-			<div class="col-md-8">
+			<div class="col-sm-8">
 				<div class="page-header">
-					<h2>开始安装</h2>
-					<p>文案是什么？文案在哪里呢？嗯嗯嗯，呵呵呵呵呵呵。
-					文案是什么？文案在哪里呢？嗯嗯嗯，呵呵呵呵呵呵。</p>
+					<h2>概览</h2>
+					<p>LemonCase2 是用于编写WEB工程前端测试用例的编程语言。
+					</p>
+					<p>
+						github托管地址：<a href="https://github.com/or-change/lemoncase2">
+						https://github.com/or-change/lemoncase2</a>
+					</p>
+					<p>
+						开源中国托管地址：<a href="http://git.oschina.net/increase/lemoncase2">
+						http://git.oschina.net/increase/lemoncase2</a>。
+					</p>
+				</div>
+				<h3>关键字&特殊表达式&宏 - 速查表</h3>
+				<div class="row">
+					<div class="col-md-6">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th width="160">宏</th>
+									<th>描述</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>#CLOCK</td>
+									<td>频率</td>
+								</tr>
+								<tr>
+									<td>#TIMES</td>
+									<td>执行次数</td>
+								</tr>
+								<tr>
+									<td>#INTERVAL</td>
+									<td>时间间隔</td>
+								</tr>
+								<tr>
+									<td>#SCREEN</td>
+									<td>屏幕尺寸</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-6">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th width="160">表达式</th>
+									<th>描述</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><@ "cssPath"/></td>
+									<td>获取元素内容</td>
+								</tr>
+								<tr>
+									<td><# "cssPath"/></td>
+									<td>获取元素个数</td>
+								</tr>
+								<tr>
+									<td>A~~B</td>
+									<td>A表达式结果包含B表达式</td>
+								</tr>
+								<tr>
+									<td>A==B</td>
+									<td>A表达式结果等于B表达式</td>
+								</tr>
+								<tr>
+									<td>A!=B</td>
+									<td>A表达式结果不等于B表达式</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-6">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th width="160">指令关键字</th>
+									<th>描述</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>var</td>
+									<td>变量定义</td>
+								</tr>
+								<tr>
+									<td>process</td>
+									<td>过程定义</td>
+								</tr>
+								<tr>
+									<td>in</td>
+									<td>时间条件定义</td>
+								</tr>
+								<tr>
+									<td>by</td>
+									<td>输入内容定义</td>
+								</tr>
+								<tr>
+									<td>jumpto</td>
+									<td>界面跳转</td>
+								</tr>
+								<tr>
+									<td>log</td>
+									<td>日志输出</td>
+								</tr>
+								<tr>
+									<td>return</td>
+									<td>返回</td>
+								</tr>
+								<tr>
+									<td>console</td>
+									<td>控制台输出</td>
+								</tr>
+								<tr>
+									<td>wait</td>
+									<td>延迟</td>
+								</tr>
+								<tr>
+									<td>assert</td>
+									<td>断言</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div class="col-md-6">
+						<table class="table table-bordered table-hover">
+							<thead>
+								<tr>
+									<th width="160">动作关键字</th>
+									<th>描述</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>click</td>
+									<td>单击</td>
+								</tr>
+								<tr>
+									<td>input</td>
+									<td>输入</td>
+								</tr>
+								<tr>
+									<td>rclick</td>
+									<td>右键单击</td>
+								</tr>
+								<tr>
+									<td>dblclick</td>
+									<td>双击</td>
+								</tr>
+								<tr>
+									<td>movein</td>
+									<td>鼠标移入</td>
+								</tr>
+								<tr>
+									<td>moveout</td>
+									<td>鼠标移出</td>
+								</tr>
+								<tr>
+									<td>scroll</td>
+									<td>滚动</td>
+								</tr>
+								<tr>
+									<td>select</td>
+									<td>下拉菜单</td>
+								</tr>
+								<tr>
+									<td>refresh</td>
+									<td>刷新</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+	
+					
 				</div>
 				<div class="page-header">
 					<h2>执行语句</h2>
@@ -43,38 +216,153 @@
 
 返回过程</p>
 				</div>
-				<h4>动作语句</h4>
-				<p><strong>写法：</strong>动作名 "执行对象" by 动作参数</p>
-				<small>对执行对象仿真动作。执行对象是用css选择器表达的唯一结果。input动作的参数</small>
-				<p>目前已经实现的动作包括：</p>
-				<ul>
-					
-					<li>mousein, 鼠标移入</li>
-					<li>mouseout, 鼠标移出</li>
-					<li>click, 左键单击</li>
-					<li>dblclick, 双击</li>
-					<li>rclick, 右键单击</li>
-					<li>input, 输入</li>
-					<li>select, 选择下拉菜单</li>
-				</ul>
+<!-------------------动作语句-------------------------->
+				<h3>动作语句</h3>
+				<p><strong>写法：</strong>动作名&nbsp;&nbsp;"执行对象"&nbsp;&nbsp;by&nbsp;&nbsp;输入参数;<br/>
+				<small>*注：执行对象是用css选择器表达的唯一结果。</small></p>
+				<table class="table table-bordered table-striped table-hover">
+					<thead>
+						<tr>
+							<th>动作名参数</th>
+							<th>执行对象</th>
+							<th>参数</th>
+							<th>描述</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>click</td>
+							<td>css选择器路径</td>
+							<td>无</td>
+							<td>模拟用户点击操作</td>
+						</tr>
+						<tr>
+							<td>input</td>
+							<td>css选择器路径</td>
+							<td>直接量|正则表达式</td>
+							<td>模拟用户表单输入</td>
+						</tr>
+						<tr>
+							<td>dbclick</td>
+							<td>css选择器路径</td>
+							<td>无</td>
+							<td>模拟用户双击操作</td>
+						</tr>
+						<tr>
+							<td>rclick</td>
+							<td>css选择器路径</td>
+							<td>无</td>
+							<td>模拟用户右键点击操作</td>
+						</tr>
+						<tr>
+							<td>mousein</td>
+							<td>css选择器路径</td>
+							<td>无</td>
+							<td>模拟用户鼠标移动到某个元素上</td>
+						</tr>
+						<tr>
+							<td>select</td>
+							<td>css选择器路径</td>
+							<td>无</td>
+							<td>。。。。。</td>
+						</tr>
+					</tbody>
+				</table>
 				<strong>示例代码：</strong>
 				<pre>
 click "input#test"; //单机输入框
 input "input#test" by "abced"; //在输入框里输入 abced
-input "input#test" by [username]; //在输入框里输入 源自数据用例的username字段的值
 input "input#test" by /[0-9]{4,8}/; //在输入框里输入 4~8位长的数字组成的字符串
 dblclick "input#test"; //双击这个输入框
 mousein "input#test"; //鼠标移入这个输入框
+				</pre>
+<!-------------------------延迟语句----------------------->
+				<h3>延迟语句</h3>
+				<p><strong>写法：</strong>wait&nbsp;&nbsp;1000;</p>
+				<strong>示例代码：</strong>
+				<pre>
+wait:3000; //等待3秒钟
+				</pre>
+<!-------------------------断言语句----------------------->
+				<h3>断言语句</h3>
+				<p><strong>写法：</strong>assert&nbsp;&nbsp;断言条件表达式&nbsp;&nbsp;in&nbsp;&nbsp; 时间参数;</p>
+				<strong>示例代码：</strong>
+				<pre>
+assert <#"textarea#test"/>; //断言存在一个id为test的输入框
+assert <#"textarea#test"/> in 2000; //断言在2秒内会出现一个id为test的输入框
+				</pre>
+<!---------------------跳转语句--------------------->
+				<h3>跳转语句</h3>
+				<p><strong>写法：</strong>jumpto&nbsp;&nbsp;'跳转地址'</p>
+				<strong>示例代码：</strong>
+				<pre>
+jumpto '/#/login'; //跳转到某个项目的登录页
+				</pre>
+<!---------------------日志输出语句--------------------->
+				<h3>日志输出语句</h3>
+				<p><strong>写法：</strong>log&nbsp;&nbsp;直接量|表达式;</p>
+				<strong>示例代码：</strong>
+				<pre>
+log "Hello Word"; //手动记录一条日志
+				</pre>
+<!---------------------控制台输出语句--------------------->
+				<h3>控制台输出语句</h3>
+				<p><strong>写法：</strong>log&nbsp;&nbsp;直接量|表达式;</p>
+				<strong>示例代码：</strong>
+				<pre>
+log "Hello Word"; //手动输出一条语句
+				</pre>
+<!---------------------调用过程语句--------------------->
+				<h3>调用过程语句</h3>
+				<p><strong>写法：</strong>过程名();</p>
+				<strong>示例代码：</strong>
+				<pre>
+process main {
+sub(); //调用sub过程
+return;
+}
+process sub {
+wait 3000;
+return;
+}
+				</pre>
+<!---------------------返回过程语句--------------------->
+				<h3>返回过程语句</h3>
+				<p><strong>写法：</strong>return;</p>
+				<strong>示例代码：</strong>
+				<pre>
+process main {
+wait 3000;
+return;
+}
 				</pre>
 				
 				<div class="page-header">
 					<h2>结构语句</h2>
 					<p>过程定义</p>
 				</div>
+<!---------------------过程定义语句--------------------->
+				<h3>过程定义语句</h3>
+				<p><strong>写法：</strong>prosess&nbsp;&nbsp;过程名&nbsp;&nbsp;{代码段}</p>
+				<strong>示例代码：</strong>
+				<pre>
+process sub { //定义一个名为sub的子过程
+wait 3000;
+return;
+}
+				</pre>
 				<div class="page-header">
 					<h2>宏</h2>
 					<p>环境变量设定语句</p>
 				</div>
+<!---------------------环境变量设定语句--------------------->
+				<h3>环境变量设定语句</h3>
+				<p><strong>写法：</strong>#set&nbsp;&nbsp;设置项&nbsp;&nbsp;值</p>
+				<strong>示例代码：</strong>
+				<pre>
+#set TIME 10  //整个case的执行次数为10次
+#set INTERVAL 10  //case每次执行的时间间隔
+				</pre>
 				<div class="page-header">
 					<h2>样例及其说明</h2>
 					<p>下面是一个具体的案例，您可以通过这个样例完整了解LemonCase的编写规则。</p>
@@ -107,18 +395,21 @@ mousein "input#test"; //鼠标移入这个输入框
 					然后接下来模拟用户操作动作‘点击’。
 				</p>
 			</div>
-			<div class="col-md-3 col-md-offset-1" style="color:#666">
+			<div class="col-sm-3 col-sm-offset-1" style="color:#666">
 				<div style="position:fixed">
 					<div class="page-header" style="border:none">
-						<h3>快速索引</h3>
+						<h3>目录</h3>
 					</div>
-					<p>开始安装</p>
+					<p>概览</p>
+					<p>关键字&特殊表达式&宏 - 速查表</p>
 					<p>执行语句</p>
 					<ol>
-						<li>动作语句</li>
-						<li>延迟语句</li>
-						<li>断言语句</li>
-						<li>记录日志语句</li>
+						<li>动作</li>
+						<li>延迟</li>
+						<li>断言</li>
+						<li>跳转</li>
+						<li>日志输出</li>
+						<li>控制台输出</li>
 						<li>调用过程</li>
 						<li>返回过程</li>
 					</ol>
