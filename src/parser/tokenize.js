@@ -198,6 +198,7 @@ module.exports = function (Parser) {
 		if (code === 60) {
 			if (next === 35) return this.finishOp(tt.tagNumL, 2); // '#'
 			if (next === 64) return this.finishOp(tt.tagAtL, 2); // '@'
+			if (next === 33) return this.finishOp(tt.tagFacL, 2); // '!'
 		}
 		if (next === 61) size = 2;
 

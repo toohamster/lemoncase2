@@ -208,7 +208,7 @@ module.exports = function (Parser) {
 			case tt.parenL:
 				return this.parseParenExpression();
 
-			case tt.tagAtL: case tt.tagNumL:
+			case tt.tagAtL: case tt.tagNumL: case tt.tagFacL:
 				return this.parseTagExpression();
 
 			default:
@@ -252,7 +252,7 @@ module.exports = function (Parser) {
 
 	pp.parseTagExpression = function () {
 		var node = {
-			type: this.type === tt.tagAtL ? 'TextExpr' : 'CountExpr'
+			type: this.type.label
 		};
 
 		this.next();

@@ -47,7 +47,7 @@ test('parse shiny ~~', t => {
 });
 
 test('parse unary', t => {
-	var p = tokenizer('assert !<#"h1 > .container"/>;');
+	var p = tokenizer('assert !<!"h1 > .container"/>;');
 	p.nextToken();
 	
 	t.notThrows(function (){

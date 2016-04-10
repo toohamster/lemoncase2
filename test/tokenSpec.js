@@ -45,7 +45,7 @@ test('parse regexp', t => {
 	
 	p.exprAllowed = true;
 	p.nextToken();
-	t.same(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: false});
+	t.deepEqual(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: false});
 });
 
 test('index', t => {
@@ -81,8 +81,8 @@ test('tag', t => {
 	t.is(p.type.label, '/>');
 	
 	p.nextToken();
-	t.is(p.type.label, '<@');
+	t.is(p.type.label, 'CountExpr');
 	
 	p.nextToken();
-	t.is(p.type.label, '<#');
+	t.is(p.type.label, 'TextExpr');
 });

@@ -317,8 +317,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		comma: new TokenType(',', beforeExpr),
 		semi: new TokenType(';', beforeExpr),
 		colon: new TokenType(':', beforeExpr),
-		tagNumL: new TokenType('<#', beforeExpr),
-		tagAtL: new TokenType('<@', beforeExpr),
+		tagNumL: new TokenType('TextExpr', beforeExpr), // <#
+		tagAtL: new TokenType('CountExpr', beforeExpr), // <@
+		tagFacL: new TokenType('VisibilityExpr', beforeExpr), // <!
 		tagR: new TokenType('/>'),
 
 		// Operators. These carry several kinds of properties to help the
@@ -748,6 +749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (code === 60) {
 				if (next === 35) return this.finishOp(tt.tagNumL, 2); // '#'
 				if (next === 64) return this.finishOp(tt.tagAtL, 2); // '@'
+				if (next === 33) return this.finishOp(tt.tagFacL, 2); // '!'
 			}
 			if (next === 61) size = 2;
 
@@ -1502,6 +1504,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			var inside = 'String(' + c(node.val) + ')';
 
 			return 'c(' + inside + ')';
+		},
+		VisibilityExpr: function (node, c) {
+			var inside = 'String(' + c(node.val) + ')';
+
+			return 'v(' + inside + ')';
 		}
 	};
 
@@ -1512,7 +1519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			return visitors[type](node, c);
 		})(node);
 
-		return new Function('$,o,d,c,t', 'return ' + string + ';');
+		return new Function('$,o,d,c,t, v', 'return ' + string + ';');
 	};
 
 
@@ -1790,7 +1797,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				case tt.parenL:
 					return this.parseParenExpression();
 
-				case tt.tagAtL: case tt.tagNumL:
+				case tt.tagAtL: case tt.tagNumL: case tt.tagFacL:
 					return this.parseTagExpression();
 
 				default:
@@ -1834,7 +1841,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		pp.parseTagExpression = function () {
 			var node = {
-				type: this.type === tt.tagAtL ? 'TextExpr' : 'CountExpr'
+				type: this.type.label
 			};
 
 			this.next();

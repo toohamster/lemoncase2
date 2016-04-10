@@ -100,6 +100,11 @@ var visitors = {
 		var inside = 'String(' + c(node.val) + ')';
 
 		return 'c(' + inside + ')';
+	},
+	VisibilityExpr: function (node, c) {
+		var inside = 'String(' + c(node.val) + ')';
+
+		return 'v(' + inside + ')';
 	}
 };
 
@@ -110,5 +115,5 @@ module.exports = function genExpr(node) {
 		return visitors[type](node, c);
 	})(node);
 
-	return new Function('$,o,d,c,t', 'return ' + string + ';');
+	return new Function('$,o,d,c,t, v', 'return ' + string + ';');
 };
