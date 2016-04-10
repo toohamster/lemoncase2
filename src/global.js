@@ -64,7 +64,16 @@ _ = {
 		if (DOM) {
 			return DOM[DOM.value ? 'value' : 'innerHTML'];
 		}
+		//TODO 它不存在就不应该有任何输出
 		return 'Error:No such HTMLElement.';
+	},
+	isVisible: function (cssPath) {
+		var DOM = _.document().querySelector(cssPath);
+		if (!DOM) {
+			return false;
+		}
+
+		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
 	}
 };
 

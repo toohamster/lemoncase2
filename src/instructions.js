@@ -187,7 +187,7 @@ IF(JUMPTO, {
 });
 IF(REFRESH, {
 	operation: function Refresh() {
-		settings.contextFrame.src = _.document().location.href;
+		_.document().location.reload();
 		this.$case.$pushLog([REFRESH], this.line());
 	}
 });

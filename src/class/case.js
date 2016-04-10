@@ -70,6 +70,7 @@ function Case(syntaxTree, object, dictionary) {
 	this.$$currentLoop = 0;
 
 	// stacks
+	this.vars = {};
 	this.$$blockStack = []; // {counter, segment}
 	this.$$scopeStack = []; // {blockIndex, vars}
 
@@ -141,7 +142,7 @@ $CP.$$run = function () {
 		this.$$popInstruction().execute();
 		settings.runCallback.call(this);
 	} catch (error) {
-		console.error(error);
+		console.error('[Error FROM LC2]:' + error);
 		settings.runExceptionHandle.call(this, error);
 	}
 	return this;
