@@ -1,37 +1,50 @@
 {
   "name": "lc2",
-  "version": "1.0.0",
-  "description": "",
-  "main": "./src/parser/index.js",
+  "version": "1.2.0",
+  "description": "browser automation library",
+  "main": "index.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "dev": "webpack-dev-server",
+    "build": "webpack && webpack -p --output-filename lemoncase.min.js"
   },
   "repository": {
     "type": "git",
     "url": "https://git.oschina.net/increase/lemoncase2.git"
   },
+  "files": [
+    "dist/",
+	"lib",
+	"src/",
+	"index.js"
+  ],
   "keywords": [
     "test"
   ],
-  "author": "Weilin Shi",
-  "license": "GPL",
+  "maintainers": [
+    "Weilin Shi <934587911@qq.com>"
+  ],
+  "author": "李超",
+  "license": "MIT",
   "devDependencies": {
-    "angular": "^1.5.0",
-    "ava": "^0.12.0",
-    "browserify": "^13.0.0",
-    "codemirror": "^5.12.0",
-    "gulp": "^3.9.1",
-    "gulp-include": "^2.1.0",
-    "gulp-rename": "^1.2.2",
-    "gulp-uglify": "^1.5.3",
-    "gulp-util": "^3.0.7",
-    "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "angular": "^1.5.3",
+    "ava": "^0.14.0",
+    "codemirror": "^5.13.4",
+    "webpack": "^1.12.15",
+    "webpack-dev-server": "^1.14.1"
   },
   "ava": {
     "files": [
       "test/*Spec.js"
     ],
     "failFast": true
+  },
+  "xo": {
+    "rules": {
+      "linebreak-style": 0
+    }
+  },
+  "dependencies": {
+    "oc-trigger": "^1.0.2"
   }
 }

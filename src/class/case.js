@@ -1,5 +1,13 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
-/*global CALL, EXIT, _, settings, Collector, console, IF */
+/*global require, console, trigger, module */
+var CALL = require('../instructionType').CALL,
+	EXIT = require('../instructionType').EXIT,
+	global = require('../global'),
+	_ = global['_'],
+	settings = global.settings,
+	Collector = require('../../lib/collector'),
+	IF = require('./instruction');
+
 function linker(syntaxTree, object, dictionary, $case) {
 	var eT = {
 		process: {},
@@ -43,7 +51,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 }
 function Case(syntaxTree, object, dictionary) {
 	if (!(this instanceof Case)) {
-		return new Case(syntaxTree);
+		return new Case(syntaxTree, object, dictionary);
 	}
 
 	var link = linker(syntaxTree, object, dictionary, this);
@@ -62,6 +70,7 @@ function Case(syntaxTree, object, dictionary) {
 	this.$$currentLoop = 0;
 
 	// stacks
+	this.vars = {};
 	this.$$blockStack = []; // {counter, segment}
 	this.$$scopeStack = []; // {blockIndex, vars}
 
@@ -133,7 +142,7 @@ $CP.$$run = function () {
 		this.$$popInstruction().execute();
 		settings.runCallback.call(this);
 	} catch (error) {
-		console.error(error);
+		console.error('[Error FROM LC2]:' + error);
 		settings.runExceptionHandle.call(this, error);
 	}
 	return this;
@@ -147,4 +156,9 @@ $CP.$$core = function () {
 	}, this.$$getConfig('clock') || settings.defaultClock);
 
 	return this;
+};
+
+module.exports = {
+	Case: Case,
+	$CP: $CP
 };

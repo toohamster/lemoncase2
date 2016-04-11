@@ -1,4 +1,4 @@
-var lineBreakG = require('./whitespace.js').lineBreakG;
+var lineBreakG = require('./whitespace').lineBreakG;
 
 var Position = function (line, col) {
 	this.line = line;
@@ -8,6 +8,10 @@ var Position = function (line, col) {
 Position.prototype.offset = function (n) {
 	return new Position(this.line, this.column + n);
 };
+
+// these function 'power up' the error message
+// by draw an arrow point to the error position
+// with the actual error message under the arrow
 
 // determine the position of error
 function getLineInfo(input, offset) {
@@ -25,7 +29,7 @@ function getLineInfo(input, offset) {
 
 // provide better error message
 
-function empowerErrMsg (input, loc, msg) {
+function empowerErrMsg(input, loc, msg) {
 	var errLine = input.split(lineBreakG)[loc.line - 1];
 	var strBeforeErr = errLine.substr(0, loc.column);
 	var width = widthOf(strBeforeErr);
@@ -36,50 +40,50 @@ function empowerErrMsg (input, loc, msg) {
 	return '\n' + errLine + '\n' + arrow + '\n' + positionedMsg;
 }
 
-function genArrow (width) {
+function genArrow(width) {
 	var i = -1, j = -1, out = '';
-	
+
 	while (++i < width) {
 		out += ' ';
 	}
-	
+
 	out += '↑\n';
-	
+
 	while (++j < width) {
 		out += ' ';
 	}
-	
+
 	out += '↑';
-	
+
 	return out;
 }
 
-function positionMsg (msg, width) {
+function positionMsg(msg, width) {
 	// very long message, no need to reposition
 	if (msg.length / 2 > width) {
 		return msg;
 	}
-	
+
 	var i = -1, emptyWidth = width - Math.floor(msg.length / 2), newMsg = '';
-	
+
 	while (++i < emptyWidth) {
 		newMsg += ' ';
 	}
-	
+
 	newMsg += msg;
-	
+
 	return newMsg;
 }
 
 // calculate width of string
-function widthOf (str) {
-	var code, 
+function widthOf(str) {
+	var code,
 		width = 0,
 		i = -1, len = str.length;
-		
+
 	while (++i < len) {
 		code = str.charCodeAt(i);
-		
+
 		switch (code) {
 			case 9: // '\t'
 				width += 4;
@@ -89,7 +93,7 @@ function widthOf (str) {
 				break;
 		}
 	}
-	
+
 	return width;
 }
 

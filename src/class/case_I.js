@@ -1,5 +1,11 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global Instruction, $CP, _, settings, IF, CALL */
+/*global require, console, trigger, module */
+var $CP = require('./case').$CP,
+	global = require('../global'),
+	_ = global['_'],
+	settings = global.settings,
+	IF = require('./instruction'),
+	CALL = require('../instructionType').CALL;
 
 $CP.$setIdleTask = function (taskFn) {
 	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -97,9 +103,8 @@ $CP.$exitLoop = function () {
 
 $CP.$runExp = function (expFn) {
 	if (typeof expFn === 'function') {
-		return expFn(this.$getCurrentScope().vars,
-					 this.$objectList, this.$loopData,
-					 _.countDOM, _.getInnerHTML);
+		return expFn(this.vars, this.$objectList, this.$loopData,
+					 _.countDOM, _.getInnerHTML, _.isVisible);
 	}
 	return expFn;
 };
@@ -129,3 +134,5 @@ $CP.$clearScope = function () {
 
 	return this;
 };
+
+module.exports = $CP;

@@ -1,9 +1,9 @@
-var getOptions = require('./options.js').getOptions;
-var keywordRegexp = require('./identifier.js').keywordRegexp;
-var tt = require('./tokentype.js').types;
+var getOptions = require('./options').getOptions;
+var keywordRegexp = require('./identifier').keywordRegexp;
+var tt = require('./tokentype').types;
 
 var Parser = function (options, input) {
-	this.options  = getOptions(options);
+	this.options = getOptions(options);
 	this.keywords = keywordRegexp;
 	this.input = String(input);
 
@@ -54,12 +54,11 @@ var extend = function (fn) {
 	fn(Parser);
 };
 
-extend(require('./location.js'));
-extend(require('./tokenize.js'));
-extend(require('./statement.js'));
-extend(require('./parseutil.js'));
-extend(require('./expression.js'));
-extend(require('./lval.js'));
-
+extend(require('./location'));
+extend(require('./tokenize'));
+extend(require('./statement'));
+extend(require('./parseutil'));
+extend(require('./expression'));
+extend(require('./lval'));
 
 module.exports = Parser;

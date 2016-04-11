@@ -1,21 +1,32 @@
 /*jslint sloppy: true, nomen: true */
-/*global IF, settings, trigger, _, console, exitIns:true, callMainIns:true */
-var CALL = 0x00,
-	RETURN = 0x01,
-	EXIT = 0x02,
 
-	EXPRESSION = 0x10,
-	WAIT = 0x11,
-	TRIGGER = 0x12,
-	ASSERT = 0x13,
-	JUMPTO = 0x14,
-	REFRESH = 0x15,
+var IF = require('./class/instruction'),
+	global = require('./global'),
+	settings = global.settings,
+	_ = global['_'],
 
-	LOG = 0x20,
-	CONSOLE = 0x21,
+	instructionType = require('./instructionType'),
+	
+	CALL = instructionType.CALL,
+	RETURN = instructionType.RETURN,
+	EXIT = instructionType.EXIT,
+
+	EXPRESSION = instructionType.EXPRESSION,
+	WAIT = instructionType.WAIT,
+	TRIGGER = instructionType.TRIGGER,
+	ASSERT = instructionType.ASSERT,
+	JUMPTO = instructionType.JUMPTO,
+	REFRESH = instructionType.REFRESH,
+
+	LOG = instructionType.LOG,
+	CONSOLE = instructionType.CONSOLE,
+	
+	PROCESS = instructionType.PROCESS,
 
 	PASSED = 1,
-	FAILURE = 0;
+	FAILURE = 0
+	
+	trigger = require('oc-trigger');
 
 IF(CALL, {
 	operation: function Call() {
@@ -176,7 +187,7 @@ IF(JUMPTO, {
 });
 IF(REFRESH, {
 	operation: function Refresh() {
-		settings.contextFrame.src = _.document().location.href;
+		_.document().location.reload();
 		this.$case.$pushLog([REFRESH], this.line());
 	}
 });

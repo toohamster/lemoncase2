@@ -5,7 +5,7 @@ function isArray(obj) {
 // Checks if an object has a property.
 
 function has(obj, propName) {
-	return Object.prototype.hasOwnProperty.call(obj, propName)
+	return Object.prototype.hasOwnProperty.call(obj, propName);
 }
 
 module.exports = {

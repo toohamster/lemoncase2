@@ -1,4 +1,4 @@
-var tt = require('./tokentype.js').types;
+var tt = require('./tokentype').types;
 
 module.exports = function (Parser) {
 	var pp = Parser.prototype;
@@ -63,8 +63,6 @@ module.exports = function (Parser) {
 	// Parse a ternary conditional (`?:`) operator.
 
 	pp.parseMaybeConditional = function () {
-
-
 		// maybe we will need '?' in the future?
 
 		return this.parseExprOps();
@@ -173,7 +171,7 @@ module.exports = function (Parser) {
 				};
 
 				this.expect(tt.parenR);
-				
+
 				return node;
 			} else {
 				return base;
@@ -203,14 +201,14 @@ module.exports = function (Parser) {
 
 			case tt.num: case tt.string:
 				return this.parseLiteral('literal', this.value);
-			
+
 			case tt.objectAt: case tt.dict:
 				return this.parseExtLiteral(this.type);
 
 			case tt.parenL:
 				return this.parseParenExpression();
 
-			case tt.tagAtL: case tt.tagNumL:
+			case tt.tagAtL: case tt.tagNumL: case tt.tagFacL:
 				return this.parseTagExpression();
 
 			default:
@@ -229,15 +227,15 @@ module.exports = function (Parser) {
 
 		return node;
 	};
-	
+
 	pp.parseExtLiteral = function (type) {
 		var node = {
 			type: type.label,
 			value: this.value
 		};
-		
+
 		this.next();
-		
+
 		return node;
 	};
 
@@ -254,7 +252,7 @@ module.exports = function (Parser) {
 
 	pp.parseTagExpression = function () {
 		var node = {
-			type: this.type === tt.tagAtL ? 'TextExpr' : 'CountExpr'
+			type: this.type.label
 		};
 
 		this.next();
@@ -276,5 +274,5 @@ module.exports = function (Parser) {
 		this.next();
 
 		return name;
-	}
+	};
 };

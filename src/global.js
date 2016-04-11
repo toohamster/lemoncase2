@@ -1,5 +1,5 @@
 /*jslint vars: true, sloppy: true, nomen: true */
-/*global settings:true */
+/*global require, console, trigger, module */
 var callMainIns, exitIns, _, settings, setup;
 
 _ = {
@@ -64,7 +64,16 @@ _ = {
 		if (DOM) {
 			return DOM[DOM.value ? 'value' : 'innerHTML'];
 		}
+		//TODO 它不存在就不应该有任何输出
 		return 'Error:No such HTMLElement.';
+	},
+	isVisible: function (cssPath) {
+		var DOM = _.document().querySelector(cssPath);
+		if (!DOM) {
+			return false;
+		}
+
+		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
 	}
 };
 
@@ -112,3 +121,11 @@ function init(wrapDOM, callback) {
 function getLemoncaseFrame() {
 	return settings.contextFrame;
 }
+
+module.exports = {
+	'_': _,
+	settings: settings,
+	setup: setup,
+	init: init,
+	getLemoncaseFrame: getLemoncaseFrame
+};
