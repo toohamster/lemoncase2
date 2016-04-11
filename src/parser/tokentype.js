@@ -53,8 +53,8 @@ var types = {
 	comma: new TokenType(',', beforeExpr),
 	semi: new TokenType(';', beforeExpr),
 	colon: new TokenType(':', beforeExpr),
-	tagNumL: new TokenType('CountExprr', beforeExpr), // <#
-	tagAtL: new TokenType('TextExp', beforeExpr), // <@
+	tagNumL: new TokenType('CountExpr', beforeExpr), // <#
+	tagAtL: new TokenType('TextExpr', beforeExpr), // <@
 	tagFacL: new TokenType('VisibilityExpr', beforeExpr), // <!
 	tagR: new TokenType('/>'),
 

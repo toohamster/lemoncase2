@@ -317,8 +317,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		comma: new TokenType(',', beforeExpr),
 		semi: new TokenType(';', beforeExpr),
 		colon: new TokenType(':', beforeExpr),
-		tagNumL: new TokenType('TextExpr', beforeExpr), // <#
-		tagAtL: new TokenType('CountExpr', beforeExpr), // <@
+		tagNumL: new TokenType('CountExpr', beforeExpr), // <#
+		tagAtL: new TokenType('TextExpr', beforeExpr), // <@
 		tagFacL: new TokenType('VisibilityExpr', beforeExpr), // <!
 		tagR: new TokenType('/>'),
 
@@ -1975,6 +1975,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.$$currentLoop = 0;
 
 		// stacks
+		this.vars = {};
 		this.$$blockStack = []; // {counter, segment}
 		this.$$scopeStack = []; // {blockIndex, vars}
 
@@ -2046,7 +2047,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.$$popInstruction().execute();
 			settings.runCallback.call(this);
 		} catch (error) {
-			console.error(error);
+			console.error('[Error FROM LC2]:' + error);
 			settings.runExceptionHandle.call(this, error);
 		}
 		return this;
@@ -2138,7 +2139,16 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (DOM) {
 				return DOM[DOM.value ? 'value' : 'innerHTML'];
 			}
+			//TODO 它不存在就不应该有任何输出
 			return 'Error:No such HTMLElement.';
+		},
+		isVisible: function (cssPath) {
+			var DOM = _.document().querySelector(cssPath);
+			if (!DOM) {
+				return false;
+			}
+
+			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
 		}
 	};
 
@@ -2636,9 +2646,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	$CP.$runExp = function (expFn) {
 		if (typeof expFn === 'function') {
-			return expFn(this.$getCurrentScope().vars,
-						 this.$objectList, this.$loopData,
-						 _.countDOM, _.getInnerHTML);
+			return expFn(this.vars, this.$objectList, this.$loopData,
+						 _.countDOM, _.getInnerHTML, _.isVisible);
 		}
 		return expFn;
 	};
@@ -3517,7 +3526,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	IF(REFRESH, {
 		operation: function Refresh() {
-			settings.contextFrame.src = _.document().location.href;
+			_.document().location.reload();
 			this.$case.$pushLog([REFRESH], this.line());
 		}
 	});

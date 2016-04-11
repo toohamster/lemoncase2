@@ -81,8 +81,8 @@ test('tag', t => {
 	t.is(p.type.label, '/>');
 	
 	p.nextToken();
-	t.is(p.type.label, 'CountExpr');
+	t.is(p.type.label, 'TextExpr');
 	
 	p.nextToken();
-	t.is(p.type.label, 'TextExpr');
+	t.is(p.type.label, 'CountExpr');
 });
