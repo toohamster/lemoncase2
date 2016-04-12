@@ -64,7 +64,8 @@ _ = {
 		if (DOM) {
 			return DOM[DOM.value ? 'value' : 'innerHTML'];
 		}
-		//TODO 它不存在就不应该有任何输出
+		//TODO 它不存在就不应该有任何输出，抽象一个match函数降低生成工厂压力
+		// 输入字符串为null时直接返回false
 		return 'Error:No such HTMLElement.';
 	},
 	isVisible: function (cssPath) {
@@ -73,7 +74,7 @@ _ = {
 			return false;
 		}
 
-		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
+		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
 	}
 };
 

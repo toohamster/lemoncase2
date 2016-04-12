@@ -102,24 +102,28 @@ IF(WAIT, {
 });
 IF(TRIGGER, {
 	operation: function Trigger() {
-		var cssPath = this.$case.$runExp(this.body('object')),
+		var DOM, cssPath = this.$case.$runExp(this.body('object')),
 			param = {
 				value: this.$case.$runExp(this.body('param'))
 			},
-			action = this.body('action'),
-			DOM = _.document().querySelectorAll(cssPath)[0];
+			action = this.body('action');
 
-		if (!DOM) {
+		try {
+			DOM = _.document().querySelectorAll(cssPath)[0];
+			if (!DOM) {
+				throw 'Can not find a DOM by cssPath: ' + cssPath;
+			}
+		} catch (msg) {
+			console.log(msg);
 			this.$case
 				.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 				.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 
-			console.log('Can not find a DOM by cssPath: ' + cssPath);
 			return;
 		}
 
 		trigger(DOM).does(action, param);
-		settings.triggerCallback.call(this.$case, DOM);
+		settings.triggerCallback(DOM, this.$case);
 
 		this.$case
 			.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
