@@ -1,6 +1,6 @@
 {
   "name": "lc2",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "description": "browser automation library",
   "main": "index.js",
   "scripts": {
