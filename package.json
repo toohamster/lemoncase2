@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "ava",
-    "dev": "webpack-dev-server",
+    "dev": "webpack-dev-server --host 0.0.0.0 --port 3001",
     "build": "webpack && webpack -p --output-filename lemoncase.min.js"
   },
   "repository": {

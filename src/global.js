@@ -85,7 +85,9 @@ settings = {
 	bootExceptionHandle: _.noop,
 	triggerCallback: _.noop,
 	runCallback: _.noop,
-	runExceptionHandle: _.noop,
+	runExceptionHandle: function () {
+		console.log(arguments);
+	},
 	successCallback: _.noop,
 	readyCallback: _.noop,
 	nextLoopCallback: _.noop,

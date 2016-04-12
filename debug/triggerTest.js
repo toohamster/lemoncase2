@@ -28,6 +28,12 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 		this.src = 'test.html';
 	});
 
+	LC.setup({
+		runExceptionHandle: function ($c) {
+			console.log($c.$$lastInstruction.line());
+		}
+	});
+
 	$scope.actionParam = {
 		value: ''
 	};
