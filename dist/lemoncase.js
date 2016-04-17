@@ -1975,11 +1975,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.$$currentLoop = 0;
 
 		// stacks
-		this.vars = {};
+		this.$$vars = {};
 		this.$$blockStack = []; // {counter, segment}
 		this.$$scopeStack = []; // {blockIndex, vars}
 
 		// buffer
+		this.$$lastInstruction = undefined;
 		this.$$instructionBuffer = undefined;
 		this.$$tempInstruction = undefined;
 		this.$$idleTask = _.noop;
@@ -2031,6 +2032,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		var tmpIns = this.$$tempInstruction,
 			block = this.$getCurrentBlock();
 
+		this.$$lastInstruction = this.$$instructionBuffer;
+
 		if (tmpIns) {
 			this.$setTempInstruction();
 			return tmpIns;
@@ -2045,10 +2048,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	$CP.$$run = function () {
 		try {
 			this.$$popInstruction().execute();
-			settings.runCallback.call(this);
-		} catch (error) {
-			console.error('[Error FROM LC2]:' + error);
-			settings.runExceptionHandle.call(this, error);
+			settings.runCallback(this);
+		} catch (e) {
+			console.error('[Error FROM LC2 Core]:' + e);
 		}
 		return this;
 	};
@@ -2139,7 +2141,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			if (DOM) {
 				return DOM[DOM.value ? 'value' : 'innerHTML'];
 			}
-			//TODO 它不存在就不应该有任何输出
+			//TODO 它不存在就不应该有任何输出，抽象一个match函数降低生成工厂压力
+			// 输入字符串为null时直接返回false
 			return 'Error:No such HTMLElement.';
 		},
 		isVisible: function (cssPath) {
@@ -2148,7 +2151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				return false;
 			}
 
-			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
+			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
 		}
 	};
 
@@ -2160,7 +2163,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		bootExceptionHandle: _.noop,
 		triggerCallback: _.noop,
 		runCallback: _.noop,
-		runExceptionHandle: _.noop,
+		runExceptionHandle: function () {
+			console.log(arguments);
+		},
 		successCallback: _.noop,
 		readyCallback: _.noop,
 		nextLoopCallback: _.noop,
@@ -2646,7 +2651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	$CP.$runExp = function (expFn) {
 		if (typeof expFn === 'function') {
-			return expFn(this.vars, this.$objectList, this.$loopData,
+			return expFn(this.$$vars, this.$objectList, this.$loopData,
 						 _.countDOM, _.getInnerHTML, _.isVisible);
 		}
 		return expFn;
@@ -3363,7 +3368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		PROCESS = instructionType.PROCESS,
 
 		PASSED = 1,
-		FAILURE = 0
+		FAILURE = 0,
 		
 		trigger = __webpack_require__(27);
 
@@ -3396,14 +3401,21 @@ return /******/ (function(modules) { // webpackBootstrap
 			var flag = this.body('isSuccess') ? PASSED : FAILURE,
 				CASE = this.$case;
 
+			this.body('preFn')();
+
+			if (!flag) {
+				settings.runExceptionHandle(this.$case);
+			}
+
 			CASE.$pushLog([EXIT, flag], this.line())
 				.$markLog(flag, CASE.getCurrentLoop())
 				.$clearScope()
 				.$exitLoop();
 		},
-		bodyFactory: function (isSuccess) {
+		bodyFactory: function (isSuccess, preFn) {
 			return {
-				isSuccess: isSuccess
+				isSuccess: isSuccess,
+				preFn: preFn || _.noop
 			};
 		}
 	});
@@ -3434,24 +3446,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	IF(TRIGGER, {
 		operation: function Trigger() {
-			var cssPath = this.$case.$runExp(this.body('object')),
+			var DOM, cssPath = this.$case.$runExp(this.body('object')),
 				param = {
 					value: this.$case.$runExp(this.body('param'))
 				},
-				action = this.body('action'),
-				DOM = _.document().querySelectorAll(cssPath)[0];
+				action = this.body('action');
 
-			if (!DOM) {
+			try {
+				DOM = _.document().querySelectorAll(cssPath)[0];
+				if (!DOM) {
+					throw 'Can not find a DOM by cssPath: ' + cssPath;
+				}
+			} catch (msg) {
+				console.log(msg);
 				this.$case
 					.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 
-				console.log('Can not find a DOM by cssPath: ' + cssPath);
 				return;
 			}
 
 			trigger(DOM).does(action, param);
-			settings.triggerCallback.call(this.$case, DOM);
+			settings.triggerCallback(DOM, this.$case);
 
 			this.$case
 				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
@@ -3486,7 +3502,9 @@ return /******/ (function(modules) { // webpackBootstrap
 					.$pushLogData(ins.body('key'), _.now() - startTime);
 			}
 
-			CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
+			CASE.$setTempInstruction(IF(EXIT).create(false, function () {
+				CASE.$pushLog([ASSERT, FAILURE], ins.line());
+			}).assignCase(CASE));
 
 			if (timeout && timeout > 2 * settings.defaultClock) {
 				CASE.$setActiveTime(timeout)
@@ -3505,8 +3523,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (timeout) {
 					CASE.$pushLogData(ins.body('key'), 0);
 				}
-			} else if (!timeout) {
-				CASE.$pushLog([ASSERT, FAILURE], this.line());
 			}
 		},
 		bodyFactory: function (exp, timeout, dataKey) {
@@ -3578,6 +3594,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return args;
 		}
+		console.log(isECS);
+		console.log(isTouch);
 
 		var $TouchEvent = function (typeArg, eventInit) {
 				var event = document.createEvent('UIEvent'),
@@ -3615,7 +3633,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
 			event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
 			return event;
-		}, $KeyboardEvent = isECS && !isTouch ? KeyboardEvent : function (typeArg, eventInit) {
+		}, $KeyboardEvent = isECS ? KeyboardEvent : function (typeArg, eventInit) {
 			var event = document.createEvent('KeyboardEvent'),
 				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
 					'char': 4, key: 5, location: 6, repeat: 8 };
