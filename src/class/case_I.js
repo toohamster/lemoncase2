@@ -104,7 +104,7 @@ $CP.$exitLoop = function () {
 $CP.$runExp = function (expFn) {
 	if (typeof expFn === 'function') {
 		return expFn(this.$$vars, this.$objectList, this.$loopData,
-					 _.countDOM, _.getInnerHTML, _.isVisible);
+					 _.countDOM, _.getInnerHTML, _.isVisible, _.match);
 	}
 	return expFn;
 };

@@ -62,11 +62,15 @@ _ = {
 	getInnerHTML: function (cssPath) {
 		var DOM = _.document().querySelector(cssPath);
 		if (DOM) {
-			return DOM[DOM.value ? 'value' : 'innerHTML'];
+			if (DOM.value) {
+				if (DOM.type === 'checkbox' || DOM.type === 'radio') {
+					return  DOM.checked;
+				}
+				return DOM.value;
+			}
+			return DOM.innerHTML;
 		}
-		//TODO 它不存在就不应该有任何输出，抽象一个match函数降低生成工厂压力
-		// 输入字符串为null时直接返回false
-		return 'Error:No such HTMLElement.';
+		return false;
 	},
 	isVisible: function (cssPath) {
 		var DOM = _.document().querySelector(cssPath);
@@ -75,6 +79,21 @@ _ = {
 		}
 
 		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
+	},
+	match: function (src, obj) {
+		if (!_.isString(src)) {
+			return false;
+		}
+
+		if (_.isString(obj)) {
+			return !!src.indexOf(obj);
+		}
+
+		if (obj.test) {
+			return obj.test(src);
+		}
+
+		return false;
 	}
 };
 

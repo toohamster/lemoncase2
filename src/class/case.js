@@ -39,7 +39,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 		});
 	});
 
-	eT.config.times = syntaxTree.CONFIG.times;
+	eT.config.times = syntaxTree.CONFIG.times || 1;
 	eT.config.interval = syntaxTree.CONFIG.interval;
 	eT.config.screen = syntaxTree.CONFIG.screen;
 
