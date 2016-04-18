@@ -146,10 +146,10 @@ module.exports = function (Parser) {
 
 	pp.readToken_slash = function () {
 		var next = this.input.charCodeAt(this.pos+1);
-		if (this.exprAllowed) {
+		if (this.exprAllowed || this.genAllowed) {
 			++this.pos;
 
-			return this.readRegexp('/');
+			return this.readRegexp(this.genAllowed);
 		}
 		// '/='
 		if (next === 61) return this.finishOp(tt.assign, 2);
@@ -170,11 +170,6 @@ module.exports = function (Parser) {
 
 	pp.readToken_pipe_amp = function (code) {
 		var next = this.input.charCodeAt(this.pos+1);
-		if (this.exprAllowed) {
-			++this.pos;
-
-			return this.readRegexp('|');
-		}
 		// '&&' '||'
 		if (next === code) return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
 
@@ -278,10 +273,11 @@ module.exports = function (Parser) {
 		this.type = type;
 		this.value = val;
 
-		this.exprAllowed = this.type.beforeExpr;
+		this.genAllowed = type.beforeGen;
+		this.exprAllowed = type.beforeExpr;
 	};
 
-	pp.readRegexp = function (close) {
+	pp.readRegexp = function (isGen) {
 		var escaped, inClass, start = this.pos;
 		for (;;) {
 			if (this.pos >= this.input.length) this.raise(start, 'Unterminated regular expression');
@@ -292,7 +288,7 @@ module.exports = function (Parser) {
 					inClass = true;
 				} else if (ch === ']' && inClass) {
 					inClass = false;
-				} else if (ch === close && !inClass) {
+				} else if (ch === '/' && !inClass) {
 					break;
 				}
 				escaped = ch === '\\';
@@ -313,7 +309,7 @@ module.exports = function (Parser) {
 		var value = {
 			pattern: content,
 			flags: mods,
-			isGenerate: close === '|'
+			isGenerate: isGen
 		};
 
 		return this.finishToken(tt.regexp, value);

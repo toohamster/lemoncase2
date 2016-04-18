@@ -42,10 +42,11 @@ test('parse regexp', t => {
 	
 	p.nextToken();
 	t.is(p.type.label, 'regexp');
+	t.is(p.value.isGenerate, false);
 	
-	p.exprAllowed = true;
+	p.genAllowed = true;
 	p.nextToken();
-	t.deepEqual(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: false});
+	t.deepEqual(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: true});
 });
 
 test('index', t => {

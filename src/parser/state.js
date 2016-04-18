@@ -17,6 +17,7 @@ var Parser = function (options, input) {
 	this.lastTokStart = this.lastTokEnd = this.pos;
 
 	this.exprAllowed = false;
+	this.genAllowed = false;
 
 	this.labels = [];
 

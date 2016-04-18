@@ -126,6 +126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.lastTokStart = this.lastTokEnd = this.pos;
 
 		this.exprAllowed = false;
+		this.genAllowed = false;
 
 		this.labels = [];
 
@@ -269,18 +270,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	// All token type variables start with an underscore, to make them
 	// easy to recognize.
 
-	// The `beforeExpr` property is used to disambiguate between regular
+	// The `beforeGen` property is used to disambiguate between regular
 	// expressions and divisions. It is set on all token types that can
 	// be followed by an expression (thus, a slash after them would be a
 	// regular expression).
-
-	//no startsExpr or isLoop
 
 	var TokenType = function (label, conf) {
 		if (conf === undefined) conf = {};
 
 		this.label = label;
 		this.keyword = conf.keyword;
+		this.beforeGen = Boolean(conf.beforeGen);
 		this.beforeExpr = Boolean(conf.beforeExpr);
 		this.isAssign = Boolean(conf.isAssign);
 		this.prefix = Boolean(conf.prefix);
@@ -290,10 +290,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 	function binop(name, prec) {
-		return new TokenType(name, {beforeExpr: true, binop: prec});
+		return new TokenType(name, {beforeGen: true, binop: prec});
 	}
 
-	var beforeExpr = {beforeExpr: true};
+	var beforeGen = {beforeGen: true};
 	var macro = {macro: true};
 
 	var types = {
@@ -308,18 +308,18 @@ return /******/ (function(modules) { // webpackBootstrap
 		dict: new TokenType('dictionaryIndex'),
 
 		//punctuation token types
-		bracketL: new TokenType('[', beforeExpr),
+		bracketL: new TokenType('[', beforeGen),
 		bracketR: new TokenType(']'),
-		braceL: new TokenType('{', beforeExpr),
+		braceL: new TokenType('{', beforeGen),
 		braceR: new TokenType('}'),
-		parenL: new TokenType('(', beforeExpr),
+		parenL: new TokenType('(', beforeGen),
 		parenR: new TokenType(')'),
-		comma: new TokenType(',', beforeExpr),
-		semi: new TokenType(';', beforeExpr),
-		colon: new TokenType(':', beforeExpr),
-		tagNumL: new TokenType('CountExpr', beforeExpr), // <#
-		tagAtL: new TokenType('TextExpr', beforeExpr), // <@
-		tagFacL: new TokenType('VisibilityExpr', beforeExpr), // <!
+		comma: new TokenType(',', beforeGen),
+		semi: new TokenType(';', beforeGen),
+		colon: new TokenType(':', beforeGen),
+		tagNumL: new TokenType('CountExpr', beforeGen), // <#
+		tagAtL: new TokenType('TextExpr', beforeGen), // <@
+		tagFacL: new TokenType('VisibilityExpr', beforeGen), // <!
 		tagR: new TokenType('/>'),
 
 		// Operators. These carry several kinds of properties to help the
@@ -336,19 +336,19 @@ return /******/ (function(modules) { // webpackBootstrap
 		// binary operators with a very low precedence, that should result
 		// in AssignmentExpression nodes.
 
-		eq: new TokenType('=', {beforeExpr: true, isAssign: true}),
-		assign: new TokenType('_=', {beforeExpr: true, isAssign: true}),
+		eq: new TokenType('=', {beforeGen: true, isAssign: true}),
+		assign: new TokenType('_=', {beforeGen: true, isAssign: true}),
 		incDec: new TokenType('++/--', {prefix: true, postfix: true}),
-		prefix: new TokenType('prefix', {beforeExpr: true, prefix: true}),
+		prefix: new TokenType('prefix', {beforeGen: true, prefix: true}),
 		logicalOR: binop('||', 1),
 		logicalAND: binop('&&', 2),
 		equality: binop('==/!=', 6),
 		relational: binop('</>', 7),
-		plusMin: new TokenType('+/-', {beforeExpr: true, binop: 9, prefix: true}),
+		plusMin: new TokenType('+/-', {beforeGen: true, binop: 9, prefix: true}),
 		modulo: binop('%', 10),
 		star: binop('*', 10),
 		slash: binop('/', 10),
-		match: binop('~~', 6)
+		match: new TokenType('~~', {beforeExpr: true, binop:6})
 	};
 
 	var keywords = {};
@@ -360,26 +360,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 
 	kw('in');
-	kw('by', beforeExpr);
-	kw('click', beforeExpr);
-	kw('input', beforeExpr);
-	kw('rclick', beforeExpr);
-	kw('dblclick', beforeExpr);
-	kw('movein', beforeExpr);
-	kw('moveout', beforeExpr);
-	kw('scroll', beforeExpr);
-	kw('select', beforeExpr);
+	kw('by', beforeGen);
+	kw('click', beforeGen);
+	kw('input', beforeGen);
+	kw('rclick', beforeGen);
+	kw('dblclick', beforeGen);
+	kw('movein', beforeGen);
+	kw('moveout', beforeGen);
+	kw('scroll', beforeGen);
+	kw('select', beforeGen);
 	kw('#CLOCK', macro);
 	kw('#TIMES', macro);
 	kw('#INTERVAL', macro);
 	kw('#SCREEN', macro);
-	kw('wait', beforeExpr);
-	kw('assert', beforeExpr);
-	kw('log', beforeExpr);
-	kw('console', beforeExpr);
+	kw('wait', beforeGen);
+	kw('assert', beforeGen);
+	kw('log', beforeGen);
+	kw('console', beforeGen);
 	kw('var');
 	kw('process');
-	kw('return', beforeExpr);
+	kw('return', beforeGen);
 	kw('jumpto');
 	kw('refresh');
 
@@ -697,10 +697,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		pp.readToken_slash = function () {
 			var next = this.input.charCodeAt(this.pos+1);
-			if (this.exprAllowed) {
+			if (this.exprAllowed || this.genAllowed) {
 				++this.pos;
 
-				return this.readRegexp('/');
+				return this.readRegexp(this.genAllowed);
 			}
 			// '/='
 			if (next === 61) return this.finishOp(tt.assign, 2);
@@ -721,11 +721,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		pp.readToken_pipe_amp = function (code) {
 			var next = this.input.charCodeAt(this.pos+1);
-			if (this.exprAllowed) {
-				++this.pos;
-
-				return this.readRegexp('|');
-			}
 			// '&&' '||'
 			if (next === code) return this.finishOp(code === 124 ? tt.logicalOR : tt.logicalAND, 2);
 
@@ -829,10 +824,11 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.type = type;
 			this.value = val;
 
-			this.exprAllowed = this.type.beforeExpr;
+			this.genAllowed = type.beforeGen;
+			this.exprAllowed = type.beforeExpr;
 		};
 
-		pp.readRegexp = function (close) {
+		pp.readRegexp = function (isGen) {
 			var escaped, inClass, start = this.pos;
 			for (;;) {
 				if (this.pos >= this.input.length) this.raise(start, 'Unterminated regular expression');
@@ -843,7 +839,7 @@ return /******/ (function(modules) { // webpackBootstrap
 						inClass = true;
 					} else if (ch === ']' && inClass) {
 						inClass = false;
-					} else if (ch === close && !inClass) {
+					} else if (ch === '/' && !inClass) {
 						break;
 					}
 					escaped = ch === '\\';
@@ -864,7 +860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			var value = {
 				pattern: content,
 				flags: mods,
-				isGenerate: close === '|'
+				isGenerate: isGen
 			};
 
 			return this.finishToken(tt.regexp, value);
@@ -1472,7 +1468,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 			if (node.operator === '~~') out += '!';
 
-			return out + '!(' + c(node.left) + ').match(' + c(node.right) + ')';
+			// return out + '!(' + c(node.left) + ').match(' + c(node.right) + ')';
+			return out + '!m(' + c(node.left) + ',' + c(node.right) + ')';
 		},
 
 		// unary
@@ -1495,6 +1492,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			return '(' + c(node.expression) + ')';
 		},
 
+		// <@
 		TextExpr: function (node, c) {
 			var inside = 'String(' + c(node.val) + ')';
 
@@ -1519,7 +1517,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			return visitors[type](node, c);
 		})(node);
 
-		return new Function('$,o,d,c,t, v', 'return ' + string + ';');
+		return new Function('$,o,d,c,t,v,m', 'return ' + string + ';');
 	};
 
 
@@ -1944,7 +1942,7 @@ return /******/ (function(modules) { // webpackBootstrap
 			});
 		});
 
-		eT.config.times = syntaxTree.CONFIG.times;
+		eT.config.times = syntaxTree.CONFIG.times || 1;
 		eT.config.interval = syntaxTree.CONFIG.interval;
 		eT.config.screen = syntaxTree.CONFIG.screen;
 
@@ -1975,11 +1973,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.$$currentLoop = 0;
 
 		// stacks
-		this.vars = {};
+		this.$$vars = {};
 		this.$$blockStack = []; // {counter, segment}
 		this.$$scopeStack = []; // {blockIndex, vars}
 
 		// buffer
+		this.$$lastInstruction = undefined;
 		this.$$instructionBuffer = undefined;
 		this.$$tempInstruction = undefined;
 		this.$$idleTask = _.noop;
@@ -2031,6 +2030,8 @@ return /******/ (function(modules) { // webpackBootstrap
 		var tmpIns = this.$$tempInstruction,
 			block = this.$getCurrentBlock();
 
+		this.$$lastInstruction = this.$$instructionBuffer;
+
 		if (tmpIns) {
 			this.$setTempInstruction();
 			return tmpIns;
@@ -2045,10 +2046,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	$CP.$$run = function () {
 		try {
 			this.$$popInstruction().execute();
-			settings.runCallback.call(this);
-		} catch (error) {
-			console.error('[Error FROM LC2]:' + error);
-			settings.runExceptionHandle.call(this, error);
+			settings.runCallback(this);
+		} catch (e) {
+			console.error('[Error FROM LC2 Core]:' + e);
 		}
 		return this;
 	};
@@ -2137,10 +2137,15 @@ return /******/ (function(modules) { // webpackBootstrap
 		getInnerHTML: function (cssPath) {
 			var DOM = _.document().querySelector(cssPath);
 			if (DOM) {
-				return DOM[DOM.value ? 'value' : 'innerHTML'];
+				if (DOM.value) {
+					if (DOM.type === 'checkbox' || DOM.type === 'radio') {
+						return  DOM.checked;
+					}
+					return DOM.value;
+				}
+				return DOM.innerHTML;
 			}
-			//TODO 它不存在就不应该有任何输出
-			return 'Error:No such HTMLElement.';
+			return false;
 		},
 		isVisible: function (cssPath) {
 			var DOM = _.document().querySelector(cssPath);
@@ -2148,7 +2153,22 @@ return /******/ (function(modules) { // webpackBootstrap
 				return false;
 			}
 
-			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
+			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
+		},
+		match: function (src, obj) {
+			if (!_.isString(src)) {
+				return false;
+			}
+
+			if (_.isString(obj)) {
+				return !!src.indexOf(obj);
+			}
+
+			if (obj.test) {
+				return obj.test(src);
+			}
+
+			return false;
 		}
 	};
 
@@ -2160,7 +2180,9 @@ return /******/ (function(modules) { // webpackBootstrap
 		bootExceptionHandle: _.noop,
 		triggerCallback: _.noop,
 		runCallback: _.noop,
-		runExceptionHandle: _.noop,
+		runExceptionHandle: function () {
+			console.log(arguments);
+		},
 		successCallback: _.noop,
 		readyCallback: _.noop,
 		nextLoopCallback: _.noop,
@@ -2646,8 +2668,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	$CP.$runExp = function (expFn) {
 		if (typeof expFn === 'function') {
-			return expFn(this.vars, this.$objectList, this.$loopData,
-						 _.countDOM, _.getInnerHTML, _.isVisible);
+			return expFn(this.$$vars, this.$objectList, this.$loopData,
+						 _.countDOM, _.getInnerHTML, _.isVisible, _.match);
 		}
 		return expFn;
 	};
@@ -3363,7 +3385,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		PROCESS = instructionType.PROCESS,
 
 		PASSED = 1,
-		FAILURE = 0
+		FAILURE = 0,
 		
 		trigger = __webpack_require__(27);
 
@@ -3396,14 +3418,21 @@ return /******/ (function(modules) { // webpackBootstrap
 			var flag = this.body('isSuccess') ? PASSED : FAILURE,
 				CASE = this.$case;
 
+			this.body('preFn')();
+
+			if (!flag) {
+				settings.runExceptionHandle(this.$case);
+			}
+
 			CASE.$pushLog([EXIT, flag], this.line())
 				.$markLog(flag, CASE.getCurrentLoop())
 				.$clearScope()
 				.$exitLoop();
 		},
-		bodyFactory: function (isSuccess) {
+		bodyFactory: function (isSuccess, preFn) {
 			return {
-				isSuccess: isSuccess
+				isSuccess: isSuccess,
+				preFn: preFn || _.noop
 			};
 		}
 	});
@@ -3434,24 +3463,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	IF(TRIGGER, {
 		operation: function Trigger() {
-			var cssPath = this.$case.$runExp(this.body('object')),
+			var DOM, cssPath = this.$case.$runExp(this.body('object')),
 				param = {
 					value: this.$case.$runExp(this.body('param'))
 				},
-				action = this.body('action'),
-				DOM = _.document().querySelectorAll(cssPath)[0];
+				action = this.body('action');
 
-			if (!DOM) {
+			try {
+				DOM = _.document().querySelectorAll(cssPath)[0];
+				if (!DOM) {
+					throw 'Can not find a DOM by cssPath: ' + cssPath;
+				}
+			} catch (msg) {
+				console.log(msg);
 				this.$case
 					.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 					.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 
-				console.log('Can not find a DOM by cssPath: ' + cssPath);
 				return;
 			}
 
 			trigger(DOM).does(action, param);
-			settings.triggerCallback.call(this.$case, DOM);
+			settings.triggerCallback(DOM, this.$case);
 
 			this.$case
 				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
@@ -3486,7 +3519,9 @@ return /******/ (function(modules) { // webpackBootstrap
 					.$pushLogData(ins.body('key'), _.now() - startTime);
 			}
 
-			CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
+			CASE.$setTempInstruction(IF(EXIT).create(false, function () {
+				CASE.$pushLog([ASSERT, FAILURE], ins.line());
+			}).assignCase(CASE));
 
 			if (timeout && timeout > 2 * settings.defaultClock) {
 				CASE.$setActiveTime(timeout)
@@ -3505,8 +3540,6 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (timeout) {
 					CASE.$pushLogData(ins.body('key'), 0);
 				}
-			} else if (!timeout) {
-				CASE.$pushLog([ASSERT, FAILURE], this.line());
 			}
 		},
 		bodyFactory: function (exp, timeout, dataKey) {
@@ -3578,6 +3611,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			}
 			return args;
 		}
+		console.log(isECS);
+		console.log(isTouch);
 
 		var $TouchEvent = function (typeArg, eventInit) {
 				var event = document.createEvent('UIEvent'),
@@ -3615,7 +3650,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
 			event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
 			return event;
-		}, $KeyboardEvent = isECS && !isTouch ? KeyboardEvent : function (typeArg, eventInit) {
+		}, $KeyboardEvent = isECS ? KeyboardEvent : function (typeArg, eventInit) {
 			var event = document.createEvent('KeyboardEvent'),
 				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
 					'char': 4, key: 5, location: 6, repeat: 8 };

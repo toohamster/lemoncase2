@@ -68,7 +68,8 @@ var visitors = {
 
 		if (node.operator === '~~') out += '!';
 
-		return out + '!(' + c(node.left) + ').match(' + c(node.right) + ')';
+		// return out + '!(' + c(node.left) + ').match(' + c(node.right) + ')';
+		return out + '!m(' + c(node.left) + ',' + c(node.right) + ')';
 	},
 
 	// unary
@@ -91,6 +92,7 @@ var visitors = {
 		return '(' + c(node.expression) + ')';
 	},
 
+	// <@
 	TextExpr: function (node, c) {
 		var inside = 'String(' + c(node.val) + ')';
 
@@ -115,5 +117,5 @@ module.exports = function genExpr(node) {
 		return visitors[type](node, c);
 	})(node);
 
-	return new Function('$,o,d,c,t, v', 'return ' + string + ';');
+	return new Function('$,o,d,c,t,v,m', 'return ' + string + ';');
 };

@@ -24,7 +24,7 @@ var IF = require('./class/instruction'),
 	PROCESS = instructionType.PROCESS,
 
 	PASSED = 1,
-	FAILURE = 0
+	FAILURE = 0,
 	
 	trigger = require('oc-trigger');
 
@@ -57,14 +57,21 @@ IF(EXIT, {
 		var flag = this.body('isSuccess') ? PASSED : FAILURE,
 			CASE = this.$case;
 
+		this.body('preFn')();
+
+		if (!flag) {
+			settings.runExceptionHandle(this.$case);
+		}
+
 		CASE.$pushLog([EXIT, flag], this.line())
 			.$markLog(flag, CASE.getCurrentLoop())
 			.$clearScope()
 			.$exitLoop();
 	},
-	bodyFactory: function (isSuccess) {
+	bodyFactory: function (isSuccess, preFn) {
 		return {
-			isSuccess: isSuccess
+			isSuccess: isSuccess,
+			preFn: preFn || _.noop
 		};
 	}
 });
@@ -95,24 +102,28 @@ IF(WAIT, {
 });
 IF(TRIGGER, {
 	operation: function Trigger() {
-		var cssPath = this.$case.$runExp(this.body('object')),
+		var DOM, cssPath = this.$case.$runExp(this.body('object')),
 			param = {
 				value: this.$case.$runExp(this.body('param'))
 			},
-			action = this.body('action'),
-			DOM = _.document().querySelectorAll(cssPath)[0];
+			action = this.body('action');
 
-		if (!DOM) {
+		try {
+			DOM = _.document().querySelectorAll(cssPath)[0];
+			if (!DOM) {
+				throw 'Can not find a DOM by cssPath: ' + cssPath;
+			}
+		} catch (msg) {
+			console.log(msg);
 			this.$case
 				.$pushLog([TRIGGER, FAILURE, cssPath, action, param], this.line())
 				.$setTempInstruction(IF(EXIT).create(false).assignCase(this.$case));
 
-			console.log('Can not find a DOM by cssPath: ' + cssPath);
 			return;
 		}
 
 		trigger(DOM).does(action, param);
-		settings.triggerCallback.call(this.$case, DOM);
+		settings.triggerCallback(DOM, this.$case);
 
 		this.$case
 			.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
@@ -147,7 +158,9 @@ IF(ASSERT, {
 				.$pushLogData(ins.body('key'), _.now() - startTime);
 		}
 
-		CASE.$setTempInstruction(IF(EXIT).create(false).assignCase(CASE));
+		CASE.$setTempInstruction(IF(EXIT).create(false, function () {
+			CASE.$pushLog([ASSERT, FAILURE], ins.line());
+		}).assignCase(CASE));
 
 		if (timeout && timeout > 2 * settings.defaultClock) {
 			CASE.$setActiveTime(timeout)
@@ -166,8 +179,6 @@ IF(ASSERT, {
 			if (timeout) {
 				CASE.$pushLogData(ins.body('key'), 0);
 			}
-		} else if (!timeout) {
-			CASE.$pushLog([ASSERT, FAILURE], this.line());
 		}
 	},
 	bodyFactory: function (exp, timeout, dataKey) {

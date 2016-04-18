@@ -62,10 +62,15 @@ _ = {
 	getInnerHTML: function (cssPath) {
 		var DOM = _.document().querySelector(cssPath);
 		if (DOM) {
-			return DOM[DOM.value ? 'value' : 'innerHTML'];
+			if (DOM.value) {
+				if (DOM.type === 'checkbox' || DOM.type === 'radio') {
+					return  DOM.checked;
+				}
+				return DOM.value;
+			}
+			return DOM.innerHTML;
 		}
-		//TODO 它不存在就不应该有任何输出
-		return 'Error:No such HTMLElement.';
+		return false;
 	},
 	isVisible: function (cssPath) {
 		var DOM = _.document().querySelector(cssPath);
@@ -73,7 +78,22 @@ _ = {
 			return false;
 		}
 
-		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0 ) ? false : true;
+		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
+	},
+	match: function (src, obj) {
+		if (!_.isString(src)) {
+			return false;
+		}
+
+		if (_.isString(obj)) {
+			return !!src.indexOf(obj);
+		}
+
+		if (obj.test) {
+			return obj.test(src);
+		}
+
+		return false;
 	}
 };
 
@@ -85,7 +105,9 @@ settings = {
 	bootExceptionHandle: _.noop,
 	triggerCallback: _.noop,
 	runCallback: _.noop,
-	runExceptionHandle: _.noop,
+	runExceptionHandle: function () {
+		console.log(arguments);
+	},
 	successCallback: _.noop,
 	readyCallback: _.noop,
 	nextLoopCallback: _.noop,

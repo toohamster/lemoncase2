@@ -28,6 +28,12 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 		this.src = 'test.html';
 	});
 
+	LC.setup({
+		runExceptionHandle: function ($c) {
+			console.log($c.$$lastInstruction.line());
+		}
+	});
+
 	$scope.actionParam = {
 		value: ''
 	};
@@ -55,6 +61,7 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 		textarea: 'textarea',
 		buttonInput: 'input[type=button]',
 		a: 'a',
+		checkbox: 'input[type=checkbox]',
 		select: 'select'
 	};
 
@@ -614,7 +621,7 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 			mode: 'text/x-php'
 		});
 		
-		$codeMirror.setValue("#TIMES 10\nprocess main {\nvar a = '[type=email]';\ninput 'input' + a by |\\d|;\nclick 'body > input:nth-child(5)';\n}");
+		$codeMirror.setValue("#TIMES 10\nprocess main {\nvar a = '[type=email]';\ninput 'input' + a by /\\d/;\nclick 'body > input:nth-child(5)';\n}");
 		$codeMirror.refresh();
 		$codeMirror.setSize('100%', '100%');
 	}

@@ -5,18 +5,17 @@
 // All token type variables start with an underscore, to make them
 // easy to recognize.
 
-// The `beforeExpr` property is used to disambiguate between regular
+// The `beforeGen` property is used to disambiguate between regular
 // expressions and divisions. It is set on all token types that can
 // be followed by an expression (thus, a slash after them would be a
 // regular expression).
-
-//no startsExpr or isLoop
 
 var TokenType = function (label, conf) {
 	if (conf === undefined) conf = {};
 
 	this.label = label;
 	this.keyword = conf.keyword;
+	this.beforeGen = Boolean(conf.beforeGen);
 	this.beforeExpr = Boolean(conf.beforeExpr);
 	this.isAssign = Boolean(conf.isAssign);
 	this.prefix = Boolean(conf.prefix);
@@ -26,10 +25,10 @@ var TokenType = function (label, conf) {
 };
 
 function binop(name, prec) {
-	return new TokenType(name, {beforeExpr: true, binop: prec});
+	return new TokenType(name, {beforeGen: true, binop: prec});
 }
 
-var beforeExpr = {beforeExpr: true};
+var beforeGen = {beforeGen: true};
 var macro = {macro: true};
 
 var types = {
@@ -44,18 +43,18 @@ var types = {
 	dict: new TokenType('dictionaryIndex'),
 
 	//punctuation token types
-	bracketL: new TokenType('[', beforeExpr),
+	bracketL: new TokenType('[', beforeGen),
 	bracketR: new TokenType(']'),
-	braceL: new TokenType('{', beforeExpr),
+	braceL: new TokenType('{', beforeGen),
 	braceR: new TokenType('}'),
-	parenL: new TokenType('(', beforeExpr),
+	parenL: new TokenType('(', beforeGen),
 	parenR: new TokenType(')'),
-	comma: new TokenType(',', beforeExpr),
-	semi: new TokenType(';', beforeExpr),
-	colon: new TokenType(':', beforeExpr),
-	tagNumL: new TokenType('CountExpr', beforeExpr), // <#
-	tagAtL: new TokenType('TextExpr', beforeExpr), // <@
-	tagFacL: new TokenType('VisibilityExpr', beforeExpr), // <!
+	comma: new TokenType(',', beforeGen),
+	semi: new TokenType(';', beforeGen),
+	colon: new TokenType(':', beforeGen),
+	tagNumL: new TokenType('CountExpr', beforeGen), // <#
+	tagAtL: new TokenType('TextExpr', beforeGen), // <@
+	tagFacL: new TokenType('VisibilityExpr', beforeGen), // <!
 	tagR: new TokenType('/>'),
 
 	// Operators. These carry several kinds of properties to help the
@@ -72,19 +71,19 @@ var types = {
 	// binary operators with a very low precedence, that should result
 	// in AssignmentExpression nodes.
 
-	eq: new TokenType('=', {beforeExpr: true, isAssign: true}),
-	assign: new TokenType('_=', {beforeExpr: true, isAssign: true}),
+	eq: new TokenType('=', {beforeGen: true, isAssign: true}),
+	assign: new TokenType('_=', {beforeGen: true, isAssign: true}),
 	incDec: new TokenType('++/--', {prefix: true, postfix: true}),
-	prefix: new TokenType('prefix', {beforeExpr: true, prefix: true}),
+	prefix: new TokenType('prefix', {beforeGen: true, prefix: true}),
 	logicalOR: binop('||', 1),
 	logicalAND: binop('&&', 2),
 	equality: binop('==/!=', 6),
 	relational: binop('</>', 7),
-	plusMin: new TokenType('+/-', {beforeExpr: true, binop: 9, prefix: true}),
+	plusMin: new TokenType('+/-', {beforeGen: true, binop: 9, prefix: true}),
 	modulo: binop('%', 10),
 	star: binop('*', 10),
 	slash: binop('/', 10),
-	match: binop('~~', 6)
+	match: new TokenType('~~', {beforeExpr: true, binop:6})
 };
 
 var keywords = {};
@@ -96,26 +95,26 @@ function kw(name, options) {
 }
 
 kw('in');
-kw('by', beforeExpr);
-kw('click', beforeExpr);
-kw('input', beforeExpr);
-kw('rclick', beforeExpr);
-kw('dblclick', beforeExpr);
-kw('movein', beforeExpr);
-kw('moveout', beforeExpr);
-kw('scroll', beforeExpr);
-kw('select', beforeExpr);
+kw('by', beforeGen);
+kw('click', beforeGen);
+kw('input', beforeGen);
+kw('rclick', beforeGen);
+kw('dblclick', beforeGen);
+kw('movein', beforeGen);
+kw('moveout', beforeGen);
+kw('scroll', beforeGen);
+kw('select', beforeGen);
 kw('#CLOCK', macro);
 kw('#TIMES', macro);
 kw('#INTERVAL', macro);
 kw('#SCREEN', macro);
-kw('wait', beforeExpr);
-kw('assert', beforeExpr);
-kw('log', beforeExpr);
-kw('console', beforeExpr);
+kw('wait', beforeGen);
+kw('assert', beforeGen);
+kw('log', beforeGen);
+kw('console', beforeGen);
 kw('var');
 kw('process');
-kw('return', beforeExpr);
+kw('return', beforeGen);
 kw('jumpto');
 kw('refresh');
 

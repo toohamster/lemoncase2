@@ -39,7 +39,7 @@ function linker(syntaxTree, object, dictionary, $case) {
 		});
 	});
 
-	eT.config.times = syntaxTree.CONFIG.times;
+	eT.config.times = syntaxTree.CONFIG.times || 1;
 	eT.config.interval = syntaxTree.CONFIG.interval;
 	eT.config.screen = syntaxTree.CONFIG.screen;
 
@@ -70,11 +70,12 @@ function Case(syntaxTree, object, dictionary) {
 	this.$$currentLoop = 0;
 
 	// stacks
-	this.vars = {};
+	this.$$vars = {};
 	this.$$blockStack = []; // {counter, segment}
 	this.$$scopeStack = []; // {blockIndex, vars}
 
 	// buffer
+	this.$$lastInstruction = undefined;
 	this.$$instructionBuffer = undefined;
 	this.$$tempInstruction = undefined;
 	this.$$idleTask = _.noop;
@@ -126,6 +127,8 @@ $CP.$$popInstruction = function () {
 	var tmpIns = this.$$tempInstruction,
 		block = this.$getCurrentBlock();
 
+	this.$$lastInstruction = this.$$instructionBuffer;
+
 	if (tmpIns) {
 		this.$setTempInstruction();
 		return tmpIns;
@@ -140,10 +143,9 @@ $CP.$$popInstruction = function () {
 $CP.$$run = function () {
 	try {
 		this.$$popInstruction().execute();
-		settings.runCallback.call(this);
-	} catch (error) {
-		console.error('[Error FROM LC2]:' + error);
-		settings.runExceptionHandle.call(this, error);
+		settings.runCallback(this);
+	} catch (e) {
+		console.error('[Error FROM LC2 Core]:' + e);
 	}
 	return this;
 };
