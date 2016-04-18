@@ -61,7 +61,7 @@ test('parse assert', t => {
 });
 
 test('input statement', t => {
-	var p = tokenizer('input [obj] by |abc|;');
+	var p = tokenizer('input [obj] by /abc/;');
 	p.nextToken();
 	
 	t.notThrows(function (){
