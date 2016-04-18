@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/or-change/lemoncase2.svg?branch=master)](https://travis-ci.org/or-change/lemoncase2)
+[![Build Status](https://travis-ci.org/or-change/lemoncase2.svg?branch=develop)](https://travis-ci.org/or-change/lemoncase2)
 
 #lemoncase2
 

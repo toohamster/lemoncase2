@@ -4,7 +4,7 @@ import genExpr from '../src/parser/walk.js';
 test('walk regexp', t => {
 	var string = genExpr({
 		type: 'regexp',
-		raw: '|^abcd|i',
+		raw: '/^abcd/i',
 		regexp: {
 			pattern: '^abcd',
 			flags: 'i',
