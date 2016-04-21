@@ -3,7 +3,8 @@
 var IF = require('./class/instruction'),
 	global = require('./global'),
 	settings = global.settings,
-	_ = global['_'],
+	getDocument = global.getDocument,
+	_ = require('./util'),
 
 	instructionType = require('./instructionType'),
 	
@@ -109,7 +110,7 @@ IF(TRIGGER, {
 			action = this.body('action');
 
 		try {
-			DOM = _.document().querySelectorAll(cssPath)[0];
+			DOM = getDocument().querySelectorAll(cssPath)[0];
 			if (!DOM) {
 				throw 'Can not find a DOM by cssPath: ' + cssPath;
 			}
@@ -198,7 +199,7 @@ IF(JUMPTO, {
 });
 IF(REFRESH, {
 	operation: function Refresh() {
-		_.document().location.reload();
+		getDocument().location.reload();
 		this.$case.$pushLog([REFRESH], this.line());
 	}
 });

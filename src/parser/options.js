@@ -1,4 +1,4 @@
-var has = require('./util').has;
+var has = require('../util').has;
 
 var defaultOptions = {
 	insertReturn: true,

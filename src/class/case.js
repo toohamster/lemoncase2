@@ -1,10 +1,10 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
-var CALL = require('../instructionType').CALL,
-	EXIT = require('../instructionType').EXIT,
-	global = require('../global'),
-	_ = global['_'],
-	settings = global.settings,
+var instructionType = require('../instructionType'),
+	CALL = instructionType.CALL,
+	EXIT = instructionType.EXIT,
+	_ = require('../util'),
+	settings = require('../global').settings,
 	Collector = require('../../lib/collector'),
 	IF = require('./instruction');
 

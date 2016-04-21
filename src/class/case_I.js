@@ -1,11 +1,55 @@
 /*jslint vars: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
 var $CP = require('./case').$CP,
+	_ = require('../util'),
 	global = require('../global'),
-	_ = global['_'],
 	settings = global.settings,
+	getDocument = global.getDocument,
 	IF = require('./instruction'),
 	CALL = require('../instructionType').CALL;
+
+function countDOM(cssPath) {
+	return getDocument().querySelectorAll(cssPath).length;
+}
+function getInnerHTML(cssPath) {
+	var DOM = getDocument().querySelector(cssPath);
+	if (DOM) {
+		if (DOM.value) {
+			if (DOM.type === 'checkbox' || DOM.type === 'radio') {
+				return  DOM.checked;
+			}
+			return DOM.value;
+		}
+		return DOM.innerHTML;
+	}
+	
+	return false;
+}
+
+function isVisible(cssPath) {
+	var DOM = getDocument().querySelector(cssPath);
+	if (!DOM) {
+		return false;
+	}
+
+	return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
+}
+
+function match(src, obj) {
+	if (!_.isString(src)) {
+		return false;
+	}
+
+	if (_.isString(obj)) {
+		return !!src.indexOf(obj);
+	}
+
+	if (obj.test) {
+		return obj.test(src);
+	}
+
+	return false;
+}
 
 $CP.$setIdleTask = function (taskFn) {
 	this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -104,7 +148,7 @@ $CP.$exitLoop = function () {
 $CP.$runExp = function (expFn) {
 	if (typeof expFn === 'function') {
 		return expFn(this.$$vars, this.$objectList, this.$loopData,
-					 _.countDOM, _.getInnerHTML, _.isVisible, _.match);
+					 countDOM, getInnerHTML, isVisible, match);
 	}
 	return expFn;
 };

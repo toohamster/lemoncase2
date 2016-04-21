@@ -28,7 +28,7 @@
  * @param {object} options.field
  * @param {object} options.assignment
  */
-var _ = require('../global')['_'];
+var _ = require('../util');
 
 function Dictionary(options) {
 	if (!(this instanceof Dictionary)) {
