@@ -16,7 +16,7 @@ function getInnerHTML(cssPath) {
 	if (DOM) {
 		if (DOM.value) {
 			if (DOM.type === 'checkbox' || DOM.type === 'radio') {
-				return  DOM.checked;
+				return DOM.checked;
 			}
 			return DOM.value;
 		}
@@ -41,7 +41,7 @@ function match(src, obj) {
 	}
 
 	if (_.isString(obj)) {
-		return !!src.indexOf(obj);
+		return src.indexOf(obj) !== -1;
 	}
 
 	if (obj.test) {
