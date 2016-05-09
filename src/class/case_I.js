@@ -40,7 +40,7 @@ function match(src, obj) {
 		return false;
 	}
 
-	if (_.isDefined(obj)) {
+	if (_.isDefined(obj) && !(obj instanceof RegExp)) {
 		return src.indexOf(obj) !== -1;
 	}
 
