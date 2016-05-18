@@ -1,11 +1,10 @@
-var parse = require('./parser/index').parse,
-	Case = require('./class/case').Case,
-	setup = require('./global').setup,
-	IF = require('./class/instruction'),
-	Dictionary = require('./class/dictionary'),
-	global = require('./global'),
-	init = global.init,
-	getLemoncaseFrame = global.getLemoncaseFrame;
+var parse = require('./parser/index').parse;
+var Case = require('./class/case').Case;
+var setup = require('./global').setup;
+var IF = require('./class/instruction');
+var global = require('./global');
+var init = global.init;
+var getLemoncaseFrame = global.getLemoncaseFrame;
 
 require('./class/case_I');
 require('./class/case_P');
@@ -17,7 +16,6 @@ var exports = {
 	setup: setup,
 	Instruction: IF,
 	parse: parse,
-	Dictionary: Dictionary,
 	init: init,
 	getLemoncaseFrame: getLemoncaseFrame
 };

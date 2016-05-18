@@ -135,12 +135,10 @@ $CP.$exitLoop = function () {
 		this.$$exitCase();
 		return this;
 	}
-	this.$setTempInstruction(IF(CALL).create('main'));
-	(settings.nextLoopCallback || _.noop).call(this);
 
-	if (this.hasDictionary()) {
-		this.$loopData = this.$dictionary.fetch();
-	}
+	// For next loop.
+	this.$setTempInstruction(IF(CALL).create('main'));
+	(settings.loopCallback || _.noop)(this);
 
 	return this;
 };

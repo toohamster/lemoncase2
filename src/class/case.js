@@ -8,27 +8,12 @@ var instructionType = require('../instructionType'),
 	Collector = require('../../lib/collector'),
 	IF = require('./instruction');
 
-function linker(syntaxTree, object, dictionary, $case) {
-	var eT = {
-		process: {},
-		config: {}
-	}, dk = [];
+function linker(syntaxTree, $case) {
+	var eT = { process: {}, config: {} }, dk = [];
 
 	_.forEach(syntaxTree.DATA_KEYS, function (isWatched, key) {
 		if (isWatched) {
 			dk.push(key);
-		}
-	});
-
-	_.forEach(syntaxTree.DICTIONARY_KEYS, function (v, fieldName) {
-		if (!dictionary.isFieldDefined(fieldName)) {
-			throw new Error('The field: ' + fieldName + ' is undefined in dictionary.');
-		}
-	});
-
-	_.forEach(syntaxTree.OBJECT_KEYS, function (v, objectName) {
-		if (!object.hasOwnProperty(objectName)) {
-			throw new Error('The key: ' + objectName + ' is undefined in object.');
 		}
 	});
 
@@ -43,24 +28,21 @@ function linker(syntaxTree, object, dictionary, $case) {
 	eT.config.interval = syntaxTree.CONFIG.interval;
 	eT.config.screen = syntaxTree.CONFIG.screen;
 
-
 	return {
 		eT: eT,
 		dK: dk
 	};
 }
-function Case(syntaxTree, object, dictionary) {
+function Case(syntaxTree) {
 	if (!(this instanceof Case)) {
-		return new Case(syntaxTree, object, dictionary);
+		return new Case(syntaxTree);
 	}
 
-	var link = linker(syntaxTree, object, dictionary, this);
+	var link = linker(syntaxTree, this);
 	// executionTree
 	this.$$executionTree = link.eT;
 
 	// Outside object.
-	this.$dictionary = dictionary;
-	this.$objectList = object;
 	this.$$log = new Collector(link.dK);
 
 	// states
@@ -94,14 +76,12 @@ $CP.$$bootstrap = function () {
 
 	this.$$currentLoop = 0;
 
-	if (this.hasDictionary()) {
-		this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
-	}
-
 	if (srnOpt) {
 		frm.height = srnOpt.height + 'px';
 		frm.width = srnOpt.width + 'px';
 	}
+
+	(settings.loopCallback || _.noop)(this);
 
 	this.$setActiveTime()
 		.$setTempInstruction(IF(CALL).create('main'))

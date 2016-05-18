@@ -16,7 +16,7 @@ settings = {
 	},
 	successCallback: _.noop,
 	readyCallback: _.noop,
-	nextLoopCallback: _.noop,
+	loopCallback: _.noop,
 	consoleFn: _.noop
 };
 

@@ -1,12 +1,7 @@
 /*jslint vars: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
-var $CP = require('./case').$CP,
-	settings = require('../global').settings,
-	Dictionary = require('./dictionary');
-
-$CP.hasDictionary = function () {
-	return !!this.$dictionary;
-};
+var $CP = require('./case').$CP;
+var settings = require('../global').settings;
 
 $CP.validateObjectList = function (objectList, keysUsed) {
     if (!keysUsed.length) {
@@ -22,6 +17,10 @@ $CP.validateObjectList = function (objectList, keysUsed) {
 		//0, NaN, '' ... => success
 		return objectList[key] !== null;
 	});
+};
+
+$CP.getVar = function () {
+	return this.$$vars;
 };
 
 $CP.exportLog = function (type) {
@@ -93,14 +92,6 @@ $CP.debug = function () {
 	this.$setState('debug').$$bootstrap();
 
 	return this;
-};
-
-$CP.dictionary = function (dictionary) {
-	if (dictionary instanceof Dictionary) {
-		this.$dictionary = dictionary;
-	}
-
-	return this.$dictionary;
 };
 
 $CP.getLog = function () {

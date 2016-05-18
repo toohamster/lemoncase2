@@ -15,14 +15,7 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 
 	var object = {
 		button: '[type=button]'
-	}, dictionary = new LC.Dictionary({
-		field: [
-			{
-				name: 'word',
-				pattern: /\w{4,8}/
-			}
-		]
-	});
+	};
 
 	LC.init($element[0].querySelector('#project'), function (){
 		this.src = 'test.html';
@@ -582,7 +575,7 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 		
 		var ast = LC.parse($codeMirror.getValue(), {});
 		console.log(ast);
-		var c = new LC.Case(ast, object, dictionary);
+		var c = new LC.Case(ast);
 		window.$case = c;
 	};
 

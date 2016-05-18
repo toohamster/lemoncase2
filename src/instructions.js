@@ -1,14 +1,13 @@
 /*jslint sloppy: true, nomen: true */
 
-var IF = require('./class/instruction'),
-	global = require('./global'),
-	settings = global.settings,
-	getDocument = global.getDocument,
-	_ = require('./util'),
-
-	instructionType = require('./instructionType'),
+var IF = require('./class/instruction');
+var global = require('./global');
+var settings = global.settings;
+var getDocument = global.getDocument;
+var _ = require('./util');
+var instructionType = require('./instructionType');
 	
-	CALL = instructionType.CALL,
+var CALL = instructionType.CALL,
 	RETURN = instructionType.RETURN,
 	EXIT = instructionType.EXIT,
 
