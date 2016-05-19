@@ -29,11 +29,6 @@ var Parser = function (options, input) {
 	this.pcs = {};
 	//keep track of all the unused process/ declared process
 	this.pcsTable = {};
-
-	//dKey - dictionary field used
-	//obKey - object key used
-	this.dTable = {};
-	this.obTable = {};
 };
 
 Parser.prototype.parse = function () {
@@ -42,10 +37,7 @@ Parser.prototype.parse = function () {
 	var program = {
 		CONFIG: this.conf,
 		DATA_KEYS: this.keys,
-		PROCESSES: this.pcs,
-
-		DICTIONARY_KEYS: this.dTable,
-		OBJECT_KEYS: this.obTable
+		PROCESSES: this.pcs
 	};
 
 	return this.parseTopLevel(program);

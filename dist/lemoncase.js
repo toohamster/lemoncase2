@@ -61,31 +61,30 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(2).parse,
-		Case = __webpack_require__(18).Case,
-		setup = __webpack_require__(19).setup,
-		IF = __webpack_require__(21),
-		Dictionary = __webpack_require__(22),
-		global = __webpack_require__(19),
-		init = global.init,
-		getLemoncaseFrame = global.getLemoncaseFrame;
+	var parse = __webpack_require__(2).parse;
+	var Case = __webpack_require__(18).Case;
+	var setup = __webpack_require__(19).setup;
+	var IF = __webpack_require__(21);
+	var global = __webpack_require__(19);
+	var init = global.init;
+	var getLemoncaseFrame = global.getLemoncaseFrame;
 
+	__webpack_require__(22);
 	__webpack_require__(23);
 	__webpack_require__(24);
 	__webpack_require__(25);
-	__webpack_require__(26);
 
 	var exports = {
 		Case: Case,
 		setup: setup,
 		Instruction: IF,
 		parse: parse,
-		Dictionary: Dictionary,
 		init: init,
 		getLemoncaseFrame: getLemoncaseFrame
 	};
 
 	module.exports = exports;
+
 
 /***/ },
 /* 2 */
@@ -99,6 +98,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 		tokenizer: function (input, options) {
 			return new Parser(options, input);
+		},
+		parseFragment: function (input, options) {
+			var p = new Parser(options, input);
+			p.nextToken();
+			
+			return p.parseStatement();
 		}
 	};
 
@@ -138,11 +143,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		this.pcs = {};
 		//keep track of all the unused process/ declared process
 		this.pcsTable = {};
-
-		//dKey - dictionary field used
-		//obKey - object key used
-		this.dTable = {};
-		this.obTable = {};
 	};
 
 	Parser.prototype.parse = function () {
@@ -151,10 +151,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		var program = {
 			CONFIG: this.conf,
 			DATA_KEYS: this.keys,
-			PROCESSES: this.pcs,
-
-			DICTIONARY_KEYS: this.dTable,
-			OBJECT_KEYS: this.obTable
+			PROCESSES: this.pcs
 		};
 
 		return this.parseTopLevel(program);
@@ -183,6 +180,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defaultOptions = {
 		insertReturn: true,
 		onComment: function () {},
+		left: '',
+		right: '',
 		plugins: {}
 	};
 
@@ -205,20 +204,60 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 5 */
 /***/ function(module, exports) {
 
-	function isArray(obj) {
-		return Object.prototype.toString.call(obj) === "[object Array]";
-	}
-
-	// Checks if an object has a property.
-
-	function has(obj, propName) {
-		return Object.prototype.hasOwnProperty.call(obj, propName);
-	}
-
-	module.exports = {
-		isArray: isArray,
-		has: has
+	var _ = {
+		now: Date.now || function () {
+			return new Date().getTime();
+		},
+		isString: function (string) {
+			return typeof string === 'string';
+		},
+		isUndefined: function (value) {
+			return value === void 0;
+		},
+		isDefined: function (value) {
+			return !_.isUndefined(value);
+		},
+		isNumber: function (value) {
+			return typeof value === 'number';
+		},
+		isObject: function (obj) {
+			var type = typeof obj;
+			return type === 'function' || (type === 'object' && !!obj);
+		},
+		isElement: function (obj) {
+			return !!(obj && obj.nodeType === 1);
+		},
+		isFunction: function (obj) {
+			return typeof obj === 'function';
+		},
+		isArray: function (obj) {
+			return ({}).toString.call(obj) === '[object Array]';
+		},
+		last: function (array) {
+			return array[array.length - 1];
+		},
+		noop: function () {},
+		forEach: function (obj, iteratee, context) {
+			iteratee = iteratee.bind(context);
+			var i, length;
+			if (this.isArray(obj)) {
+				for (i = 0, length = obj.length; i < length; i += 1) {
+					iteratee(obj[i], i, obj);
+				}
+			} else {
+				var keys = Object.keys(obj);
+				for (i = 0, length = keys.length; i < length; i += 1) {
+					iteratee(obj[keys[i]], keys[i], obj);
+				}
+			}
+			return obj;
+		},
+		has: function has(obj, propName) {
+			return Object.prototype.hasOwnProperty.call(obj, propName);
+		}
 	};
+
+	module.exports = _;
 
 
 /***/ },
@@ -302,10 +341,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		string: new TokenType('string'),
 		name: new TokenType('name'),
 		eof: new TokenType('eof'),
-
-		// special to lemoncase
-		objectAt: new TokenType('objectStore'),
-		dict: new TokenType('dictionaryIndex'),
 
 		//punctuation token types
 		bracketL: new TokenType('[', beforeGen),
@@ -410,7 +445,12 @@ return /******/ (function(modules) { // webpackBootstrap
 		pp.raise = function (pos, msg) {
 			var loc = getLineInfo(this.input, pos);
 			msg += ' (' + loc.line + ':' + loc.column + ')';
-			msg = empowerErrMsg(this.input, loc, msg);
+			var left = this.options.left, right = this.options.right;
+			if (left || right) {
+				msg = left + msg + right;
+			} else {
+				msg = empowerErrMsg(this.input, loc, msg);
+			}
 			var err = new SyntaxError(msg);
 			err.pos = pos; err.loc = loc; err.raisedAt = this.pos;
 			throw err;
@@ -661,36 +701,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			var start = this.pos++;//
 			var next = this.fullCharCodeAtPos();
 
-			if (isIdentifierStart(next)) {
-				var name = this.readWord1();
-				next = this.fullCharCodeAtPos();
-				// ']'
-				if (next !== 93) this.raise(start, 'Unterminated dictionary index');
-				this.pos++;
-				// mark it in dictionary conf
-				this.dTable[name] = true;
-
-				return this.finishToken(tt.dict, name);
-			}
-
 			return this.finishToken(tt.bracketL);
 		};
 
 		pp.readToken_brace = function () {
 			var start = this.pos++;
 			var next = this.fullCharCodeAtPos();
-
-			if (isIdentifierStart(next)) {
-				var name = this.readWord1();
-				next = this.fullCharCodeAtPos();
-				// '}'
-				if (next !== 125) this.raise(start, 'Unterminated object store index');
-				this.pos++;
-				//mark it in ob conf
-				this.obTable[name] = true;
-
-				return this.finishToken(tt.objectAt, name);
-			}
 
 			return this.finishToken(tt.braceL);
 		};
@@ -1446,12 +1462,6 @@ return /******/ (function(modules) { // webpackBootstrap
 			// regular regular expression is fine...
 			return '(' + node.raw + ')';
 		},
-		dictionaryIndex: function (node) {
-			return 'd.' + node.value;
-		},
-		objectStore: function (node) {
-			return 'o.' + node.value;
-		},
 		Identifier: function (node) {
 			return '$.' + node.name;
 		},
@@ -1903,35 +1913,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*jslint plusplus: true, sloppy: true, nomen: true */
 	/*global require, console, trigger, module */
-	var CALL = __webpack_require__(14).CALL,
-		EXIT = __webpack_require__(14).EXIT,
-		global = __webpack_require__(19),
-		_ = global['_'],
-		settings = global.settings,
+	var instructionType = __webpack_require__(14),
+		CALL = instructionType.CALL,
+		EXIT = instructionType.EXIT,
+		_ = __webpack_require__(5),
+		settings = __webpack_require__(19).settings,
 		Collector = __webpack_require__(20),
 		IF = __webpack_require__(21);
 
-	function linker(syntaxTree, object, dictionary, $case) {
-		var eT = {
-			process: {},
-			config: {}
-		}, dk = [];
+	function linker(syntaxTree, $case) {
+		var eT = { process: {}, config: {} }, dk = [];
 
 		_.forEach(syntaxTree.DATA_KEYS, function (isWatched, key) {
 			if (isWatched) {
 				dk.push(key);
-			}
-		});
-
-		_.forEach(syntaxTree.DICTIONARY_KEYS, function (v, fieldName) {
-			if (!dictionary.isFieldDefined(fieldName)) {
-				throw new Error('The field: ' + fieldName + ' is undefined in dictionary.');
-			}
-		});
-
-		_.forEach(syntaxTree.OBJECT_KEYS, function (v, objectName) {
-			if (!object.hasOwnProperty(objectName)) {
-				throw new Error('The key: ' + objectName + ' is undefined in object.');
 			}
 		});
 
@@ -1946,24 +1941,21 @@ return /******/ (function(modules) { // webpackBootstrap
 		eT.config.interval = syntaxTree.CONFIG.interval;
 		eT.config.screen = syntaxTree.CONFIG.screen;
 
-
 		return {
 			eT: eT,
 			dK: dk
 		};
 	}
-	function Case(syntaxTree, object, dictionary) {
+	function Case(syntaxTree) {
 		if (!(this instanceof Case)) {
-			return new Case(syntaxTree, object, dictionary);
+			return new Case(syntaxTree);
 		}
 
-		var link = linker(syntaxTree, object, dictionary, this);
+		var link = linker(syntaxTree, this);
 		// executionTree
 		this.$$executionTree = link.eT;
 
 		// Outside object.
-		this.$dictionary = dictionary;
-		this.$objectList = object;
 		this.$$log = new Collector(link.dK);
 
 		// states
@@ -1997,14 +1989,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		this.$$currentLoop = 0;
 
-		if (this.hasDictionary()) {
-			this.$loopData = this.$dictionary.load(this.$$getConfig('times')).fetch();
-		}
-
 		if (srnOpt) {
 			frm.height = srnOpt.height + 'px';
 			frm.width = srnOpt.width + 'px';
 		}
+
+		(settings.loopCallback || _.noop)(this);
 
 		this.$setActiveTime()
 			.$setTempInstruction(IF(CALL).create('main'))
@@ -2071,106 +2061,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 19 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global require, console, trigger, module */
-	var callMainIns, exitIns, _, settings, setup;
-
-	_ = {
-		now: Date.now || function () {
-			return new Date().getTime();
-		},
-		isString: function (string) {
-			return typeof string === 'string';
-		},
-		isUndefined: function (value) {
-			return value === void 0;
-		},
-		isDefined: function (value) {
-			return !_.isUndefined(value);
-		},
-		isNumber: function (value) {
-			return typeof value === 'number';
-		},
-		isObject: function (obj) {
-			var type = typeof obj;
-			return type === 'function' || (type === 'object' && !!obj);
-		},
-		isElement: function (obj) {
-			return !!(obj && obj.nodeType === 1);
-		},
-		isFunction: function (obj) {
-			return typeof obj === 'function';
-		},
-		isArray: function (obj) {
-			return ({}).toString.call(obj) === '[object Array]';
-		},
-		last: function (array) {
-			return array[array.length - 1];
-		},
-		noop: function () {},
-		forEach: function (obj, iteratee, context) {
-			iteratee = iteratee.bind(context);
-			var i, length;
-			if (this.isArray(obj)) {
-				for (i = 0, length = obj.length; i < length; i += 1) {
-					iteratee(obj[i], i, obj);
-				}
-			} else {
-				var keys = Object.keys(obj);
-				for (i = 0, length = keys.length; i < length; i += 1) {
-					iteratee(obj[keys[i]], keys[i], obj);
-				}
-			}
-			return obj;
-		},
-		document: function () {
-			if (settings.contextFrame) {
-				return settings.contextFrame.contentWindow.document;
-			}
-			return document;
-		},
-		countDOM: function (cssPath) {
-			return _.document().querySelectorAll(cssPath).length;
-		},
-		getInnerHTML: function (cssPath) {
-			var DOM = _.document().querySelector(cssPath);
-			if (DOM) {
-				if (DOM.value) {
-					if (DOM.type === 'checkbox' || DOM.type === 'radio') {
-						return  DOM.checked;
-					}
-					return DOM.value;
-				}
-				return DOM.innerHTML;
-			}
-			return false;
-		},
-		isVisible: function (cssPath) {
-			var DOM = _.document().querySelector(cssPath);
-			if (!DOM) {
-				return false;
-			}
-
-			return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
-		},
-		match: function (src, obj) {
-			if (!_.isString(src)) {
-				return false;
-			}
-
-			if (_.isString(obj)) {
-				return !!src.indexOf(obj);
-			}
-
-			if (obj.test) {
-				return obj.test(src);
-			}
-
-			return false;
-		}
-	};
+	var callMainIns, exitIns, settings, setup,
+		_ = __webpack_require__(5);
 
 	settings = {
 		contextFrame: document.createElement('iframe'),
@@ -2185,7 +2081,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		},
 		successCallback: _.noop,
 		readyCallback: _.noop,
-		nextLoopCallback: _.noop,
+		loopCallback: _.noop,
 		consoleFn: _.noop
 	};
 
@@ -2219,9 +2115,17 @@ return /******/ (function(modules) { // webpackBootstrap
 		return settings.contextFrame;
 	}
 
+	function getDocument() {
+		if (settings.contextFrame) {
+			return settings.contextFrame.contentWindow.document;
+		}
+
+		return document;
+	}
+
 	module.exports = {
-		'_': _,
 		settings: settings,
+		getDocument: getDocument,
 		setup: setup,
 		init: init,
 		getLemoncaseFrame: getLemoncaseFrame
@@ -2235,7 +2139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global now: false, _, instructions */
 
-	var _ = __webpack_require__(19)['_'];
+	var _ = __webpack_require__(5);
 
 	//1_SYSTEM 2_USER -1_ERROR 0_NOTICE
 	var Collector = function (dataKeys) {
@@ -2309,7 +2213,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
-	/*global require, console, trigger, module */
+	/*global require, console, trigger, module, instructionFactories */
 	var IF = function InstructionFactory(TYPE, opts) {
 		if (!opts) {
 			var IF = instructionFactories[TYPE];
@@ -2365,212 +2269,57 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
-	/**
-	 * Dictionary use to input action when data type is "index".
-	 *
-	 * To create a dictionary which has 2 field with 3 assignments.
-	 *
-	 *     var dict = new Dictionary({
-	 *       field: [
-	 *         {name: "username", pattern: /zjm\d{6}/, comment: "comment_1"},
-	 *         {name: "password", pattern: /\d{8}/, comment: "comment_2"}
-	 *       ],
-	 *       assignment: [
-	 *         ["lichao", "lichaopass"],
-	 *         ["shiweilin", "shiweilinpass"],
-	 *         ["liyueyu", "liyueyupass"]
-	 *       ]
-	 *     });
-	 *
-	 * @class Dictionary
-	 * @constructor
-	 * @extends Entity
-	 * @param {object} options
-	 * @param {object} options.id
-	 * @param {object} options.name
-	 * @param {object} options.comment
-	 * @param {object} options.createtime
-	 * @param {object} options.updatetime
-	 * @param {object} options.field
-	 * @param {object} options.assignment
-	 */
-	var _ = __webpack_require__(19)['_'];
+	/*global require, console, trigger, module */
+	var $CP = __webpack_require__(18).$CP,
+		_ = __webpack_require__(5),
+		global = __webpack_require__(19),
+		settings = global.settings,
+		getDocument = global.getDocument,
+		IF = __webpack_require__(21),
+		CALL = __webpack_require__(14).CALL;
 
-	function Dictionary(options) {
-		if (!(this instanceof Dictionary)) {
-			return new Dictionary(options);
+	function countDOM(cssPath) {
+		return getDocument().querySelectorAll(cssPath).length;
+	}
+	function getInnerHTML(cssPath) {
+		var DOM = getDocument().querySelector(cssPath);
+		if (DOM) {
+			if (DOM.value) {
+				if (DOM.type === 'checkbox' || DOM.type === 'radio') {
+					return DOM.checked;
+				}
+				return DOM.value;
+			}
+			return DOM.innerHTML;
 		}
-
-		this.$options = {};
-
-		/**
-		 * Cache a builder result in it.
-		 *
-		 * @property $$buffer
-		 * @type array
-		 * @private
-		 * @default []
-		 */
-		this.$$buffer = [];
-		/**
-		 * Specific value list
-		 *
-		 * @property $assignment
-		 * @type array
-		 * @private
-		 * @default []
-		 */
-		this.$assignment = [];
-		/**
-		 * Field configuration.
-		 *
-		 * @property $field
-		 * @type array
-		 * @private
-		 * @default []
-		 */
-		this.$field = [];
-
-		this.field(options.field);
-		this.assignment(options.assignment);
+		
+		return false;
 	}
 
-	/**
-	 * The getter/setter of the property "field".
-	 *
-	 * @method field
-	 * @param {array} [field]
-	 * @return {array} The fields of this "dictionary".
-	 * @example
-	 *
-	 *     dict.field();
-	 *     dict.field(1000);
-	 */
-	Dictionary.prototype.field = function (field) {
-		if (_.isArray(field)) {
-			this.$field = field;
-		}
-		this.$options.field = this.$field;
-		return this.$field;
-	};
-
-	/**
-	 * The getter/setter of the property "assignment".
-	 *
-	 * @method assignment
-	 * @param {array} [assignment]
-	 * @return {array} The assignments of this "dictionary".
-	 * @example
-	 *
-	 *     step.assignment();
-	 *     step.assignment(1000);
-	 */
-	Dictionary.prototype.assignment = function (assignment) {
-		if (_.isArray(assignment)) {
-			this.$assignment = assignment;
-		}
-		this.$options.assignment = this.$assignment;
-		return this.$assignment;
-	};
-
-	/**
-	 * To load in buffer by assignment & fields.
-	 *
-	 * @method load
-	 * @param {number} length The length of dictionary.
-	 * @return {Dictionary} this
-	 * @chainable
-	 * @example
-	 *
-	 *     dict.load(10);
-	 */
-	Dictionary.prototype.load = function (length) {
-		var i, len = this.$assignment.length,
-			keys = this.getKeys(),
-			len_of_fields = keys.length;
-
-		var Row = function (row_array) {
-			_.forEach(keys, function (field, index) {
-				this[field.name] = row_array[index];
-			}, this);
-		};
-		var RandRow = function () {
-			_.forEach(keys, function (field) {
-				this[field.name] = field.pattern.gen();
-			}, this);
-		};
-
-		this.$$buffer = [];
-		// load assignment.
-		for (i = 0; i < len && i < length; i += 1) {
-			this.$$buffer.push(new Row(this.$assignment[i]));
-		}
-		// load rand row.
-		for (null; i < length; i += 1) {
-			this.$$buffer.push(new RandRow());
+	function isVisible(cssPath) {
+		var DOM = getDocument().querySelector(cssPath);
+		if (!DOM) {
+			return false;
 		}
 
-		return this;
-	};
+		return (DOM.offsetHeight === 0 && DOM.offsetWidth === 0) ? false : true;
+	}
 
-	/**
-	 * Get all fields config of this "dictionary".
-	 *
-	 * @method getKeys
-	 * @return {array} keys
-	 * @example
-	 *
-	 *     dict.getKeys();
-	 */
-	Dictionary.prototype.getKeys = function () {
-		var keys = [];
-		_.forEach(this.$field, function (field) {
-			this.push({
-				name: field.name,
-				pattern: new RegExp(field.pattern)
-			});
-		}, keys);
+	function match(src, obj) {
+		if (!_.isString(src)) {
+			return false;
+		}
 
-		return keys;
-	};
+		if (_.isDefined(obj) && !(obj instanceof RegExp)) {
+			return src.indexOf(obj) !== -1;
+		}
 
-	/**
-	 * Get one row from $$buffer in front.
-	 *
-	 * @method fetch
-	 * @return {object} One row in $$buffer.
-	 * @example
-	 *
-	 *     dict.fetch();
-	 */
-	Dictionary.prototype.fetch = function () {
-		return this.$$buffer.shift();
-	};
-
-	Dictionary.prototype.isFieldDefined = function (name) {
-		var i, len = this.$field.length;
-
-		for (i = 0; i < len; i += 1) {
-			if (this.$field[i].name === name) { return true; }
+		if (obj.test) {
+			return obj.test(src);
 		}
 
 		return false;
-	};
-
-	module.exports = Dictionary;
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/*jslint vars: true, sloppy: true, nomen: true */
-	/*global require, console, trigger, module */
-	var $CP = __webpack_require__(18).$CP,
-		global = __webpack_require__(19),
-		_ = global['_'],
-		settings = global.settings,
-		IF = __webpack_require__(21),
-		CALL = __webpack_require__(14).CALL;
+	}
 
 	$CP.$setIdleTask = function (taskFn) {
 		this.$$idleTask = _.isFunction(taskFn) ? taskFn : _.noop;
@@ -2656,12 +2405,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.$$exitCase();
 			return this;
 		}
-		this.$setTempInstruction(IF(CALL).create('main'));
-		(settings.nextLoopCallback || _.noop).call(this);
 
-		if (this.hasDictionary()) {
-			this.$loopData = this.$dictionary.fetch();
-		}
+		// For next loop.
+		this.$setTempInstruction(IF(CALL).create('main'));
+		(settings.loopCallback || _.noop)(this);
 
 		return this;
 	};
@@ -2669,7 +2416,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	$CP.$runExp = function (expFn) {
 		if (typeof expFn === 'function') {
 			return expFn(this.$$vars, this.$objectList, this.$loopData,
-						 _.countDOM, _.getInnerHTML, _.isVisible, _.match);
+						 countDOM, getInnerHTML, isVisible, match);
 		}
 		return expFn;
 	};
@@ -2704,18 +2451,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint vars: true, sloppy: true, nomen: true */
 	/*global require, console, trigger, module */
-	var $CP = __webpack_require__(18).$CP,
-		settings = __webpack_require__(19).settings,
-		Dictionary = __webpack_require__(22);
-
-	$CP.hasDictionary = function () {
-		return !!this.$dictionary;
-	};
+	var $CP = __webpack_require__(18).$CP;
+	var settings = __webpack_require__(19).settings;
 
 	$CP.validateObjectList = function (objectList, keysUsed) {
 	    if (!keysUsed.length) {
@@ -2731,6 +2473,10 @@ return /******/ (function(modules) { // webpackBootstrap
 			//0, NaN, '' ... => success
 			return objectList[key] !== null;
 		});
+	};
+
+	$CP.getVar = function () {
+		return this.$$vars;
 	};
 
 	$CP.exportLog = function (type) {
@@ -2804,14 +2550,6 @@ return /******/ (function(modules) { // webpackBootstrap
 		return this;
 	};
 
-	$CP.dictionary = function (dictionary) {
-		if (dictionary instanceof Dictionary) {
-			this.$dictionary = dictionary;
-		}
-
-		return this.$dictionary;
-	};
-
 	$CP.getLog = function () {
 		return this.$$log;
 	};
@@ -2840,7 +2578,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports) {
 
 	(function () {
@@ -3356,19 +3094,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint sloppy: true, nomen: true */
 
-	var IF = __webpack_require__(21),
-		global = __webpack_require__(19),
-		settings = global.settings,
-		_ = global['_'],
-
-		instructionType = __webpack_require__(14),
+	var IF = __webpack_require__(21);
+	var global = __webpack_require__(19);
+	var settings = global.settings;
+	var getDocument = global.getDocument;
+	var _ = __webpack_require__(5);
+	var instructionType = __webpack_require__(14);
 		
-		CALL = instructionType.CALL,
+	var CALL = instructionType.CALL,
 		RETURN = instructionType.RETURN,
 		EXIT = instructionType.EXIT,
 
@@ -3387,7 +3125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		PASSED = 1,
 		FAILURE = 0,
 		
-		trigger = __webpack_require__(27);
+		trigger = __webpack_require__(26);
 
 	IF(CALL, {
 		operation: function Call() {
@@ -3470,7 +3208,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				action = this.body('action');
 
 			try {
-				DOM = _.document().querySelectorAll(cssPath)[0];
+				DOM = getDocument().querySelectorAll(cssPath)[0];
 				if (!DOM) {
 					throw 'Can not find a DOM by cssPath: ' + cssPath;
 				}
@@ -3559,7 +3297,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	IF(REFRESH, {
 		operation: function Refresh() {
-			_.document().location.reload();
+			getDocument().location.reload();
 			this.$case.$pushLog([REFRESH], this.line());
 		}
 	});
@@ -3589,7 +3327,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports) {
 
 	/*jslint vars: true, plusplus: true */

@@ -22,9 +22,7 @@ test('semi colon error', t => {
 });
 
 test('get html output', t => {
-	var p = tokenizer('@@@@@', {html: 'code'});
+	var p = tokenizer('@@@@@', {left: '<code>', right: '</code>'});
 	
-	p.nextToken();
-	
-	t.throws(function () {p.parseStatement()}, )
+	t.throws(function (){ p.nextToken() }, /code[\s\S]+code/);
 });

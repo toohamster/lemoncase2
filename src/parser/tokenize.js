@@ -110,36 +110,12 @@ module.exports = function (Parser) {
 		var start = this.pos++;//
 		var next = this.fullCharCodeAtPos();
 
-		// if (isIdentifierStart(next)) {
-		// 	var name = this.readWord1();
-		// 	next = this.fullCharCodeAtPos();
-		// 	// ']'
-		// 	if (next !== 93) this.raise(start, 'Unterminated dictionary index');
-		// 	this.pos++;
-		// 	// mark it in dictionary conf
-		// 	this.dTable[name] = true;
-
-		// 	return this.finishToken(tt.dict, name);
-		// }
-
 		return this.finishToken(tt.bracketL);
 	};
 
 	pp.readToken_brace = function () {
 		var start = this.pos++;
 		var next = this.fullCharCodeAtPos();
-
-		// if (isIdentifierStart(next)) {
-		// 	var name = this.readWord1();
-		// 	next = this.fullCharCodeAtPos();
-		// 	// '}'
-		// 	if (next !== 125) this.raise(start, 'Unterminated object store index');
-		// 	this.pos++;
-		// 	//mark it in ob conf
-		// 	this.obTable[name] = true;
-
-		// 	return this.finishToken(tt.objectAt, name);
-		// }
 
 		return this.finishToken(tt.braceL);
 	};

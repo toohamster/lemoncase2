@@ -38,10 +38,6 @@ var types = {
 	name: new TokenType('name'),
 	eof: new TokenType('eof'),
 
-	// special to lemoncase
-	objectAt: new TokenType('objectStore'),
-	dict: new TokenType('dictionaryIndex'),
-
 	//punctuation token types
 	bracketL: new TokenType('[', beforeGen),
 	bracketR: new TokenType(']'),

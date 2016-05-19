@@ -67,8 +67,6 @@ test('input statement', t => {
 	t.notThrows(function (){
 		p.parseStatement();
 	});
-	
-	t.true(p.dTable['obj']);
 });
 
 test('sequence expression', t => {

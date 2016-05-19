@@ -46,12 +46,6 @@ var visitors = {
 		// regular regular expression is fine...
 		return '(' + node.raw + ')';
 	},
-	dictionaryIndex: function (node) {
-		return 'd.' + node.value;
-	},
-	objectStore: function (node) {
-		return 'o.' + node.value;
-	},
 	Identifier: function (node) {
 		return '$.' + node.name;
 	},
