@@ -20,3 +20,11 @@ test('semi colon error', t => {
 	
 	t.throws(function (){ p.parseStatement() }, /expect[\s\S]+1:/i);
 });
+
+test('get html output', t => {
+	var p = tokenizer('@@@@@', {html: 'code'});
+	
+	p.nextToken();
+	
+	t.throws(function () {p.parseStatement()}, )
+});

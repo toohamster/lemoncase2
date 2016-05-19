@@ -14,7 +14,12 @@ module.exports = function (Parser) {
 	pp.raise = function (pos, msg) {
 		var loc = getLineInfo(this.input, pos);
 		msg += ' (' + loc.line + ':' + loc.column + ')';
-		msg = empowerErrMsg(this.input, loc, msg);
+		var left = this.options.left, right = this.options.right;
+		if (left || right) {
+			msg = left + msg + right;
+		} else {
+			msg = empowerErrMsg(this.input, loc, msg);
+		}
 		var err = new SyntaxError(msg);
 		err.pos = pos; err.loc = loc; err.raisedAt = this.pos;
 		throw err;

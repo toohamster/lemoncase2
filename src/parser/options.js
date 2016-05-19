@@ -3,6 +3,8 @@ var has = require('../util').has;
 var defaultOptions = {
 	insertReturn: true,
 	onComment: function () {},
+	left: '',
+	right: '',
 	plugins: {}
 };
 

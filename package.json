@@ -27,10 +27,10 @@
   "author": "李超",
   "license": "GPL-2.0",
   "devDependencies": {
-    "angular": "^1.5.3",
+    "angular": "^1.5.5",
     "ava": "^0.14.0",
-    "codemirror": "^5.13.4",
-    "webpack": "^1.12.15",
+    "codemirror": "^5.14.2",
+    "webpack": "^1.13.0",
     "webpack-dev-server": "^1.14.1"
   },
   "ava": {

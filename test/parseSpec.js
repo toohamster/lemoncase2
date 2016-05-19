@@ -25,8 +25,8 @@ process main {
 		click ".btnG";
   input selector by "1";
   input "input" by /test\d{4}/img;
-  input [input] by /[/]/;
-  input [input] by {selector};
+  input "input" by /[/]/;
+  input "input" by selector + 1;
 		rclick time ;
 		dblclick selector ;
 		movein selector ;
