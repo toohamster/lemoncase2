@@ -1,5 +1,5 @@
 import test from 'ava';
-import {tokenizer} from '../src/parser/index.js';
+import {tokenizer, parseFragment} from '../src/parser/index.js';
 
 test('block comment error', t => {
 	var p = tokenizer(' /**** \n');
@@ -19,6 +19,10 @@ test('semi colon error', t => {
 	p.nextToken();
 	
 	t.throws(function (){ p.parseStatement() }, /expect[\s\S]+1:/i);
+});
+
+test('select by', t => {
+	t.throws(() => parseFragment('select 1;'));
 });
 
 test('get html output', t => {

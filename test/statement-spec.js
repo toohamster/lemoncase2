@@ -50,7 +50,7 @@ test('input statement', t => {
 });
 
 test('select', t => {
-	t.notThrows(() => parseFragment('select 1;'));
+	t.notThrows(() => parseFragment('select \'select\' by 1;'));
 });
 
 test('sequence expression', t => {
