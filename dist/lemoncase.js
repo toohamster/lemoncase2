@@ -61,7 +61,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var parse = __webpack_require__(2).parse;
+	var parser = __webpack_require__(2);
+	var parse = parser.parse;
+	var parseAt = parser.parseFragment;
 	var Case = __webpack_require__(18).Case;
 	var setup = __webpack_require__(19).setup;
 	var IF = __webpack_require__(21);
@@ -79,6 +81,7 @@ return /******/ (function(modules) { // webpackBootstrap
 		setup: setup,
 		Instruction: IF,
 		parse: parse,
+		parseAt: parseAt,
 		init: init,
 		getLemoncaseFrame: getLemoncaseFrame
 	};
@@ -1175,7 +1178,7 @@ return /******/ (function(modules) { // webpackBootstrap
 				case tt._movein: case tt._moveout:
 					return this.parseMouseAction(node, starttype.keyword);
 				case tt._select:
-					return this.parseSelectAction();
+					return this.parseSelectAction(node);
 				case tt._scroll:
 					return this.parseScrollAction(node, starttype.keyword);
 				case tt._input:
@@ -1316,8 +1319,21 @@ return /******/ (function(modules) { // webpackBootstrap
 			return this.finishNode(node, insDefinition.TRIGGER);
 		};
 
-		pp.parseSelectAction = function () {
-			this.raise('work in progress...');
+		pp.parseSelectAction = function (node) {
+			this.next();
+
+			node.BODY.raw = this.parseExpression();
+			node.BODY.object = genExpr(node.BODY.raw);
+
+			this.expect(tt._by);
+
+			node.BODY.raw1 = this.parseExpression();
+			node.BODY.param = genExpr(node.BODY.raw1);
+			node.BODY.action = 'select';
+			
+			this.semicolon();
+			
+			return this.finishNode(node, insDefinition.TRIGGER);
 		};
 
 		pp.parseInputAction = function (node, keyword) {
@@ -1913,13 +1929,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/*jslint plusplus: true, sloppy: true, nomen: true */
 	/*global require, console, trigger, module */
-	var instructionType = __webpack_require__(14),
-		CALL = instructionType.CALL,
-		EXIT = instructionType.EXIT,
-		_ = __webpack_require__(5),
-		settings = __webpack_require__(19).settings,
-		Collector = __webpack_require__(20),
-		IF = __webpack_require__(21);
+	var instructionType = __webpack_require__(14);
+	var CALL = instructionType.CALL;
+	var EXIT = instructionType.EXIT;
+	var _ = __webpack_require__(5);
+	var settings = __webpack_require__(19).settings;
+	var Collector = __webpack_require__(20);
+	var IF = __webpack_require__(21);
+	var parse = __webpack_require__(2).parse;
 
 	function linker(syntaxTree, $case) {
 		var eT = { process: {}, config: {} }, dk = [];
@@ -1949,6 +1966,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	function Case(syntaxTree) {
 		if (!(this instanceof Case)) {
 			return new Case(syntaxTree);
+		}
+
+		if (_.isUndefined(syntaxTree)) {
+			return new Case(parse('process main{}'));
 		}
 
 		var link = linker(syntaxTree, this);
@@ -3098,7 +3119,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	/*jslint sloppy: true, nomen: true */
-
+	/*global require, console */
 	var IF = __webpack_require__(21);
 	var global = __webpack_require__(19);
 	var settings = global.settings;
@@ -3212,6 +3233,9 @@ return /******/ (function(modules) { // webpackBootstrap
 				if (!DOM) {
 					throw 'Can not find a DOM by cssPath: ' + cssPath;
 				}
+
+				trigger(DOM).does(action, param);
+				settings.triggerCallback(DOM, this.$case);
 			} catch (msg) {
 				console.log(msg);
 				this.$case
@@ -3220,9 +3244,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 				return;
 			}
-
-			trigger(DOM).does(action, param);
-			settings.triggerCallback(DOM, this.$case);
 
 			this.$case
 				.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
@@ -3331,11 +3352,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	/*jslint vars: true, plusplus: true */
-	/*global console, Window, HTMLIFrameElement, Event */
+	/*global Window, HTMLIFrameElement, Event, MouseEvent, TouchEvent,
+	UIEvent, InputEvent, KeyboardEvent, module*/
 	(function () {
 		'use strict';
 
-		var t, isECS = true, isTouch = true, hasInput = true;
+		var t, isECS = true, isTouch = true, hasInput = true, lastElement = null;
 		try { t = new MouseEvent('click', {}); } catch ($e) { isECS = false; }
 		try { TouchEvent; } catch ($f) { isTouch = false; }
 		try { InputEvent; } catch ($g) { hasInput = false; }
@@ -3358,43 +3380,48 @@ return /******/ (function(modules) { // webpackBootstrap
 				event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
 
 				return event;
-			}, $Event = isECS && !isTouch ? Event : function (typeArg, eventInit) {
-			var event = document.createEvent('Event'),
-				initMap = { 'bubbles': 1, 'cancelBubble': 2};
-			event.initEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
-			return event;
-		}, $MouseEvent = isECS && !isTouch ? MouseEvent : function (typeArg, eventInit) {
-			var event = document.createEvent('MouseEvent'),
-				initMap = {
-					'bubbles': 1,
-					'cancelBubble': 2,
-					'view': 3,
-					'detail': 4,
-					'screenX': 5,
-					'screenY': 6,
-					'clientX': 7,
-					'clientY': 8,
-					'ctrlKey': 9,
-					'altKey': 10,
-					'shiftKey': 11,
-					'metaKey': 12,
-					'button': 13,
-					'relatedTarget': 14
-				};
-			event.initMouseEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
-			return event;
-		}, $UIEvent = isECS && !isTouch ? UIEvent : function (typeArg, eventInit) {
-			var event = document.createEvent('UIEvent'),
-				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
-			event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
-			return event;
-		}, $KeyboardEvent = isECS ? KeyboardEvent : function (typeArg, eventInit) {
-			var event = document.createEvent('KeyboardEvent'),
-				initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
-					'char': 4, key: 5, location: 6, repeat: 8 };
-			event.initKeyboardEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
-			return event;
-		}, $InputEvent = hasInput ? InputEvent : $UIEvent;
+			},
+			$Event = isECS && !isTouch ? Event : function (typeArg, eventInit) {
+				var event = document.createEvent('Event'),
+					initMap = { 'bubbles': 1, 'cancelBubble': 2};
+				event.initEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+				return event;
+			},
+			$MouseEvent = isECS && !isTouch ? MouseEvent : function (typeArg, eventInit) {
+				var event = document.createEvent('MouseEvent'),
+					initMap = {
+						'bubbles': 1,
+						'cancelBubble': 2,
+						'view': 3,
+						'detail': 4,
+						'screenX': 5,
+						'screenY': 6,
+						'clientX': 7,
+						'clientY': 8,
+						'ctrlKey': 9,
+						'altKey': 10,
+						'shiftKey': 11,
+						'metaKey': 12,
+						'button': 13,
+						'relatedTarget': 14
+					};
+				event.initMouseEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+				return event;
+			},
+			$UIEvent = isECS && !isTouch ? UIEvent : function (typeArg, eventInit) {
+				var event = document.createEvent('UIEvent'),
+					initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3, 'detail': 4 };
+				event.initUIEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+				return event;
+			},
+			$KeyboardEvent = isECS && !isTouch ? KeyboardEvent : function (typeArg, eventInit) {
+				var event = document.createEvent('KeyboardEvent'),
+					initMap = { 'bubbles': 1, 'cancelBubble': 2, 'view': 3,
+						'char': 4, key: 5, location: 6, repeat: 8 };
+				event.initKeyboardEvent.apply(event, buildInitEventArgs(typeArg, eventInit, initMap));
+				return event;
+			},
+			$InputEvent = hasInput ? InputEvent : $UIEvent;
 
 	//	alert($MouseEvent);
 	//	alert(isTouch);
@@ -3497,8 +3524,15 @@ return /******/ (function(modules) { // webpackBootstrap
 			dispatchMouseEvent(this, 'mouseup', opts);
 		};
 		aUs[MOUSEDOWN] = function (opts) {
+			// check last element and fouce blur it.
+			if (lastElement && this !== lastElement && lastElement.value) {
+				lastElement.blur();
+			}
+
 			dispatchTouchEvent(this, 'touchstart', opts);
 			dispatchMouseEvent(this, 'mousedown', opts);
+
+			lastElement = this;
 		};
 		aUs[MOUSEENTER] = function (opts) {
 			dispatchMouseEvent(this, 'mouseenter', opts);
@@ -3553,7 +3587,14 @@ return /******/ (function(modules) { // webpackBootstrap
 			this.dispatchEvent(new $UIEvent('scroll'));
 		};
 		aUs[SELECT] = function (opts) {
-			var optionElement = this[opts.index];
+			var optionElement, index = parseInt(opts.value, 0);
+			if (isNaN(index)) {
+				throw new Error('[Trigger > select]: Value is invalid option index.');
+			}
+			optionElement = this[index];
+			if (!optionElement) {
+				throw new Error('[Trigger > select]: No matched <option>.');
+			}
 			aUs[MOUSEDOWN].call(optionElement, opts);
 			aUs[MOUSEUP].call(optionElement, opts);
 			optionElement.selected = true;
@@ -3601,8 +3642,8 @@ return /******/ (function(modules) { // webpackBootstrap
 			var i, len, rule;
 
 			if (this.testAction(actionName) !== true) {
-				throw 'The element:' + this.element.outerHTNL +
-					' can not use action:' + actionName;
+				throw new Error('[Trigger]: The element:' + this.element.outerHTNL +
+					' can not use action:' + actionName);
 			}
 
 			rule = this.action[actionName];
@@ -3654,13 +3695,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 		exports = function (element) {
 			if (!isWindow(element) && !isElement(element)) {
-				throw '"element" for trigger must be a HTMLElement';
+				throw new Error('[Trigger]: "element" for trigger must be a HTMLElement');
 			}
 			return new Trigger(element);
 		};
 		exports.setupIframe = function (iframe) {
 			if (!(iframe instanceof HTMLIFrameElement)) {
-				throw '"element" must be a iframe element.';
+				throw new Error('[Trigger]: "element" must be a iframe element.');
 			}
 			config.contextIframe = iframe;
 		};

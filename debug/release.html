@@ -5,23 +5,10 @@
 	<script src="../dist/lemoncase.min.js"></script>
 	<script>
 		(function(){
-			var ast = LC.parse('#TIMES 2\nprocess main{ console "ok" + [word]; }');
+			var ast = LC.parse('#TIMES 2\nprocess main{ console "ok"; }');
 			console.log(LC);
 			
-			var object = {
-				button: '[type=button]'
-			};
-			
-			var dictionary = new LC.Dictionary({
-				field: [
-					{
-						name: 'word',
-						pattern: /\w{4,8}/
-					}
-				]
-			});
-			
-			var c = new LC.Case(ast, object, dictionary);
+			var c = new LC.Case(ast);
 			c.start();
 			
 			LC.setup.setContextFrame(LC.getLemoncaseFrame());
