@@ -30,3 +30,19 @@ test('is array', t => {
 	t.true(_.isArray([]));
 	t.false(_.isArray(''));
 });
+
+test('last', t => {
+	t.is(_.last([222]), 222);
+});
+
+test('for each', t => {
+	let c = 0;
+	
+	_.forEach([1,2,3,4,5], () => c++);
+	
+	t.is(c, 5);
+});
+
+test('has', t => {
+	
+});

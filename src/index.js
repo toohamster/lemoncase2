@@ -1,4 +1,6 @@
-var parse = require('./parser/index').parse;
+var parser = require('./parser/index');
+var parse = parser.parse;
+var parseAt = parser.parseFragment;
 var Case = require('./class/case').Case;
 var setup = require('./global').setup;
 var IF = require('./class/instruction');
@@ -16,6 +18,7 @@ var exports = {
 	setup: setup,
 	Instruction: IF,
 	parse: parse,
+	parseAt: parseAt,
 	init: init,
 	getLemoncaseFrame: getLemoncaseFrame
 };
