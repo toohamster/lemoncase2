@@ -44,5 +44,5 @@ test('for each', t => {
 });
 
 test('has', t => {
-	
+	t.falsy(_.has({}, 'hasOwnProperty'));
 });

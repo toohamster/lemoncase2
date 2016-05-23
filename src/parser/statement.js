@@ -148,7 +148,7 @@ module.exports = function (Parser) {
 			case tt._movein: case tt._moveout:
 				return this.parseMouseAction(node, starttype.keyword);
 			case tt._select:
-				return this.parseSelectAction();
+				return this.parseSelectAction(node);
 			case tt._scroll:
 				return this.parseScrollAction(node, starttype.keyword);
 			case tt._input:
@@ -289,8 +289,15 @@ module.exports = function (Parser) {
 		return this.finishNode(node, insDefinition.TRIGGER);
 	};
 
-	pp.parseSelectAction = function () {
-		this.raise('work in progress...');
+	pp.parseSelectAction = function (node) {
+		this.next();
+
+		node.BODY.raw = this.parseExpression();
+		node.BODY.object = genExpr(node.BODY.raw);
+		
+		this.semicolon();
+		
+		return this.finishNode(node, insDefinition.TRIGGER);
 	};
 
 	pp.parseInputAction = function (node, keyword) {

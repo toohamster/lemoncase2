@@ -49,22 +49,6 @@ test('parse regexp', t => {
 	t.deepEqual(p.value, {pattern:'abc', flags: 'iimmgg', isGenerate: true});
 });
 
-// test('index', t => {
-// 	var p = tokenizer(' [mama]+{baba}');
-// 	p.nextToken();
-	
-// 	t.is(p.type.label, 'dictionaryIndex');
-// 	t.is(p.value, 'mama');
-	
-// 	p.nextToken();
-// 	t.is(p.type.label, '+/-');
-	
-// 	p.nextToken();
-	
-// 	t.is(p.type.label, 'objectStore');
-// 	t.is(p.value, 'baba');
-// });
-
 test('multiple and modulo', t => {
 	var p = tokenizer('*%');
 	

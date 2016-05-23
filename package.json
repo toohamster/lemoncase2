@@ -34,9 +34,6 @@
     "webpack-dev-server": "^1.14.1"
   },
   "ava": {
-    "files": [
-      "test/*Spec.js"
-    ],
     "failFast": true
   },
   "xo": {

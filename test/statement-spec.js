@@ -1,5 +1,5 @@
 import test from 'ava';
-import {tokenizer} from '../src/parser/index.js';
+import {tokenizer, parseFragment} from '../src/parser/index.js';
 
 test('parse macro', t => {
 	var p = tokenizer('#CLOCK 1234\n#TIMES \t200 \n', {});
@@ -23,30 +23,15 @@ test('parse process', t => {
 });
 
 test('parse click', t => {
-	var p = tokenizer('click "me";');
-	p.nextToken();
-	
-	t.notThrows(function (){
-		p.parseStatement();
-	});
+	t.notThrows(() => parseFragment('click "me";'));
 });
 
 test('parse var decl', t => {
-	var p = tokenizer('var a=1 , b =  2;');
-	p.nextToken();
-	
-	t.notThrows(function (){
-		p.parseStatement();
-	});
+	t.notThrows(() => parseFragment('var a=1 , b =  2;'));
 });
 
 test('parse log', t => {
-	var p = tokenizer('log a +"输出";');
-	p.nextToken();
-	
-	t.notThrows(function (){
-		p.parseStatement();
-	});
+	t.notThrows(() => parseFragment('log a +"输出";'));
 });
 
 test('parse assert', t => {
@@ -61,19 +46,13 @@ test('parse assert', t => {
 });
 
 test('input statement', t => {
-	var p = tokenizer('input obj + "1" by /abc/;');
-	p.nextToken();
-	
-	t.notThrows(function (){
-		p.parseStatement();
-	});
+	t.notThrows(() => parseFragment('input obj + "1" by /abc/;'));
+});
+
+test('select', t => {
+	t.notThrows(() => parseFragment('select 1;'));
 });
 
 test('sequence expression', t => {
-	var p = tokenizer('b = 2, a += 1;');
-	p.nextToken();
-	
-	t.notThrows(function (){
-		p.parseStatement();
-	});
+	t.notThrows(() => parseFragment('b = 2, a += 1;'));
 });
