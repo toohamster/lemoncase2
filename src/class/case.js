@@ -1,12 +1,13 @@
 /*jslint plusplus: true, sloppy: true, nomen: true */
 /*global require, console, trigger, module */
-var instructionType = require('../instructionType'),
-	CALL = instructionType.CALL,
-	EXIT = instructionType.EXIT,
-	_ = require('../util'),
-	settings = require('../global').settings,
-	Collector = require('../../lib/collector'),
-	IF = require('./instruction');
+var instructionType = require('../instructionType');
+var CALL = instructionType.CALL;
+var EXIT = instructionType.EXIT;
+var _ = require('../util');
+var settings = require('../global').settings;
+var Collector = require('../../lib/collector');
+var IF = require('./instruction');
+var parse = require('../parser/index').parse;
 
 function linker(syntaxTree, $case) {
 	var eT = { process: {}, config: {} }, dk = [];
@@ -36,6 +37,10 @@ function linker(syntaxTree, $case) {
 function Case(syntaxTree) {
 	if (!(this instanceof Case)) {
 		return new Case(syntaxTree);
+	}
+
+	if (_.isUndefined(syntaxTree)) {
+		return new Case(parse('process main{}'));
 	}
 
 	var link = linker(syntaxTree, this);

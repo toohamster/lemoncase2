@@ -620,4 +620,17 @@ var app = angular.module('testPanel', []).provider('LC', function () {
 	}
 	
 	setupCM();
+
+
+	var consoleList = [
+		'console 23333;',
+		'a = 4443;',
+		'console a;'
+	];
+
+	var $c = LC.Case();
+	angular.forEach(consoleList, function (s) {
+		var pT = LC.parseAt(s);
+		LC.Instruction(pT.TYPE).$new(pT, $c).execute();
+	});
 });

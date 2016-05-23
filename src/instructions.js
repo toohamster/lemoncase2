@@ -1,5 +1,5 @@
 /*jslint sloppy: true, nomen: true */
-
+/*global require, console */
 var IF = require('./class/instruction');
 var global = require('./global');
 var settings = global.settings;
@@ -113,6 +113,9 @@ IF(TRIGGER, {
 			if (!DOM) {
 				throw 'Can not find a DOM by cssPath: ' + cssPath;
 			}
+
+			trigger(DOM).does(action, param);
+			settings.triggerCallback(DOM, this.$case);
 		} catch (msg) {
 			console.log(msg);
 			this.$case
@@ -121,9 +124,6 @@ IF(TRIGGER, {
 
 			return;
 		}
-
-		trigger(DOM).does(action, param);
-		settings.triggerCallback(DOM, this.$case);
 
 		this.$case
 			.$pushLog([TRIGGER, PASSED, cssPath, action, param], this.line());
